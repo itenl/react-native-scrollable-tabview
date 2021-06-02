@@ -1,0 +1,24 @@
+{
+  "name": "react-native-scrollable-tabview",
+  "version": "1.0.0",
+  "description": "react-native-scrollable-tabview",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "react-native-snap-carousel": "^3.9.1"
+  },
+  "keywords": [
+    "react",
+    "react-native",
+    "scrollabletabview"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/itenl/react-native-scrollable-tabview.git"
+  },
+  "author": "itenl",
+  "license": "ISC",
+  "homepage": "https://github.com/itenl/react-native-scrollable-tabview"
+}
