@@ -1,4 +1,6 @@
-# React-Native-ScrollableTabView
+# react-native-scrollable-tabview
+
+[![NPM Version](http://img.shields.io/npm/v/@itenl/react-native-scrollable-tabview.svg?style=flat)](https://www.npmjs.com/package/@itenl/react-native-scrollable-tabview)
 
 
 ```javascript
