@@ -29,14 +29,14 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _initial(props = this.props, isFix = false) {
+    isFix && this._fixData(props);
     this.tabs = this._getTabs(props);
     this.stacks = this._getWrapChildren(props);
-    isFix && this._fixData(props);
   }
 
   // 避免reset栈时的默认 firstIndex 超出当前选中索引导致无法显示视图
   _fixData(props) {
-    if (props.stacks && props.stacks.length && props.firstIndex != this.state.checkedIndex) {
+    if (props.stacks && props.stacks.length && props.stacks.length != this.stacks.length && props.firstIndex != this.state.checkedIndex) {
       this._onTabviewChange(props.firstIndex);
     }
   }
@@ -118,22 +118,21 @@ export default class ScrollableTabView extends React.Component {
     const ref = this._getCurrentRef();
     if (stacks && stacks.sticky && typeof stacks.sticky == 'function' && ref) {
       // 用于自动同步 Screen 数据流改变后仅会 render 自身 Screen 的问题，用于自动同步 context 给吸顶组件
-      ref.componentDidUpdate = () => {
-        this._refresh();
-      };
+      // ref.componentDidUpdate = () => {
+      //   this._refresh();
+      // };
       return <stacks.sticky {...this._getProps(this.props.mappingProps || {})} context={ref}></stacks.sticky>;
     }
     return null;
   }
 
-  _renderBadges(tab) {
-    return (
-      !!tab.badges &&
-      tab.badges.length &&
-      tab.badges.map(item => {
+  _renderBadges(tabIndex) {
+    let badges = this.props.badges[tabIndex];
+    if (badges && badges.length)
+      return badges.map(item => {
         return item;
-      })
-    );
+      });
+    return null;
   }
 
   _renderTabs() {
@@ -143,7 +142,7 @@ export default class ScrollableTabView extends React.Component {
           {this.tabs.map((tab, index) => {
             return (
               <View key={index} style={[{ flex: 1 }, tab.style]}>
-                {this._renderBadges(tab)}
+                {this._renderBadges(index)}
                 <TouchableOpacity
                   onPress={() => {
                     this._onTabviewChange(index);
