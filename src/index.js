@@ -25,12 +25,20 @@ export default class ScrollableTabView extends React.Component {
   }
 
   componentWillReceiveProps(newProps) {
-    this._initial(newProps);
+    this._initial(newProps, true);
   }
 
-  _initial(props = this.props) {
+  _initial(props = this.props, isFix = false) {
     this.tabs = this._getTabs(props);
     this.stacks = this._getWrapChildren(props);
+    isFix && this._fixData(props);
+  }
+
+  // 避免reset栈时的默认 firstIndex 超出当前选中索引导致无法显示视图
+  _fixData(props) {
+    if (props.stacks && props.stacks.length && props.firstIndex != this.state.checkedIndex) {
+      this._onTabviewChange(props.firstIndex);
+    }
   }
 
   _getTabs(props) {
@@ -179,7 +187,7 @@ export default class ScrollableTabView extends React.Component {
       this._getLazyIndexs(index) &&
       this.state.checkedIndex == index && (
         <View style={{ flex: 1 }}>
-          <item.screen {...this._getProps(this.props.mappingProps)} />
+          <item.screen {...this._getProps(this.props.mappingProps)} {...(item.toProps || {})} />
         </View>
       )
     );
@@ -257,6 +265,10 @@ const styles = StyleSheet.create({
 //     // 吸顶类组件 / 函数组件
 //     // 类组件可吸顶组件，需用函数包括，实例内将返回该类组件的上下文
 //     sticky: sticky,
+//     // toProps 仅传递给 Screen，不作数据关联
+//     toProps: {
+//        xx: 123，
+//     },
 //     tab: {
 //       // 徽章
 //       badges: (
