@@ -16,10 +16,28 @@ const deviceHeight = Dimensions.get('window').height;
 export default class ScrollableTabView extends React.Component {
   static propTypes = {
     stacks: PropTypes.array.isRequired,
+    firstIndex: PropTypes.number,
+    mappingProps: PropTypes.object,
+    header: PropTypes.function,
+    badges: PropTypes.array,
+    tabsStyle: PropTypes.object,
+    tabStyle: PropTypes.object,
+    textStyle: PropTypes.object,
+    textActiveStyle: PropTypes.object,
+    tabUnderlineStyle: PropTypes.object,
   };
 
   static defaultProps = {
     stacks: [],
+    firstIndex: 0,
+    mappingProps: {},
+    header: null,
+    badges: [],
+    tabsStyle: {},
+    tabStyle: {},
+    textStyle: {},
+    textActiveStyle: {},
+    tabUnderlineStyle: {},
   };
 
   constructor(props) {
@@ -53,32 +71,13 @@ export default class ScrollableTabView extends React.Component {
   _getTabs(props) {
     return (
       props.stacks &&
-      props.stacks.map(item => {
-        if (item.tab && item.tab.label) return item.tab;
-        return Object.assign(
-          {
-            label: item.screen.name,
-          },
-          item.tab,
-        );
+      props.stacks.map((item, index) => {
+        return {
+          tabLabel: item.tabLabel || item.screen?.name,
+          index,
+        };
       })
     );
-    return [
-      {
-        // 显示的标签名
-        labe: 'Home',
-        // tab外部容器样式
-        style: {},
-        // 文字样式
-        textStyle: {},
-        // 徽章组件
-        badges: (
-          <View>
-            <Text>i am badges</Text>
-          </View>
-        ),
-      },
-    ];
   }
 
   _getWrapChildren(props) {
@@ -147,20 +146,48 @@ export default class ScrollableTabView extends React.Component {
   _renderTabs() {
     return (
       <View style={{ flex: 1 }}>
-        <View style={[{ flex: 1, zIndex: 100, flexDirection: 'row', backgroundColor: 'gray', justifyContent: 'space-around', height: 30 }, this.props.tabsStyle]}>
+        <View style={[{ flex: 1, zIndex: 100, flexDirection: 'row', backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'space-around', height: 35 }, this.props.tabsStyle]}>
           {this.tabs &&
             this.tabs.map((tab, index) => {
+              const checked = this.state.checkedIndex == index;
               return (
-                <View key={index} style={[{ flex: 1 }, tab.style]}>
+                <View key={index} style={{ flex: 1 }}>
                   {this._renderBadges(index)}
                   <TouchableOpacity
                     onPress={() => {
                       this._onTabviewChange(index);
                     }}
-                    style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'pink', width: '100%', height: '100%' }}
+                    style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fcfcfc' }, this.props.tabStyle]}
                   >
-                    <Text style={[{ textAlign: 'center' }, tab.textStyle]}>{tab.label}</Text>
-                    {this.state.checkedIndex == index && <View style={{ height: 2, backgroundColor: 'black', width: '80%' }}></View>}
+                    <View>
+                      <Text
+                        style={[
+                          {
+                            height: 20,
+                            fontSize: 12,
+                            color: '#11111180',
+                            textAlign: 'center',
+                          },
+                          this.props.textStyle,
+                          checked && this.props.textActiveStyle,
+                        ]}
+                      >
+                        {tab.tabLabel}
+                      </Text>
+                      {checked && (
+                        <View
+                          style={[
+                            {
+                              top: 6,
+                              height: 2,
+                              borderRadius: 2,
+                              backgroundColor: '#00aced',
+                            },
+                            this.props.tabUnderlineStyle,
+                          ]}
+                        ></View>
+                      )}
+                    </View>
                   </TouchableOpacity>
                 </View>
               );
