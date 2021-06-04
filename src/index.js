@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity } from 'react-native';
+import PropTypes from 'prop-types';
 import Carousel from 'react-native-snap-carousel';
 import { Dimensions, PixelRatio } from 'react-native';
 import HocComponent from './HocComponent';
@@ -13,6 +14,14 @@ const deviceHeight = Dimensions.get('window').height;
  *  for - Value
  *  */
 export default class ScrollableTabView extends React.Component {
+  static propTypes = {
+    stacks: PropTypes.array.isRequired,
+  };
+
+  static defaultProps = {
+    stacks: [],
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -139,22 +148,23 @@ export default class ScrollableTabView extends React.Component {
     return (
       <View style={{ flex: 1 }}>
         <View style={[{ flex: 1, zIndex: 100, flexDirection: 'row', backgroundColor: 'gray', justifyContent: 'space-around', height: 30 }, this.props.tabsStyle]}>
-          {this.tabs.map((tab, index) => {
-            return (
-              <View key={index} style={[{ flex: 1 }, tab.style]}>
-                {this._renderBadges(index)}
-                <TouchableOpacity
-                  onPress={() => {
-                    this._onTabviewChange(index);
-                  }}
-                  style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'pink', width: '100%', height: '100%' }}
-                >
-                  <Text style={[{ textAlign: 'center' }, tab.textStyle]}>{tab.label}</Text>
-                  {this.state.checkedIndex == index && <View style={{ height: 2, backgroundColor: 'black', width: '80%' }}></View>}
-                </TouchableOpacity>
-              </View>
-            );
-          })}
+          {this.tabs &&
+            this.tabs.map((tab, index) => {
+              return (
+                <View key={index} style={[{ flex: 1 }, tab.style]}>
+                  {this._renderBadges(index)}
+                  <TouchableOpacity
+                    onPress={() => {
+                      this._onTabviewChange(index);
+                    }}
+                    style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'pink', width: '100%', height: '100%' }}
+                  >
+                    <Text style={[{ textAlign: 'center' }, tab.textStyle]}>{tab.label}</Text>
+                    {this.state.checkedIndex == index && <View style={{ height: 2, backgroundColor: 'black', width: '80%' }}></View>}
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
         </View>
         {this._renderSticky()}
       </View>
