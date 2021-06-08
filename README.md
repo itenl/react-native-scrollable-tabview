@@ -70,3 +70,10 @@ const render = () => {
   );
 };
 ```
+
+## Snapshot
+
+<img src="./snapshot/qoz8r-klpuc.gif" />
+<br />
+
+-------------------
