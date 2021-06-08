@@ -25,6 +25,7 @@ export default class ScrollableTabView extends React.Component {
     textStyle: PropTypes.object,
     textActiveStyle: PropTypes.object,
     tabUnderlineStyle: PropTypes.object,
+    syncToSticky: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -38,6 +39,7 @@ export default class ScrollableTabView extends React.Component {
     textStyle: {},
     textActiveStyle: {},
     tabUnderlineStyle: {},
+    syncToSticky: true,
   };
 
   constructor(props) {
@@ -126,9 +128,11 @@ export default class ScrollableTabView extends React.Component {
     const ref = this._getCurrentRef();
     if (stacks && stacks.sticky && typeof stacks.sticky == 'function' && ref) {
       // 用于自动同步 Screen 数据流改变后仅会 render 自身 Screen 的问题，用于自动同步 context 给吸顶组件
-      // ref.componentDidUpdate = () => {
-      //   this._refresh();
-      // };
+      if (this.props.syncToSticky) {
+        ref.componentDidUpdate = () => {
+          this._refresh();
+        };
+      }
       return <stacks.sticky {...this._getProps(this.props.mappingProps || {})} context={ref}></stacks.sticky>;
     }
     return null;
