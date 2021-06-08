@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity } from 'react-native';
+import PropTypes from 'prop-types';
 import Carousel from 'react-native-snap-carousel';
 import { Dimensions, PixelRatio } from 'react-native';
 import HocComponent from './HocComponent';
@@ -13,6 +14,34 @@ const deviceHeight = Dimensions.get('window').height;
  *  for - Value
  *  */
 export default class ScrollableTabView extends React.Component {
+  static propTypes = {
+    stacks: PropTypes.array.isRequired,
+    firstIndex: PropTypes.number,
+    mappingProps: PropTypes.object,
+    header: PropTypes.function,
+    badges: PropTypes.array,
+    tabsStyle: PropTypes.object,
+    tabStyle: PropTypes.object,
+    textStyle: PropTypes.object,
+    textActiveStyle: PropTypes.object,
+    tabUnderlineStyle: PropTypes.object,
+    syncToSticky: PropTypes.bool,
+  };
+
+  static defaultProps = {
+    stacks: [],
+    firstIndex: 0,
+    mappingProps: {},
+    header: null,
+    badges: [],
+    tabsStyle: {},
+    tabStyle: {},
+    textStyle: {},
+    textActiveStyle: {},
+    tabUnderlineStyle: {},
+    syncToSticky: true,
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -25,43 +54,32 @@ export default class ScrollableTabView extends React.Component {
   }
 
   componentWillReceiveProps(newProps) {
-    this._initial(newProps);
+    this._initial(newProps, true);
   }
 
-  _initial(props = this.props) {
+  _initial(props = this.props, isFix = false) {
+    isFix && this._fixData(props);
     this.tabs = this._getTabs(props);
     this.stacks = this._getWrapChildren(props);
+  }
+
+  // 避免reset栈时的默认 firstIndex 超出当前选中索引导致无法显示视图
+  _fixData(props) {
+    if (props.stacks && props.stacks.length && props.stacks.length != this.stacks.length && props.firstIndex != this.state.checkedIndex) {
+      this._onTabviewChange(props.firstIndex);
+    }
   }
 
   _getTabs(props) {
     return (
       props.stacks &&
-      props.stacks.map(item => {
-        if (item.tab && item.tab.label) return item.tab;
-        return Object.assign(
-          {
-            label: item.screen.name,
-          },
-          item.tab,
-        );
+      props.stacks.map((item, index) => {
+        return {
+          tabLabel: item.tabLabel || item.screen?.name,
+          index,
+        };
       })
     );
-    return [
-      {
-        // 显示的标签名
-        labe: 'Home',
-        // tab外部容器样式
-        style: {},
-        // 文字样式
-        textStyle: {},
-        // 徽章组件
-        badges: (
-          <View>
-            <Text>i am badges</Text>
-          </View>
-        ),
-      },
-    ];
   }
 
   _getWrapChildren(props) {
@@ -110,44 +128,49 @@ export default class ScrollableTabView extends React.Component {
     const ref = this._getCurrentRef();
     if (stacks && stacks.sticky && typeof stacks.sticky == 'function' && ref) {
       // 用于自动同步 Screen 数据流改变后仅会 render 自身 Screen 的问题，用于自动同步 context 给吸顶组件
-      ref.componentDidUpdate = () => {
-        this._refresh();
-      };
+      if (this.props.syncToSticky) {
+        ref.componentDidUpdate = () => {
+          this._refresh();
+        };
+      }
       return <stacks.sticky {...this._getProps(this.props.mappingProps || {})} context={ref}></stacks.sticky>;
     }
     return null;
   }
 
-  _renderBadges(tab) {
-    return (
-      !!tab.badges &&
-      tab.badges.length &&
-      tab.badges.map(item => {
+  _renderBadges(tabIndex) {
+    let badges = this.props.badges[tabIndex];
+    if (badges && badges.length)
+      return badges.map(item => {
         return item;
-      })
-    );
+      });
+    return null;
   }
 
   _renderTabs() {
     return (
       <View style={{ flex: 1 }}>
-        <View style={[{ flex: 1, zIndex: 100, flexDirection: 'row', backgroundColor: 'gray', justifyContent: 'space-around', height: 30 }, this.props.tabsStyle]}>
-          {this.tabs.map((tab, index) => {
-            return (
-              <View key={index} style={[{ flex: 1 }, tab.style]}>
-                {this._renderBadges(tab)}
-                <TouchableOpacity
-                  onPress={() => {
-                    this._onTabviewChange(index);
-                  }}
-                  style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'pink', width: '100%', height: '100%' }}
-                >
-                  <Text style={[{ textAlign: 'center' }, tab.textStyle]}>{tab.label}</Text>
-                  {this.state.checkedIndex == index && <View style={{ height: 2, backgroundColor: 'black', width: '80%' }}></View>}
-                </TouchableOpacity>
-              </View>
-            );
-          })}
+        <View style={[styles.tabsStyle, this.props.tabsStyle]}>
+          {this.tabs &&
+            this.tabs.map((tab, index) => {
+              const checked = this.state.checkedIndex == index;
+              return (
+                <View key={index} style={{ flex: 1 }}>
+                  {this._renderBadges(index)}
+                  <TouchableOpacity
+                    onPress={() => {
+                      this._onTabviewChange(index);
+                    }}
+                    style={[styles.tabStyle, this.props.tabStyle]}
+                  >
+                    <View>
+                      <Text style={[styles.textStyle, this.props.textStyle, checked && this.props.textActiveStyle]}>{tab.tabLabel}</Text>
+                      {checked && <View style={[styles.tabUnderlineStyle, this.props.tabUnderlineStyle]}></View>}
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
         </View>
         {this._renderSticky()}
       </View>
@@ -179,7 +202,7 @@ export default class ScrollableTabView extends React.Component {
       this._getLazyIndexs(index) &&
       this.state.checkedIndex == index && (
         <View style={{ flex: 1 }}>
-          <item.screen {...this._getProps(this.props.mappingProps)} />
+          <item.screen {...this._getProps(this.props.mappingProps)} {...(item.toProps || {})} />
         </View>
       )
     );
@@ -243,53 +266,76 @@ export default class ScrollableTabView extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
+  tabsStyle: { flex: 1, zIndex: 100, flexDirection: 'row', backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'space-around', height: 35 },
+  tabStyle: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fcfcfc' },
+  textStyle: { height: 20, fontSize: 12, color: '#11111180', textAlign: 'center' },
+  tabUnderlineStyle: { top: 6, height: 2, borderRadius: 2, backgroundColor: '#00aced' },
 });
 
-// // 调用 Demo
-// // 栈
-// const stacks = [
-//   {
-//     // TabView 类组件 / 函数组件
-//     screen: One,
-//     // 吸顶类组件 / 函数组件
-//     // 类组件可吸顶组件，需用函数包括，实例内将返回该类组件的上下文
-//     sticky: sticky,
-//     tab: {
-//       // 徽章
-//       badges: (
-//         <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-//           <Text>new</Text>
-//         </View>
-//       ),
-//       // tab昵称
-//       label: 'one',
-//       // 对应单个的tab 文本样式
-//       // textStyle: { fontSize: 18 },
-//       // 对应单个的tab 容器样式
-//       // style: { backgroundColor: 'red' },
-//     },
-//   },
-// ];
-
+// Demo
 // const render = () => {
 //   return (
 //     <ScrollableTabView
-//       // 栈
-//       stacks={stacks}
-//       // 用于在 最外层异步数据同步给各Screen与吸顶组件
-//       mappingProps={{ xx: this.state.xxx }}
-//       // 整个tab容器样式
-//       tabsStyle={{ height: 40 }}
-//       // 头部组件
+//       // 关联映射数据到 Stack / Sticky
+//       mappingProps={{
+//         fromRootEst: this.state.est,
+//       }}
+//       // 针对每个Tab的徽章
+//       badges={[
+//         null,
+//         [
+//           <View
+//             style={{
+//               position: 'absolute',
+//               zIndex: 100,
+//               top: 10,
+//               right: 0,
+//             }}
+//           >
+//             <Text>new</Text>
+//           </View>,
+//           <View
+//             style={{
+//               position: 'absolute',
+//               width: 150,
+//               height: 50,
+//               zIndex: 100,
+//               marginTop: 35,
+//               right: 0,
+//               opacity: 0.6,
+//               backgroundColor: 'pink',
+//               justifyContent: 'center',
+//               alignItems: 'center',
+//             }}
+//           >
+//             <Text>Three Tips</Text>
+//           </View>,
+//         ],
+//       ]}
+//       // 栈数组
+//       stacks={[
+//         {
+//           // TabView 类组件 / 函数组件
+//           screen: One,
+//           // 吸顶类组件 / 函数组件
+//           // 类组件可吸顶组件，需用函数包括，实例内将返回该类组件的上下文
+//           sticky: Sticky,
+//           // toProps 仅传递给 Screen，不作数据关联
+//           toProps: {
+//             xx: 123,
+//           },
+//         },
+//       ]}
+//       tabsStyle={{}}
+//       tabStyle={{}}
+//       textStyle={{}}
+//       textActiveStyle={{}}
+//       tabUnderlineStyle={{}}
+//       firstIndex={0}
+//       syncToSticky={true}
 //       header={() => {
-//         return (
-//           <View>
-//             <Text>Top</Text>
-//           </View>
-//         );
+//         return <View style={{ backgroundColor: 'red', height: 120 }}></View>;
 //       }}
 //     ></ScrollableTabView>
 //   );
