@@ -3,6 +3,10 @@
 [![NPM Version](http://img.shields.io/npm/v/@itenl/react-native-scrollable-tabview.svg?style=flat)](https://www.npmjs.com/package/@itenl/react-native-scrollable-tabview)
 
 ```javascript
+// 1. 在 Stacks 中每个 Screen 将提供 onRefresh(toggled) / onEndReached 函数
+// 2. 通过 mappingProps 传递的数据将映射结构到 Screen / Sticky
+// 3. 在 Sticky 中可通过 this.props.context 来获取 Screen 的上下文
+
 const render = () => {
   return (
     <ScrollableTabView
@@ -56,13 +60,34 @@ const render = () => {
           },
         },
       ]}
+      // 整个Tabs包装样式
       tabsStyle={{}}
+      // 单个tab样式控制
       tabStyle={{}}
+      // tab内文本样式
       textStyle={{}}
+      // 选中激活的text样式
       textActiveStyle={{}}
+      // 选中激活的下划线样式
       tabUnderlineStyle={{}}
+      // 默认选中index
       firstIndex={0}
+      // 是否同步(在screen中发生render触发componentDidUpdate将更新sticky)
       syncToSticky={true}
+      // 触底回调阈值
+      onEndReachedThreshold={0.1}
+      // 下拉刷新前置函数
+      onBeforeRefresh={(next,toggled)=>{
+        // 切换loading 可传 true / false 进行指定
+        toggled()
+        // 下一步执行 screen 中的 onRefresh 函数进行视图自身逻辑
+        next();
+      }}
+      onBeforeEndReached={(next,toggled)=>{
+        // 下一步执行 screen 中的 onRefresh 函数进行视图自身逻辑
+        next();
+      }}
+      // 顶部组件
       header={() => {
         return <View style={{ backgroundColor: 'pink', height: 120 }}></View>;
       }}
