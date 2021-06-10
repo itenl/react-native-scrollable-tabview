@@ -83,8 +83,8 @@ const render = () => {
         // 下一步执行 screen 中的 onRefresh 函数进行视图自身逻辑
         next();
       }}
-      onBeforeEndReached={(next,toggled)=>{
-        // 下一步执行 screen 中的 onRefresh 函数进行视图自身逻辑
+      onBeforeEndReached={(next)=>{
+        // 下一步执行 screen 中的 onEndReached 函数进行视图自身逻辑
         next();
       }}
       // 顶部组件
