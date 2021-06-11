@@ -29,6 +29,7 @@ export default class ScrollableTabView extends React.Component {
     onEndReachedThreshold: PropTypes.number,
     onBeforeRefresh: PropTypes.func,
     onBeforeEndReached: PropTypes.func,
+    onTabviewChanged: PropTypes.func,
   };
 
   static defaultProps = {
@@ -46,6 +47,7 @@ export default class ScrollableTabView extends React.Component {
     onEndReachedThreshold: 0.2,
     onBeforeRefresh: null,
     onBeforeEndReached: null,
+    onTabviewChanged: null,
   };
 
   constructor(props) {
@@ -107,7 +109,7 @@ export default class ScrollableTabView extends React.Component {
     };
   }
 
-  _getCurrentRef(index) {
+  getCurrentRef(index) {
     return this.state.refsObj[index ?? this.state.checkedIndex];
   }
 
@@ -131,7 +133,7 @@ export default class ScrollableTabView extends React.Component {
 
   _renderSticky() {
     const stacks = this.props.stacks[this.state.checkedIndex];
-    const ref = this._getCurrentRef();
+    const ref = this.getCurrentRef();
     if (stacks && stacks.sticky && typeof stacks.sticky == 'function' && ref) {
       // 用于自动同步 Screen 数据流改变后仅会 render 自身 Screen 的问题，用于自动同步 context 给吸顶组件
       if (this.props.syncToSticky) {
@@ -189,10 +191,15 @@ export default class ScrollableTabView extends React.Component {
 
   _onTabviewChange(index, callback = this._snapToItem) {
     if (!this.state.lazyIndexs.includes(index)) this.state.lazyIndexs.push(index);
-    this.setState({
-      checkedIndex: index,
-      lazyIndexs: this.state.lazyIndexs,
-    });
+    this.setState(
+      {
+        checkedIndex: index,
+        lazyIndexs: this.state.lazyIndexs,
+      },
+      () => {
+        this.props.onTabviewChanged && this.props.onTabviewChanged(this.state.checkedIndex);
+      },
+    );
     callback && callback(index);
     // 切换后强制重置刷新状态
     this._toggledRefreshing(false);
@@ -204,7 +211,7 @@ export default class ScrollableTabView extends React.Component {
 
   _renderItem({ item, index }) {
     return (
-      (this._getCurrentRef(index) || this._getCurrentRef(index) == undefined) &&
+      (this.getCurrentRef(index) || this.getCurrentRef(index) == undefined) &&
       this._getLazyIndexs(index) &&
       this.state.checkedIndex == index && (
         <View style={{ flex: 1 }}>
@@ -216,7 +223,7 @@ export default class ScrollableTabView extends React.Component {
 
   _onEndReached() {
     const next = () => {
-      const ref = this._getCurrentRef();
+      const ref = this.getCurrentRef();
       if (ref && ref.onEndReached && typeof ref.onEndReached == 'function') ref.onEndReached();
     };
     const { onBeforeEndReached } = this.props;
@@ -231,7 +238,7 @@ export default class ScrollableTabView extends React.Component {
 
   _onRefresh() {
     const next = () => {
-      const ref = this._getCurrentRef();
+      const ref = this.getCurrentRef();
       if (ref && ref.onRefresh && typeof ref.onRefresh == 'function') ref.onRefresh(this._toggledRefreshing.bind(this));
     };
     const { onBeforeRefresh } = this.props;
