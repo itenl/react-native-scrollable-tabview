@@ -68,6 +68,7 @@ export default class ScrollableTabView extends React.Component {
   _initial(props = this.props, isFix = false) {
     isFix && this._fixData(props);
     this.tabs = this._getTabs(props);
+    this.badges = this._getBadges(props);
     this.stacks = this._getWrapChildren(props);
   }
 
@@ -86,6 +87,15 @@ export default class ScrollableTabView extends React.Component {
           tabLabel: item.tabLabel || item.screen?.name,
           index,
         };
+      })
+    );
+  }
+
+  _getBadges(props) {
+    return (
+      props.stacks &&
+      props.stacks.map(item => {
+        return item.badge ?? null;
       })
     );
   }
@@ -147,7 +157,7 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderBadges(tabIndex) {
-    let badges = this.props.badges[tabIndex];
+    let badges = this.props.badges[tabIndex] || this.badges[tabIndex];
     if (badges && badges.length)
       return badges.map(item => {
         return item;
