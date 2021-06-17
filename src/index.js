@@ -190,6 +190,7 @@ export default class ScrollableTabView extends React.Component {
   };
 
   _onTabviewChange(index, callback = this._snapToItem) {
+    if (index == this.state.checkedIndex) return;
     if (!this.state.lazyIndexs.includes(index)) this.state.lazyIndexs.push(index);
     this.setState(
       {
