@@ -55,9 +55,12 @@ const render = () => {
         {
           // TabView 类组件 / 函数组件
           screen: One,
-          // 吸顶类组件 / 函数组件
-          // 类组件可吸顶组件，需用函数包括，实例内将返回该类组件的上下文
+          // 吸顶 类组件 / 函数组件 实例内将返回该类组件的上下文
           sticky: Sticky,
+          // Tab 昵称
+          tabLabel: 'OneTab',
+          // 针对当前 Tab 的徽章，与 badges 属性互斥
+          badge: [<Text>one</Text>, <Text>two</Text>],
           // toProps 仅传递给 Screen，不作数据关联
           toProps: {
             xx: 123,
@@ -81,21 +84,21 @@ const render = () => {
       // 触底回调阈值
       onEndReachedThreshold={0.1}
       // 下拉刷新前置函数
-      onBeforeRefresh={(next,toggled)=>{
+      onBeforeRefresh={(next, toggled) => {
         // 切换loading 可传 true / false 进行指定
-        toggled()
+        toggled();
         // 下一步执行 screen 中的 onRefresh 函数进行视图自身逻辑
         next();
       }}
       // 上滑加载更多前置函数
-      onBeforeEndReached={(next)=>{
+      onBeforeEndReached={next => {
         // 下一步执行 screen 中的 onEndReached 函数进行视图自身逻辑
         next();
       }}
       // Tab切换完成回调
-      onTabviewChanged={(index)=>{
+      onTabviewChanged={index => {
         // 当前索引
-        alert(index)
+        alert(index);
       }}
       // 顶部组件
       header={() => {
@@ -111,4 +114,4 @@ const render = () => {
 <img src="./snapshot/qoz8r-klpuc.gif" />
 <br />
 
--------------------
+---
