@@ -197,7 +197,10 @@ export default class ScrollableTabView extends React.Component {
         lazyIndexs: this.state.lazyIndexs,
       },
       () => {
-        this.props.onTabviewChanged && this.props.onTabviewChanged(this.state.checkedIndex);
+        if (this.props.onTabviewChanged) {
+          const tab = this.tabs[this.state.checkedIndex];
+          this.props.onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel);
+        }
       },
     );
     callback && callback(index);
