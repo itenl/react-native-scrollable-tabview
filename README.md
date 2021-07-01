@@ -6,6 +6,7 @@
 // 1. 在 Stacks 中每个 Screen 将提供 onRefresh(toggled) / onEndReached 函数
 // 2. 通过 mappingProps 传递的数据将映射结构到 Screen / Sticky
 // 3. 在 Sticky 中可通过 this.props.context 来获取 Screen 的上下文
+// 4. 在 Screen 中默认提供 this.props.refresh() / this.props.scrollTo(0) 函数
 
 // 获取当前激活的 Screen 实例上下文
 this.scrollableTabView.getCurrentRef();

@@ -8,11 +8,13 @@ const deviceWidth = Dimensions.get('window').width;
 const deviceHeight = Dimensions.get('window').height;
 
 /**
- *  ScrollableTabView
  *  该组件内禁止再次嵌套 SectionList / FlatList / ScrollView 等类似组件
  *  Screen 内上下文将提供 onRefresh(toggled) / onEndReached 方法用于方便触发对应业务，其中 toggled 用于切换loading状态，可传指定true/false参数，不传将默认与上个状态进行切换
  *  for - Value
- *  */
+ * @export
+ * @class ScrollableTabView
+ * @extends {React.Component}
+ */
 export default class ScrollableTabView extends React.Component {
   static propTypes = {
     stacks: PropTypes.array.isRequired,
@@ -74,7 +76,11 @@ export default class ScrollableTabView extends React.Component {
     this.stacks = this._getWrapChildren(props);
   }
 
-  // 避免reset栈时的默认 firstIndex 超出当前选中索引导致无法显示视图
+  /**
+   * 避免reset栈时的默认 firstIndex 超出当前选中索引导致无法显示视图
+   * @param {*} props
+   * @memberof ScrollableTabView
+   */
   _fixData(props) {
     if (props.stacks && props.stacks.length && props.stacks.length != this.stacks.length && props.firstIndex != this.state.checkedIndex) {
       this._onTabviewChange(props.firstIndex);
@@ -125,7 +131,12 @@ export default class ScrollableTabView extends React.Component {
     return this.state.refsObj[index ?? this.state.checkedIndex];
   }
 
-  _scrollToLocation = y => {
+
+  /**
+   * y 轴偏移量，0以Tab为基准点
+   * @memberof ScrollableTabView
+   */
+  _scrollTo = y => {
     if (typeof y == 'number') {
       this.section &&
         this.section.scrollToLocation({
@@ -139,7 +150,10 @@ export default class ScrollableTabView extends React.Component {
     return this.props.firstIndex ?? 0;
   }
 
-  // 作为吸顶组件与Screen之间的桥梁，用于同步吸顶组件与Screen之间的状态
+  /**
+   * 作为吸顶组件与Screen之间的桥梁，用于同步吸顶组件与Screen之间的状态
+   * @memberof ScrollableTabView
+   */
   _refresh = () => {
     this.setState({});
   };
@@ -148,7 +162,7 @@ export default class ScrollableTabView extends React.Component {
     return Object.assign(
       {
         refresh: this._refresh,
-        scrollToLocation: this._scrollToLocation,
+        scrollTo: this._scrollTo,
       },
       props || {},
     );
