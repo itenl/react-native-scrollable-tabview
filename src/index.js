@@ -126,11 +126,11 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _scrollToLocation = y => {
-    if (y && typeof y == 'number') {
+    if (typeof y == 'number') {
       this.section &&
         this.section.scrollToLocation({
           itemIndex: 0,
-          viewOffset: y,
+          viewOffset: 0 - y,
         });
     }
   };
