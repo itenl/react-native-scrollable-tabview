@@ -125,6 +125,16 @@ export default class ScrollableTabView extends React.Component {
     return this.state.refsObj[index ?? this.state.checkedIndex];
   }
 
+  _scrollToLocation = y => {
+    if (y && typeof y == 'number') {
+      this.section &&
+        this.section.scrollToLocation({
+          itemIndex: 0,
+          viewOffset: y,
+        });
+    }
+  };
+
   _getFirstIndex() {
     return this.props.firstIndex ?? 0;
   }
@@ -138,6 +148,7 @@ export default class ScrollableTabView extends React.Component {
     return Object.assign(
       {
         refresh: this._refresh,
+        scrollToLocation: this._scrollToLocation,
       },
       props || {},
     );
@@ -265,6 +276,7 @@ export default class ScrollableTabView extends React.Component {
     return (
       <View style={[styles.container, this.props.style]}>
         <SectionList
+          ref={rf => (this.section = rf)}
           keyExtractor={(item, index) => `scrollable-tab-view-wrap-${index}`}
           renderSectionHeader={this._renderTabs.bind(this)}
           onEndReached={this._onEndReached.bind(this)}
@@ -276,9 +288,7 @@ export default class ScrollableTabView extends React.Component {
           renderItem={() => {
             return (
               <Carousel
-                ref={c => {
-                  this.tabview = c;
-                }}
+                ref={c => (this.tabview = c)}
                 inactiveSlideScale={1}
                 data={this.stacks}
                 renderItem={this._renderItem.bind(this)}
