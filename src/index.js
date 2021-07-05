@@ -33,6 +33,7 @@ export default class ScrollableTabView extends React.Component {
     onBeforeRefresh: PropTypes.func,
     onBeforeEndReached: PropTypes.func,
     onTabviewChanged: PropTypes.func,
+    oneTabHidden: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -52,6 +53,7 @@ export default class ScrollableTabView extends React.Component {
     onBeforeRefresh: null,
     onBeforeEndReached: null,
     onTabviewChanged: null,
+    oneTabHidden: false,
   };
 
   constructor(props) {
@@ -131,7 +133,6 @@ export default class ScrollableTabView extends React.Component {
     return this.state.refsObj[index ?? this.state.checkedIndex];
   }
 
-
   /**
    * y 轴偏移量，0以Tab为基准点
    * @memberof ScrollableTabView
@@ -193,30 +194,33 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderTabs() {
+    const renderTab = !(this.props.oneTabHidden && this.tabs && this.tabs.length == 1);
     return (
       <View style={{ flex: 1 }}>
-        <View style={[styles.tabsStyle, this.props.tabsStyle]}>
-          {this.tabs &&
-            this.tabs.map((tab, index) => {
-              const checked = this.state.checkedIndex == index;
-              return (
-                <View key={index} style={this.props.tabWrapStyle}>
-                  {this._renderBadges(index)}
-                  <TouchableOpacity
-                    onPress={() => {
-                      this._onTabviewChange(index);
-                    }}
-                    style={[styles.tabStyle, this.props.tabStyle]}
-                  >
-                    <View>
-                      <Text style={[styles.textStyle, this.props.textStyle, checked && this.props.textActiveStyle]}>{tab.tabLabel}</Text>
-                      {checked && <View style={[styles.tabUnderlineStyle, this.props.tabUnderlineStyle]}></View>}
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-        </View>
+        {renderTab && (
+          <View style={[styles.tabsStyle, this.props.tabsStyle]}>
+            {this.tabs &&
+              this.tabs.map((tab, index) => {
+                const checked = this.state.checkedIndex == index;
+                return (
+                  <View key={index} style={this.props.tabWrapStyle}>
+                    {this._renderBadges(index)}
+                    <TouchableOpacity
+                      onPress={() => {
+                        this._onTabviewChange(index);
+                      }}
+                      style={[styles.tabStyle, this.props.tabStyle]}
+                    >
+                      <View>
+                        <Text style={[styles.textStyle, this.props.textStyle, checked && this.props.textActiveStyle]}>{tab.tabLabel}</Text>
+                        {checked && <View style={[styles.tabUnderlineStyle, this.props.tabUnderlineStyle]}></View>}
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+          </View>
+        )}
         {this._renderSticky()}
       </View>
     );
