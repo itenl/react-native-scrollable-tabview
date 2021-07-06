@@ -1,6 +1,6 @@
 {
   "name": "@itenl/react-native-scrollable-tabview",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "react-native-scrollable-tabview",
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,9 @@
   },
   "keywords": [
     "react",
+    "sticky",
+    "tabbar",
+    "tabview",
     "react-native",
     "scrollabletabview"
   ],
