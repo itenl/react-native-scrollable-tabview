@@ -95,6 +95,7 @@ export default class ScrollableTabView extends React.Component {
       props.stacks.map((item, index) => {
         return {
           tabLabel: item.tabLabel || item.screen?.name,
+          tabLabelRender: item.tabLabelRender ?? null,
           index,
         };
       })
@@ -133,6 +134,20 @@ export default class ScrollableTabView extends React.Component {
     return this.state.refsObj[index ?? this.state.checkedIndex];
   }
 
+  toTabView = indexOrLabel => {
+    switch (typeof indexOrLabel) {
+      case 'number':
+        this._onTabviewChange(indexOrLabel);
+        break;
+      case 'string':
+        const tab = this.tabs.filter(f => f.tabLabel == indexOrLabel)[0];
+        if (tab) {
+          this._onTabviewChange(tab.index);
+        }
+        break;
+    }
+  };
+
   /**
    * y 轴偏移量，0以Tab为基准点
    * @memberof ScrollableTabView
@@ -164,6 +179,7 @@ export default class ScrollableTabView extends React.Component {
       {
         refresh: this._refresh,
         scrollTo: this._scrollTo,
+        toTabView: this.toTabView,
       },
       props || {},
     );
@@ -212,7 +228,9 @@ export default class ScrollableTabView extends React.Component {
                       style={[styles.tabStyle, this.props.tabStyle]}
                     >
                       <View>
-                        <Text style={[styles.textStyle, this.props.textStyle, checked && this.props.textActiveStyle]}>{tab.tabLabel}</Text>
+                        <Text style={[styles.textStyle, this.props.textStyle, checked && this.props.textActiveStyle]}>
+                          {tab.tabLabelRender && typeof tab.tabLabelRender == 'function' ? tab.tabLabelRender(tab.tabLabel) : tab.tabLabel}
+                        </Text>
                         {checked && <View style={[styles.tabUnderlineStyle, this.props.tabUnderlineStyle]}></View>}
                       </View>
                     </TouchableOpacity>

@@ -60,6 +60,10 @@ const render = () => {
           sticky: Sticky,
           // Tab 昵称
           tabLabel: 'OneTab',
+          // 自定义 Tab渲染函数，优先级高于 tabLabel
+          tabLabelRender:(tabLabel) => {
+            return `--- ${tabLabel} ---`
+          },
           // 针对当前 Tab 的徽章，与 badges 属性互斥
           badge: [<Text>one</Text>, <Text>two</Text>],
           // toProps 仅传递给 Screen，不作数据关联
