@@ -7,9 +7,13 @@
 // 2. 通过 mappingProps 传递的数据将映射结构到 Screen / Sticky
 // 3. 在 Sticky 中可通过 this.props.context 来获取 Screen 的上下文
 
+// 获取当前激活的 Screen 实例上下文
+this.scrollableTabView.getCurrentRef();
+
 const render = () => {
   return (
     <ScrollableTabView
+      ref={rf => (this.scrollableTabView = rf)}
       // 关联映射数据到 Stack / Sticky
       mappingProps={{
         fromRootEst: this.state.est,
@@ -62,7 +66,7 @@ const render = () => {
       ]}
       // 整个Tabs包装样式
       tabsStyle={{}}
-      // 单个tab样式控制
+      // 单个Tab样式控制
       tabStyle={{}}
       // tab内文本样式
       textStyle={{}}
@@ -83,9 +87,15 @@ const render = () => {
         // 下一步执行 screen 中的 onRefresh 函数进行视图自身逻辑
         next();
       }}
+      // 上滑加载更多前置函数
       onBeforeEndReached={(next)=>{
         // 下一步执行 screen 中的 onEndReached 函数进行视图自身逻辑
         next();
+      }}
+      // Tab切换完成回调
+      onTabviewChanged={(index)=>{
+        // 当前索引
+        alert(index)
       }}
       // 顶部组件
       header={() => {
