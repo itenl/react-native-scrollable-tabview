@@ -34,6 +34,8 @@ export default class ScrollableTabView extends React.Component {
     onBeforeEndReached: PropTypes.func,
     onTabviewChanged: PropTypes.func,
     oneTabHidden: PropTypes.bool,
+    enableCachePage: PropTypes.bool,
+    carouselProps: PropTypes.object,
   };
 
   static defaultProps = {
@@ -54,6 +56,8 @@ export default class ScrollableTabView extends React.Component {
     onBeforeEndReached: null,
     onTabviewChanged: null,
     oneTabHidden: false,
+    enableCachePage: false,
+    carouselProps: {},
   };
 
   constructor(props) {
@@ -276,8 +280,8 @@ export default class ScrollableTabView extends React.Component {
     return (
       (this.getCurrentRef(index) || this.getCurrentRef(index) == undefined) &&
       this._getLazyIndexs(index) &&
-      this.state.checkedIndex == index && (
-        <View style={{ flex: 1 }}>
+      (this.props.enableCachePage ? this.props.enableCachePage : this.state.checkedIndex == index) && (
+        <View style={[{ flex: 1 }, this.props.enableCachePage && this.state.checkedIndex != index && { height: 0 }]}>
           <item.screen {...this._getProps(this.props.mappingProps)} {...(item.toProps || {})} />
         </View>
       )
@@ -339,6 +343,7 @@ export default class ScrollableTabView extends React.Component {
                   offset: deviceWidth * index,
                   index,
                 })}
+                {...this.props.carouselProps}
               />
             );
           }}
