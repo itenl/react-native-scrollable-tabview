@@ -4,6 +4,7 @@ export default (WrappedComponent, getRef) => {
   return class HocComponent extends PureComponent {
     constructor(props) {
       super(props);
+      this.testdata = 123;
     }
 
     render() {
