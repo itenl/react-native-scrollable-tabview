@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 
-export default (WrappedComponent, getRef = () => {}) => {
+export default (WrappedComponent, getRef) => {
   return class HocComponent extends PureComponent {
     constructor(props) {
       super(props);

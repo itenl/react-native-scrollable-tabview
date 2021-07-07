@@ -109,6 +109,11 @@ const render = () => {
       header={() => {
         return <View style={{ backgroundColor: 'pink', height: 120 }}></View>;
       }}
+      // 是否持久化页面切换后不销毁
+      enableCachePage={true}
+      // 传递给 carousel 的属性
+      // 参照文档 https://github.com/meliorence/react-native-snap-carousel/blob/master/doc/PROPS_METHODS_AND_GETTERS.md
+      carouselProps={{}}
     ></ScrollableTabView>
   );
 };
