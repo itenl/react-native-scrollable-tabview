@@ -205,7 +205,7 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderBadges(tabIndex) {
-    let badges = this.props.badges[tabIndex] || this.badges[tabIndex];
+    let badges = this.badges[tabIndex] || this.props.badges[tabIndex];
     if (badges && badges.length)
       return badges.map(item => {
         return item;
