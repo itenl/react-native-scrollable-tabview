@@ -64,7 +64,7 @@ const render = () => {
           tabLabelRender:(tabLabel) => {
             return `--- ${tabLabel} ---`
           },
-          // 针对当前 Tab 的徽章，与 badges 属性互斥
+          // 针对当前 Tab 的徽章，与 badges 属性互斥，优先级高于最外层属性 badges
           badge: [<Text>one</Text>, <Text>two</Text>],
           // toProps 仅传递给 Screen，不作数据关联
           toProps: {
@@ -109,6 +109,8 @@ const render = () => {
       header={() => {
         return <View style={{ backgroundColor: 'pink', height: 120 }}></View>;
       }}
+      // 仅一个Tab时将隐藏自身
+      oneTabHidden={true}
       // 是否持久化页面切换后不销毁
       enableCachePage={true}
       // 传递给 carousel 的属性
