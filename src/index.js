@@ -119,7 +119,9 @@ export default class ScrollableTabView extends React.Component {
     return (
       props.stacks &&
       props.stacks.map((item, index) => {
-        if (item.screen && item.screen.name && item.screen.name != 'HocComponent') item.screen = HocComponent(item.screen, this._setCurrentRef(index), index);
+        if (item.screen && !item.screen.__HOCNAME__) {
+          item.screen = HocComponent(item.screen, this._setCurrentRef(index), index);
+        }
         return item;
       })
     );

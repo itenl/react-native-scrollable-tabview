@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 
 export default (WrappedComponent, getRef) => {
   return class HocComponent extends PureComponent {
+    static __HOCNAME__ = 'HocComponent';
     constructor(props) {
       super(props);
       this.__HOCNAME__ = 'HocComponent';
