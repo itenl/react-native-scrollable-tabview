@@ -195,9 +195,14 @@ export default class ScrollableTabView extends React.Component {
     if (stacks && stacks.sticky && typeof stacks.sticky == 'function' && ref) {
       // 用于自动同步 Screen 数据流改变后仅会 render 自身 Screen 的问题，用于自动同步 screenContext 给吸顶组件
       if (this.props.syncToSticky) {
-        ref.componentDidUpdate = () => {
-          this._refresh();
-        };
+        const originalDidUpdate = ref.componentDidUpdate,
+          context = this;
+        if (originalDidUpdate) {
+          ref.componentDidUpdate = function () {
+            context._refresh();
+            originalDidUpdate.apply(this, [...arguments]);
+          };
+        }
       }
       return <stacks.sticky {...this._getProps(this.props.mappingProps || {})} screenContext={ref}></stacks.sticky>;
     }
