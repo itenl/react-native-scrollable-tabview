@@ -4,15 +4,14 @@ export default (WrappedComponent, getRef) => {
   return class HocComponent extends PureComponent {
     constructor(props) {
       super(props);
-      this.testdata = 123;
+      this.__HOCNAME__ = 'HocComponent';
     }
 
     render() {
       return (
         <WrappedComponent
           ref={comp => {
-            this.comp = comp;
-            getRef && getRef(comp);
+            if (comp && !comp.__HOCNAME__) comp && getRef && getRef(comp);
           }}
           {...this.props}
         />
