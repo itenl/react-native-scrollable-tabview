@@ -68,6 +68,12 @@ export default class ScrollableTabView extends React.Component {
       lazyIndexs: [this._getFirstIndex()],
       isRefreshing: false,
     };
+    this.layoutHeight = {
+      container: 0,
+      header: 0,
+      tabs: 0,
+      screen: 0,
+    };
     this._initial();
   }
 
@@ -221,10 +227,12 @@ export default class ScrollableTabView extends React.Component {
 
   _renderTabs() {
     const renderTab = !(this.props.oneTabHidden && this.tabs && this.tabs.length == 1);
+    const tabsStyle = Object.assign({}, styles.tabsStyle, this.props.tabsStyle || {});
+    this.layoutHeight['tabs'] = renderTab ? tabsStyle.height : 0;
     return (
       <View style={{ flex: 1 }}>
         {renderTab && (
-          <View style={[styles.tabsStyle, this.props.tabsStyle]}>
+          <View style={tabsStyle}>
             {this.tabs &&
               this.tabs.map((tab, index) => {
                 const checked = this.state.checkedIndex == index;
@@ -282,12 +290,17 @@ export default class ScrollableTabView extends React.Component {
     if (this.state.lazyIndexs.includes(index)) return true;
   }
 
+  _getScreenHeight() {
+    this.layoutHeight['screen'] = this.layoutHeight['container'] - (this.layoutHeight['header'] + this.layoutHeight['tabs']);
+    return this.layoutHeight['screen'];
+  }
+
   _renderItem({ item, index }) {
     return (
       (this.getCurrentRef(index) || this.getCurrentRef(index) == undefined) &&
       this._getLazyIndexs(index) &&
       (this.props.enableCachePage ? this.props.enableCachePage : this.state.checkedIndex == index) && (
-        <View style={[{ flex: 1 }, this.props.enableCachePage && this.state.checkedIndex != index && { height: 0 }]}>
+        <View style={[{ flex: 1 }, this.props.enableCachePage && this.state.checkedIndex != index && { height: this._getScreenHeight() }]}>
           <item.screen {...this._getProps(this.props.mappingProps)} {...(item.toProps || {})} />
         </View>
       )
@@ -318,9 +331,29 @@ export default class ScrollableTabView extends React.Component {
     onBeforeRefresh && typeof onBeforeRefresh === 'function' ? onBeforeRefresh(next, this._toggledRefreshing.bind(this)) : next();
   }
 
+  _renderHeader() {
+    if (!this.props.header) return null;
+    return (
+      <View
+        onLayout={({ nativeEvent }) => {
+          const { height } = nativeEvent.layout;
+          this.layoutHeight['header'] = height;
+        }}
+      >
+        {this.props.header()}
+      </View>
+    );
+  }
+
   render() {
     return (
-      <View style={[styles.container, this.props.style]}>
+      <View
+        onLayout={({ nativeEvent }) => {
+          const { height } = nativeEvent.layout;
+          this.layoutHeight['container'] = height;
+        }}
+        style={[styles.container, this.props.style]}
+      >
         <SectionList
           ref={rf => (this.section = rf)}
           keyExtractor={(item, index) => `scrollable-tab-view-wrap-${index}`}
@@ -330,7 +363,7 @@ export default class ScrollableTabView extends React.Component {
           refreshControl={<RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh.bind(this)} />}
           sections={[{ data: [1] }]}
           stickySectionHeadersEnabled={true}
-          ListHeaderComponent={this.props.header ?? null}
+          ListHeaderComponent={this._renderHeader.bind(this)}
           renderItem={() => {
             return (
               <Carousel
