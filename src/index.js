@@ -8,7 +8,7 @@ const deviceWidth = Dimensions.get('window').width;
 const deviceHeight = Dimensions.get('window').height;
 
 /**
- *  该组件内禁止再次嵌套 SectionList / FlatList / ScrollView 等类似组件
+ *  该组件内不推荐再次嵌套 SectionList / FlatList / ScrollView 等类似组件
  *  Screen 内上下文将提供 onRefresh(toggled) / onEndReached 方法用于方便触发对应业务，其中 toggled 用于切换loading状态，可传指定true/false参数，不传将默认与上个状态进行切换
  *  for - Value
  * @export
