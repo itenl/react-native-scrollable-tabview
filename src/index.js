@@ -236,30 +236,29 @@ export default class ScrollableTabView extends React.Component {
     this.layoutHeight['tabs'] = renderTab ? tabsStyle.height : 0;
     return (
       <View style={{ flex: 1 }}>
-        {renderTab && (
+        {renderTab && this.tabs && !!this.tabs.length && (
           <View style={tabsStyle}>
-            {this.tabs &&
-              this.tabs.map((tab, index) => {
-                const checked = this.state.checkedIndex == index;
-                return (
-                  <View key={index} style={this.props.tabWrapStyle}>
-                    {this._renderBadges(index)}
-                    <TouchableOpacity
-                      onPress={() => {
-                        this._onTabviewChange(index);
-                      }}
-                      style={[styles.tabStyle, this.props.tabStyle]}
-                    >
-                      <View>
-                        <Text style={[styles.textStyle, this.props.textStyle, checked && this.props.textActiveStyle]}>
-                          {tab.tabLabelRender && typeof tab.tabLabelRender == 'function' ? tab.tabLabelRender(tab.tabLabel) : tab.tabLabel}
-                        </Text>
-                        {checked && <View style={[styles.tabUnderlineStyle, this.props.tabUnderlineStyle]}></View>}
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                );
-              })}
+            {this.tabs.map((tab, index) => {
+              const checked = this.state.checkedIndex == index;
+              return (
+                <View key={index} style={this.props.tabWrapStyle}>
+                  {this._renderBadges(index)}
+                  <TouchableOpacity
+                    onPress={() => {
+                      this._onTabviewChange(index);
+                    }}
+                    style={[styles.tabStyle, this.props.tabStyle]}
+                  >
+                    <View>
+                      <Text style={[styles.textStyle, this.props.textStyle, checked && this.props.textActiveStyle]}>
+                        {tab.tabLabelRender && typeof tab.tabLabelRender == 'function' ? tab.tabLabelRender(tab.tabLabel) : tab.tabLabel}
+                      </Text>
+                      {checked && <View style={[styles.tabUnderlineStyle, this.props.tabUnderlineStyle]}></View>}
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
           </View>
         )}
         {this._renderSticky()}
