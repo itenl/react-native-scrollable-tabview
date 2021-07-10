@@ -36,6 +36,8 @@ export default class ScrollableTabView extends React.Component {
     oneTabHidden: PropTypes.bool,
     enableCachePage: PropTypes.bool,
     carouselProps: PropTypes.object,
+    toHeaderOnTab: PropTypes.bool,
+    toTabsOnTab: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -58,6 +60,8 @@ export default class ScrollableTabView extends React.Component {
     oneTabHidden: false,
     enableCachePage: false,
     carouselProps: {},
+    toHeaderOnTab: false,
+    toTabsOnTab: false,
   };
 
   constructor(props) {
@@ -268,7 +272,11 @@ export default class ScrollableTabView extends React.Component {
   };
 
   _onTabviewChange(index, callback = this._snapToItem) {
-    if (index == this.state.checkedIndex) return;
+    if (index == this.state.checkedIndex) {
+      if (this.props.toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
+      if (this.props.toTabsOnTab) return this._scrollTo(0);
+      return void 0;
+    }
     if (!this.state.lazyIndexs.includes(index)) this.state.lazyIndexs.push(index);
     this.setState(
       {

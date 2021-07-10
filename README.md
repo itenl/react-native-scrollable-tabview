@@ -61,8 +61,8 @@ const render = () => {
           // Tab 昵称
           tabLabel: 'OneTab',
           // 自定义 Tab渲染函数，优先级高于 tabLabel
-          tabLabelRender:(tabLabel) => {
-            return `--- ${tabLabel} ---`
+          tabLabelRender: tabLabel => {
+            return `--- ${tabLabel} ---`;
           },
           // 针对当前 Tab 的徽章，与 badges 属性互斥，优先级高于最外层属性 badges
           badge: [<Text>one</Text>, <Text>two</Text>],
@@ -116,6 +116,10 @@ const render = () => {
       // 传递给 carousel 的属性
       // 参照文档 https://github.com/meliorence/react-native-snap-carousel/blob/master/doc/PROPS_METHODS_AND_GETTERS.md
       carouselProps={{}}
+      // 触发已激活的Tab将回到Header(高优先级)
+      toHeaderOnTab={true}
+      // 触发已激活的Tab将回到Tabs
+      toTabsOnTab={true}
     ></ScrollableTabView>
   );
 };
