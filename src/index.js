@@ -135,6 +135,7 @@ export default class ScrollableTabView extends React.Component {
 
   _setCurrentRef(index) {
     return ref => {
+      if (this.state.refsObj[index] && this.state.refsObj[index] === ref) return;
       this.state.refsObj[index] = ref;
       this.setState({
         refsObj: this.state.refsObj,
