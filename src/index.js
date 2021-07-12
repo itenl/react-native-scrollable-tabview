@@ -71,7 +71,6 @@ export default class ScrollableTabView extends React.Component {
     this.state = {
       checkedIndex: this._getFirstIndex(),
       refsObj: {},
-      lazyIndexs: [this._getFirstIndex()],
       isRefreshing: false,
     };
     this.layoutHeight = {
@@ -279,11 +278,9 @@ export default class ScrollableTabView extends React.Component {
       if (this.props.toTabsOnTab) return this._scrollTo(0);
       return void 0;
     }
-    if (!this.state.lazyIndexs.includes(index)) this.state.lazyIndexs.push(index);
     this.setState(
       {
         checkedIndex: index,
-        lazyIndexs: this.state.lazyIndexs,
       },
       () => {
         if (this.props.onTabviewChanged) {
@@ -297,10 +294,6 @@ export default class ScrollableTabView extends React.Component {
     this._toggledRefreshing(false);
   }
 
-  _getLazyIndexs(index) {
-    if (this.state.lazyIndexs.includes(index)) return true;
-  }
-
   _getScreenHeight() {
     this.layoutHeight['screen'] = this.layoutHeight['container'] - (this.layoutHeight['header'] + this.layoutHeight['tabs']);
     return this.layoutHeight['screen'];
@@ -309,7 +302,6 @@ export default class ScrollableTabView extends React.Component {
   _renderItem({ item, index }) {
     return (
       (this.getCurrentRef(index) || this.getCurrentRef(index) == undefined) &&
-      this._getLazyIndexs(index) &&
       (this.props.enableCachePage ? this.props.enableCachePage : this.state.checkedIndex == index) && (
         <View style={[{ flex: 1 }, this.props.enableCachePage && this.state.checkedIndex != index && { height: this._getScreenHeight() }]}>
           <item.screen {...this._getProps(this.props.mappingProps)} {...(item.toProps || {})} />
