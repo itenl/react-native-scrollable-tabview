@@ -5,7 +5,7 @@
 ```javascript
 // 1. 在 Stacks 中每个 Screen 将提供 onRefresh(toggled) / onEndReached 函数
 // 2. 通过 mappingProps 传递的数据将映射结构到 Screen / Sticky
-// 3. 在 Sticky 中可通过 this.props.context 来获取 Screen 的上下文
+// 3. 在 Sticky 中可通过 this.props.screenContext 来获取 Screen 的上下文
 // 4. 在 Screen 中默认提供 this.props.refresh() / this.props.scrollTo(0) 函数
 
 // 获取当前激活的 Screen 实例上下文
@@ -60,7 +60,11 @@ const render = () => {
           sticky: Sticky,
           // Tab 昵称
           tabLabel: 'OneTab',
-          // 针对当前 Tab 的徽章，与 badges 属性互斥
+          // 自定义 Tab渲染函数，优先级高于 tabLabel
+          tabLabelRender: tabLabel => {
+            return `--- ${tabLabel} ---`;
+          },
+          // 针对当前 Tab 的徽章，与 badges 属性互斥，优先级高于最外层属性 badges
           badge: [<Text>one</Text>, <Text>two</Text>],
           // toProps 仅传递给 Screen，不作数据关联
           toProps: {
@@ -105,6 +109,19 @@ const render = () => {
       header={() => {
         return <View style={{ backgroundColor: 'pink', height: 120 }}></View>;
       }}
+      // 仅一个Tab时将隐藏自身
+      oneTabHidden={true}
+      // 是否持久化页面切换后不销毁
+      enableCachePage={true}
+      // 传递给 carousel 的属性
+      // 参照文档 https://github.com/meliorence/react-native-snap-carousel/blob/master/doc/PROPS_METHODS_AND_GETTERS.md
+      carouselProps={{}}
+      // 触发已激活的Tab将回到Header(高优先级)
+      toHeaderOnTab={true}
+      // 触发已激活的Tab将回到Tabs
+      toTabsOnTab={true}
+      // 配置 Tabs 显示隐藏
+      tabsShown={false}
     ></ScrollableTabView>
   );
 };
