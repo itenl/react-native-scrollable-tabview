@@ -38,6 +38,7 @@ export default class ScrollableTabView extends React.Component {
     carouselProps: PropTypes.object,
     toHeaderOnTab: PropTypes.bool,
     toTabsOnTab: PropTypes.bool,
+    tabsShown: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -62,6 +63,7 @@ export default class ScrollableTabView extends React.Component {
     carouselProps: {},
     toHeaderOnTab: false,
     toTabsOnTab: false,
+    tabsShown: true,
   };
 
   constructor(props) {
@@ -231,29 +233,30 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderTabs() {
-    const renderTab = !(this.props.oneTabHidden && this.tabs && this.tabs.length == 1);
-    const tabsStyle = Object.assign({}, styles.tabsStyle, this.props.tabsStyle || {});
-    this.layoutHeight['tabs'] = renderTab ? tabsStyle.height : 0;
+    const { oneTabHidden, tabsShown, tabsStyle, tabWrapStyle, tabStyle, textStyle, textActiveStyle, tabUnderlineStyle } = this.props;
+    const renderTab = !(oneTabHidden && this.tabs && this.tabs.length == 1) && tabsShown;
+    const _tabsStyle = Object.assign({}, styles.tabsStyle, tabsStyle || {});
+    this.layoutHeight['tabs'] = renderTab ? _tabsStyle.height : 0;
     return (
       <View style={{ flex: 1 }}>
         {renderTab && this.tabs && !!this.tabs.length && (
-          <View style={tabsStyle}>
+          <View style={_tabsStyle}>
             {this.tabs.map((tab, index) => {
               const checked = this.state.checkedIndex == index;
               return (
-                <View key={index} style={this.props.tabWrapStyle}>
+                <View key={index} style={tabWrapStyle}>
                   {this._renderBadges(index)}
                   <TouchableOpacity
                     onPress={() => {
                       this._onTabviewChange(index);
                     }}
-                    style={[styles.tabStyle, this.props.tabStyle]}
+                    style={[styles.tabStyle, tabStyle]}
                   >
                     <View>
-                      <Text style={[styles.textStyle, this.props.textStyle, checked && this.props.textActiveStyle]}>
+                      <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
                         {tab.tabLabelRender && typeof tab.tabLabelRender == 'function' ? tab.tabLabelRender(tab.tabLabel) : tab.tabLabel}
                       </Text>
-                      {checked && <View style={[styles.tabUnderlineStyle, this.props.tabUnderlineStyle]}></View>}
+                      {checked && <View style={[styles.tabUnderlineStyle, tabUnderlineStyle]}></View>}
                     </View>
                   </TouchableOpacity>
                 </View>
