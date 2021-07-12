@@ -120,6 +120,8 @@ const render = () => {
       toHeaderOnTab={true}
       // 触发已激活的Tab将回到Tabs
       toTabsOnTab={true}
+      // 配置 Tabs 显示隐藏
+      tabsShown={false}
     ></ScrollableTabView>
   );
 };
