@@ -59,7 +59,7 @@ export default class ScrollableTabView extends React.Component {
     onBeforeEndReached: null,
     onTabviewChanged: null,
     oneTabHidden: false,
-    enableCachePage: false,
+    enableCachePage: true,
     carouselProps: {},
     toHeaderOnTab: false,
     toTabsOnTab: false,
@@ -275,7 +275,13 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _snapToItem = index => {
-    this.tabview && this.tabview.snapToItem(index);
+    return new Promise((resolve, reject) => {
+      const tabview = this.tabview;
+      tabview.snapToItem(index);
+      const timer = setInterval(() => {
+        tabview.currentIndex == index ? (clearInterval(timer), resolve()) : tabview.snapToItem(index);
+      }, 50);
+    });
   };
 
   _onTabviewChange(index, callback = this._snapToItem) {
