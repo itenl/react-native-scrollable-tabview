@@ -386,6 +386,8 @@ export default class ScrollableTabView extends React.Component {
           sections={[{ data: [1] }]}
           stickySectionHeadersEnabled={true}
           ListHeaderComponent={this._renderHeader.bind(this)}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
           renderItem={() => {
             return (
               <Carousel
