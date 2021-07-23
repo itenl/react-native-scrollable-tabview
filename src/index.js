@@ -36,9 +36,11 @@ export default class ScrollableTabView extends React.Component {
     oneTabHidden: PropTypes.bool,
     enableCachePage: PropTypes.bool,
     carouselProps: PropTypes.object,
+    sectionListProps: PropTypes.object,
     toHeaderOnTab: PropTypes.bool,
     toTabsOnTab: PropTypes.bool,
     tabsShown: PropTypes.bool,
+    minHeight: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -61,9 +63,11 @@ export default class ScrollableTabView extends React.Component {
     oneTabHidden: false,
     enableCachePage: true,
     carouselProps: {},
+    sectionListProps: {},
     toHeaderOnTab: false,
     toTabsOnTab: false,
     tabsShown: true,
+    minHeight: true,
   };
 
   constructor(props) {
@@ -204,6 +208,7 @@ export default class ScrollableTabView extends React.Component {
         refresh: this._refresh,
         scrollTo: this._scrollTo,
         toTabView: this.toTabView,
+        layoutHeight: this.layoutHeight,
       },
       props || {},
     );
@@ -275,16 +280,10 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _snapToItem = index => {
-    return new Promise((resolve, reject) => {
-      const tabview = this.tabview;
-      tabview.snapToItem(index);
-      const timer = setInterval(() => {
-        tabview.currentIndex == index ? (clearInterval(timer), resolve()) : tabview.snapToItem(index);
-      }, 50);
-    });
+    return this.tabview && this.tabview.snapToItem(index);
   };
 
-  _onTabviewChange(index, callback = this._snapToItem) {
+  _onTabviewChange(index) {
     if (index == this.state.checkedIndex) {
       if (this.props.toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
       if (this.props.toTabsOnTab) return this._scrollTo(0);
@@ -303,7 +302,7 @@ export default class ScrollableTabView extends React.Component {
         }
       },
     );
-    callback && callback(index);
+    this._snapToItem(index);
     // 切换后强制重置刷新状态
     this._toggledRefreshing(false);
   }
@@ -318,11 +317,12 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderItem({ item, index }) {
+    const screenHeight = this._getScreenHeight();
     return (
+      (this.props.enableCachePage ? this.props.enableCachePage : this.state.checkedIndex == index) &&
       (this.getCurrentRef(index) || this.getCurrentRef(index) == undefined) &&
-      this._getLazyIndexs(index) &&
-      (this.props.enableCachePage ? this.props.enableCachePage : this.state.checkedIndex == index) && (
-        <View style={[{ flex: 1 }, this.props.enableCachePage && this.state.checkedIndex != index && { height: this._getScreenHeight() }]}>
+      this._getLazyIndexs(index) && (
+        <View style={[{ flex: 1 }, this.props.minHeight && { minHeight: screenHeight }]}>
           <item.screen {...this._getProps(this.props.mappingProps)} {...(item.toProps || {})} />
         </View>
       )
@@ -395,8 +395,8 @@ export default class ScrollableTabView extends React.Component {
                 renderItem={this._renderItem.bind(this)}
                 sliderWidth={deviceWidth}
                 itemWidth={deviceWidth}
-                onSnapToItem={index => {
-                  this._onTabviewChange(index, null);
+                onBeforeSnapToItem={index => {
+                  this._onTabviewChange(index);
                 }}
                 firstItem={this.state.checkedIndex}
                 getItemLayout={(data, index) => ({
@@ -408,6 +408,7 @@ export default class ScrollableTabView extends React.Component {
               />
             );
           }}
+          {...this.props.sectionListProps}
         ></SectionList>
       </View>
     );

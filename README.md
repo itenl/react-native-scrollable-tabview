@@ -3,13 +3,40 @@
 [![NPM Version](http://img.shields.io/npm/v/@itenl/react-native-scrollable-tabview.svg?style=flat)](https://www.npmjs.com/package/@itenl/react-native-scrollable-tabview)
 
 ```javascript
-// 1. 在 Stacks 中每个 Screen 将提供 onRefresh(toggled) / onEndReached 函数
-// 2. 通过 mappingProps 传递的数据将映射结构到 Screen / Sticky
-// 3. 在 Sticky 中可通过 this.props.screenContext 来获取 Screen 的上下文
-// 4. 在 Screen 中默认提供 this.props.refresh() / this.props.scrollTo(0) 函数
+// · 在 Stacks 中每个 Screen 将提供 onRefresh(toggled) / onEndReached 函数
+// · 通过 mappingProps 传递的数据将映射结构到 Screen / Sticky
+// · 在 Sticky 中可通过 this.props.screenContext 来获取 Screen 的上下文
+// · 在 Screen 中默认提供 this.props.refresh() / this.props.scrollTo(0) 函数
 
 // 获取当前激活的 Screen 实例上下文
 this.scrollableTabView.getCurrentRef();
+
+// Screen 注入的生命周期
+// 1.下拉刷新时触发
+//  onRefresh(toggled){}
+// 2.上滑加载更多触发
+//  onEndReached(toggled){}
+
+// Sticky this.props 注入的方法/属性
+// 1.获取 Screen 上下文
+//  this.props.screenContext
+
+// Screen this.props 注入的方法/属性
+// 1.方法：手动触发刷新、同步Screen状态至Sticky
+//  this.props.refresh(无参数)
+// 2.方法：上下滑动至指定位置
+//  this.props.scrollTo(传入 0 默认定位至 tabs / 传入负数则置顶)
+// 3.方法：跳转至其他 Tab
+//  this.props.toTabView(可传入 index 或 tabLabel)
+// 4.属性 获取 layoutHeight 对象
+//  容器总高度
+//  this.props.layoutHeight.container
+//  顶部header高度
+//  this.props.layoutHeight.header
+//  tabs高度
+//  this.props.layoutHeight.tabs
+//  视图高度
+//  this.props.layoutHeight.screen
 
 const render = () => {
   return (
@@ -113,15 +140,20 @@ const render = () => {
       oneTabHidden={true}
       // 是否持久化页面切换后不销毁
       enableCachePage={true}
-      // 传递给 carousel 的属性
+      // 传递给 Carousel 的属性
       // 参照文档 https://github.com/meliorence/react-native-snap-carousel/blob/master/doc/PROPS_METHODS_AND_GETTERS.md
       carouselProps={{}}
+      // 传递给 SectionList 的属性
+      // 参照文档 https://reactnative.cn/docs/sectionlist
+      sectionListProps={{}}
       // 触发已激活的Tab将回到Header(高优先级)
       toHeaderOnTab={true}
       // 触发已激活的Tab将回到Tabs
       toTabsOnTab={true}
       // 配置 Tabs 显示隐藏
       tabsShown={false}
+      // 配置 Screen 系统分配默认最小高度(默认true)
+      minHeight={true}
     ></ScrollableTabView>
   );
 };
