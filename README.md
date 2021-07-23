@@ -152,8 +152,6 @@ const render = () => {
       toTabsOnTab={true}
       // 配置 Tabs 显示隐藏
       tabsShown={false}
-      // 配置 Screen 系统分配默认最小高度(默认true)
-      minHeight={true}
     ></ScrollableTabView>
   );
 };
