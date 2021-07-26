@@ -12,10 +12,10 @@
 this.scrollableTabView.getCurrentRef();
 
 // Screen 注入的生命周期
-// 1.下拉刷新时触发
+// 1.下拉刷新时触发 形参toggled函数用于切换原生loading状态的显隐，若在loading中用户切换tab将会强制隐藏并重置状态
 //  onRefresh(toggled){}
 // 2.上滑加载更多触发
-//  onEndReached(toggled){}
+//  onEndReached(){}
 
 // Sticky this.props 注入的方法/属性
 // 1.获取 Screen 上下文
