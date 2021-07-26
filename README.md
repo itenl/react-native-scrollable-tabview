@@ -152,7 +152,7 @@ const render = () => {
       toTabsOnTab={true}
       // 配置 Tabs 显示隐藏
       tabsShown={false}
-      // 在enableCachePage为true的情况下滑动切换Screen设置最小高度保障Header与Tabs不会弹跳导致页面
+      // 在enableCachePage为true的情况下滑动切换Screen设置最小高度保障Header与Tabs不会弹跳
       fixedTabs={false}
     ></ScrollableTabView>
   );
