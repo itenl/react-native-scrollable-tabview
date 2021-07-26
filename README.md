@@ -152,6 +152,8 @@ const render = () => {
       toTabsOnTab={true}
       // 配置 Tabs 显示隐藏
       tabsShown={false}
+      // 在enableCachePage为true的情况下滑动切换Screen将Header隐藏并固定Tabs
+      fixedTabs={false}
     ></ScrollableTabView>
   );
 };

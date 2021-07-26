@@ -1,6 +1,6 @@
 {
   "name": "@itenl/react-native-scrollable-tabview",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "react-native-scrollable-tabview",
   "main": "index.js",
   "scripts": {
