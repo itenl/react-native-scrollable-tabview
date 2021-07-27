@@ -40,7 +40,7 @@ export default class ScrollableTabView extends React.Component {
     toHeaderOnTab: PropTypes.bool,
     toTabsOnTab: PropTypes.bool,
     tabsShown: PropTypes.bool,
-    minHeight: PropTypes.bool,
+    fixedTabs: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -67,7 +67,7 @@ export default class ScrollableTabView extends React.Component {
     toHeaderOnTab: false,
     toTabsOnTab: false,
     tabsShown: true,
-    minHeight: true,
+    fixedTabs: false,
   };
 
   constructor(props) {
@@ -316,13 +316,24 @@ export default class ScrollableTabView extends React.Component {
     return this.layoutHeight['screen'];
   }
 
+  _getMaximumScreenHeight() {
+    return this.layoutHeight['container'] - this.layoutHeight['tabs'];
+  }
+
   _renderItem({ item, index }) {
     const screenHeight = this._getScreenHeight();
     return (
       (this.props.enableCachePage ? this.props.enableCachePage : this.state.checkedIndex == index) &&
       (this.getCurrentRef(index) || this.getCurrentRef(index) == undefined) &&
       this._getLazyIndexs(index) && (
-        <View style={[{ flex: 1 }, this.props.minHeight && { minHeight: screenHeight }]}>
+        <View
+          style={[
+            { flex: 1 },
+            this.props.enableCachePage && this.state.checkedIndex != index && { maxHeight: screenHeight },
+            this.props.enableCachePage && this.props.fixedTabs && this.state.checkedIndex == index && { minHeight: this._getMaximumScreenHeight() },
+            !this.props.enableCachePage && this.state.checkedIndex == index && { minHeight: screenHeight },
+          ]}
+        >
           <item.screen {...this._getProps(this.props.mappingProps)} {...(item.toProps || {})} />
         </View>
       )
@@ -419,8 +430,8 @@ export default class ScrollableTabView extends React.Component {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  tabsStyle: { flex: 1, zIndex: 100, flexDirection: 'row', backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'space-around', height: 35 },
-  tabStyle: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fcfcfc' },
-  textStyle: { height: 20, fontSize: 12, color: '#11111180', textAlign: 'center' },
+  tabsStyle: { flex: 1, zIndex: 100, flexDirection: 'row', backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'space-around', height: 35, marginBottom: -0.5 },
+  tabStyle: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' },
+  textStyle: { height: 20, fontSize: 12, color: '#11111180', textAlign: 'center', lineHeight: 20 },
   tabUnderlineStyle: { top: 6, height: 2, borderRadius: 2, backgroundColor: '#00aced' },
 });
