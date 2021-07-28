@@ -69,7 +69,7 @@ export default class ScrollableTabView extends React.Component {
     toTabsOnTab: false,
     tabsShown: true,
     fixedTabs: false,
-    fixedHeader: true,
+    fixedHeader: false,
   };
 
   constructor(props) {
