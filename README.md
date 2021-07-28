@@ -99,9 +99,11 @@ const render = () => {
           },
         },
       ]}
-      // 整个Tabs包装样式
+      // 整个Tabs样式
       tabsStyle={{}}
-      // 单个Tab样式控制
+      // 单个Tab包装样式
+      tabWrapStyle={{}}
+      // 单个Tab样式
       tabStyle={{}}
       // tab内文本样式
       textStyle={{}}
