@@ -105,7 +105,7 @@ const render = () => {
       tabWrapStyle={{}}
       // 单个Tab样式
       tabStyle={{}}
-      // tab内文本样式
+      // Tab内文本样式
       textStyle={{}}
       // 选中激活的text样式
       textActiveStyle={{}}
@@ -158,6 +158,8 @@ const render = () => {
       fixedTabs={false}
       // 与Tabs一同渲染，固定顶部Header，不跟随滚动
       fixedHeader={false}
+      // Tabs是否支持横向滚动(存在多个类目Tab的情况需要启用，建议 tabStyle 传入固定宽度)
+      useScroll={false}
     ></ScrollableTabView>
   );
 };
