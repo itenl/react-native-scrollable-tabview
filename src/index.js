@@ -41,6 +41,7 @@ export default class ScrollableTabView extends React.Component {
     toTabsOnTab: PropTypes.bool,
     tabsShown: PropTypes.bool,
     fixedTabs: PropTypes.bool,
+    fixedHeader: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -68,6 +69,7 @@ export default class ScrollableTabView extends React.Component {
     toTabsOnTab: false,
     tabsShown: true,
     fixedTabs: false,
+    fixedHeader: true,
   };
 
   constructor(props) {
@@ -248,32 +250,41 @@ export default class ScrollableTabView extends React.Component {
     const _tabsStyle = Object.assign({}, styles.tabsStyle, tabsStyle || {});
     this.layoutHeight['tabs'] = renderTab ? _tabsStyle.height : 0;
     return (
+      renderTab &&
+      this.tabs &&
+      !!this.tabs.length && (
+        <View style={_tabsStyle}>
+          {this.tabs.map((tab, index) => {
+            const checked = this.state.checkedIndex == index;
+            return (
+              <View key={index} style={tabWrapStyle}>
+                {this._renderBadges(index)}
+                <TouchableOpacity
+                  onPress={() => {
+                    this._onTabviewChange(index);
+                  }}
+                  style={[styles.tabStyle, tabStyle]}
+                >
+                  <View>
+                    <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
+                      {tab.tabLabelRender && typeof tab.tabLabelRender == 'function' ? tab.tabLabelRender(tab.tabLabel) : tab.tabLabel}
+                    </Text>
+                    {checked && <View style={[styles.tabUnderlineStyle, tabUnderlineStyle]}></View>}
+                  </View>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </View>
+      )
+    );
+  }
+
+  _renderSectionHeader() {
+    return (
       <View style={{ flex: 1 }}>
-        {renderTab && this.tabs && !!this.tabs.length && (
-          <View style={_tabsStyle}>
-            {this.tabs.map((tab, index) => {
-              const checked = this.state.checkedIndex == index;
-              return (
-                <View key={index} style={tabWrapStyle}>
-                  {this._renderBadges(index)}
-                  <TouchableOpacity
-                    onPress={() => {
-                      this._onTabviewChange(index);
-                    }}
-                    style={[styles.tabStyle, tabStyle]}
-                  >
-                    <View>
-                      <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
-                        {tab.tabLabelRender && typeof tab.tabLabelRender == 'function' ? tab.tabLabelRender(tab.tabLabel) : tab.tabLabel}
-                      </Text>
-                      {checked && <View style={[styles.tabUnderlineStyle, tabUnderlineStyle]}></View>}
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </View>
-        )}
+        {this.props.fixedHeader && this._renderHeader()}
+        {this._renderTabs()}
         {this._renderSticky()}
       </View>
     );
@@ -390,13 +401,13 @@ export default class ScrollableTabView extends React.Component {
         <SectionList
           ref={rf => (this.section = rf)}
           keyExtractor={(item, index) => `scrollable-tab-view-wrap-${index}`}
-          renderSectionHeader={this._renderTabs.bind(this)}
+          renderSectionHeader={this._renderSectionHeader.bind(this)}
           onEndReached={this._onEndReached.bind(this)}
           onEndReachedThreshold={this.props.onEndReachedThreshold}
           refreshControl={<RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh.bind(this)} />}
           sections={[{ data: [1] }]}
           stickySectionHeadersEnabled={true}
-          ListHeaderComponent={this._renderHeader.bind(this)}
+          ListHeaderComponent={!this.props.fixedHeader && this._renderHeader.bind(this)}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           renderItem={() => {

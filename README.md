@@ -154,6 +154,8 @@ const render = () => {
       tabsShown={false}
       // 在enableCachePage为true的情况下滑动切换Screen设置最小高度保障Header与Tabs不会弹跳
       fixedTabs={false}
+      // 与Tabs一同渲染，固定顶部Header，不跟随滚动
+      fixedHeader={false}
     ></ScrollableTabView>
   );
 };
