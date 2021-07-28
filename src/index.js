@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity, FlatList } from 'react-native';
 import PropTypes from 'prop-types';
 import Carousel from 'react-native-snap-carousel';
 import { Dimensions, PixelRatio } from 'react-native';
@@ -41,6 +41,8 @@ export default class ScrollableTabView extends React.Component {
     toTabsOnTab: PropTypes.bool,
     tabsShown: PropTypes.bool,
     fixedTabs: PropTypes.bool,
+    fixedHeader: PropTypes.bool,
+    useScroll: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -68,6 +70,8 @@ export default class ScrollableTabView extends React.Component {
     toTabsOnTab: false,
     tabsShown: true,
     fixedTabs: false,
+    fixedHeader: false,
+    useScroll: false,
   };
 
   constructor(props) {
@@ -242,38 +246,59 @@ export default class ScrollableTabView extends React.Component {
     return null;
   }
 
+  _renderTab({ item, index }) {
+    const { tabWrapStyle, tabStyle, textStyle, textActiveStyle, tabUnderlineStyle } = this.props;
+    const checked = this.state.checkedIndex == index;
+    return (
+      <View key={index} style={tabWrapStyle}>
+        {this._renderBadges(index)}
+        <TouchableOpacity
+          onPress={() => {
+            this._onTabviewChange(index);
+          }}
+          style={[styles.tabStyle, tabStyle]}
+        >
+          <View>
+            <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
+              {item.tabLabelRender && typeof item.tabLabelRender == 'function' ? item.tabLabelRender(item.tabLabel) : item.tabLabel}
+            </Text>
+            {checked && <View style={[styles.tabUnderlineStyle, tabUnderlineStyle]}></View>}
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   _renderTabs() {
-    const { oneTabHidden, tabsShown, tabsStyle, tabWrapStyle, tabStyle, textStyle, textActiveStyle, tabUnderlineStyle } = this.props;
+    const { oneTabHidden, tabsShown, tabsStyle, useScroll } = this.props;
     const renderTab = !(oneTabHidden && this.tabs && this.tabs.length == 1) && tabsShown;
-    const _tabsStyle = Object.assign({}, styles.tabsStyle, tabsStyle || {});
+    const _tabsStyle = Object.assign({}, !useScroll && { alignItems: 'center', justifyContent: 'space-around' }, styles.tabsStyle, tabsStyle);
     this.layoutHeight['tabs'] = renderTab ? _tabsStyle.height : 0;
     return (
+      renderTab &&
+      this.tabs &&
+      !!this.tabs.length &&
+      (useScroll ? (
+        <FlatList
+          ref={rf => (this.flatlist = rf)}
+          data={this.tabs}
+          renderItem={this._renderTab.bind(this)}
+          style={_tabsStyle}
+          horizontal={true}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+        ></FlatList>
+      ) : (
+        <View style={_tabsStyle}>{this.tabs.map((tab, index) => this._renderTab({ item: tab, index }))}</View>
+      ))
+    );
+  }
+
+  _renderSectionHeader() {
+    return (
       <View style={{ flex: 1 }}>
-        {renderTab && this.tabs && !!this.tabs.length && (
-          <View style={_tabsStyle}>
-            {this.tabs.map((tab, index) => {
-              const checked = this.state.checkedIndex == index;
-              return (
-                <View key={index} style={tabWrapStyle}>
-                  {this._renderBadges(index)}
-                  <TouchableOpacity
-                    onPress={() => {
-                      this._onTabviewChange(index);
-                    }}
-                    style={[styles.tabStyle, tabStyle]}
-                  >
-                    <View>
-                      <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
-                        {tab.tabLabelRender && typeof tab.tabLabelRender == 'function' ? tab.tabLabelRender(tab.tabLabel) : tab.tabLabel}
-                      </Text>
-                      {checked && <View style={[styles.tabUnderlineStyle, tabUnderlineStyle]}></View>}
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </View>
-        )}
+        {this.props.fixedHeader && this._renderHeader()}
+        {this._renderTabs()}
         {this._renderSticky()}
       </View>
     );
@@ -284,9 +309,10 @@ export default class ScrollableTabView extends React.Component {
   };
 
   _onTabviewChange(index) {
+    const { toHeaderOnTab, toTabsOnTab, onTabviewChanged, useScroll } = this.props;
     if (index == this.state.checkedIndex) {
-      if (this.props.toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
-      if (this.props.toTabsOnTab) return this._scrollTo(0);
+      if (toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
+      if (toTabsOnTab) return this._scrollTo(0);
       return void 0;
     }
     if (!this.state.lazyIndexs.includes(index)) this.state.lazyIndexs.push(index);
@@ -296,13 +322,17 @@ export default class ScrollableTabView extends React.Component {
         lazyIndexs: this.state.lazyIndexs,
       },
       () => {
-        if (this.props.onTabviewChanged) {
+        if (onTabviewChanged) {
           const tab = this.tabs[this.state.checkedIndex];
-          this.props.onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel);
+          onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel);
         }
       },
     );
     this._snapToItem(index);
+    if (useScroll && this.flatlist)
+      this.flatlist.scrollToIndex({
+        index: index,
+      });
     // 切换后强制重置刷新状态
     this._toggledRefreshing(false);
   }
@@ -390,13 +420,13 @@ export default class ScrollableTabView extends React.Component {
         <SectionList
           ref={rf => (this.section = rf)}
           keyExtractor={(item, index) => `scrollable-tab-view-wrap-${index}`}
-          renderSectionHeader={this._renderTabs.bind(this)}
+          renderSectionHeader={this._renderSectionHeader.bind(this)}
           onEndReached={this._onEndReached.bind(this)}
           onEndReachedThreshold={this.props.onEndReachedThreshold}
           refreshControl={<RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh.bind(this)} />}
           sections={[{ data: [1] }]}
           stickySectionHeadersEnabled={true}
-          ListHeaderComponent={this._renderHeader.bind(this)}
+          ListHeaderComponent={!this.props.fixedHeader && this._renderHeader.bind(this)}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           renderItem={() => {
@@ -430,7 +460,7 @@ export default class ScrollableTabView extends React.Component {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  tabsStyle: { flex: 1, zIndex: 100, flexDirection: 'row', backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'space-around', height: 35, marginBottom: -0.5 },
+  tabsStyle: { flex: 1, zIndex: 100, flexDirection: 'row', backgroundColor: '#ffffff', height: 35, marginBottom: -0.5 },
   tabStyle: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' },
   textStyle: { height: 20, fontSize: 12, color: '#11111180', textAlign: 'center', lineHeight: 20 },
   tabUnderlineStyle: { top: 6, height: 2, borderRadius: 2, backgroundColor: '#00aced' },
