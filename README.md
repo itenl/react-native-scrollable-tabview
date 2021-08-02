@@ -124,6 +124,7 @@ function App() {
         fixedTabs={false}
         fixedHeader={false}
         useScroll={false}
+        fillScreen={true}
       ></ScrollableTabView>
   );
 }
@@ -161,6 +162,7 @@ tabsShown            | Boolean    | true          | 配置 Tabs 显示隐藏
 fixedTabs            | Boolean    | false          | 在enableCachePage为true的情况下滑动切换Screen设置最小高度保障Header与Tabs不会弹跳
 fixedHeader            | Boolean    | false          | 与Tabs一同渲染，固定顶部Header，不跟随滚动
 useScroll            | Boolean    | false          | Tabs是否支持横向滚动(存在多个类目Tab的情况需要启用，建议 tabStyle 传入固定宽度)
+fillScreen            | Boolean    | true          | 填充整个屏幕
 
 ## <a name="StackProperty"/>Stack Property
 

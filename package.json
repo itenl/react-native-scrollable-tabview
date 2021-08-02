@@ -22,6 +22,6 @@
     "url": "https://github.com/itenl/react-native-scrollable-tabview.git"
   },
   "author": "itenl",
-  "license": "ISC",
+  "license": "MIT",
   "homepage": "https://github.com/itenl/react-native-scrollable-tabview"
 }
