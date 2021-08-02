@@ -20,7 +20,7 @@ export default class ScrollableTabView extends React.Component {
     stacks: PropTypes.array.isRequired,
     firstIndex: PropTypes.number,
     mappingProps: PropTypes.object,
-    header: PropTypes.function,
+    header: PropTypes.func,
     badges: PropTypes.array,
     tabsStyle: PropTypes.object,
     tabWrapStyle: PropTypes.object,
@@ -43,6 +43,7 @@ export default class ScrollableTabView extends React.Component {
     fixedTabs: PropTypes.bool,
     fixedHeader: PropTypes.bool,
     useScroll: PropTypes.bool,
+    fillScreen: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -72,6 +73,7 @@ export default class ScrollableTabView extends React.Component {
     fixedTabs: false,
     fixedHeader: false,
     useScroll: false,
+    fillScreen: true,
   };
 
   constructor(props) {
@@ -360,7 +362,8 @@ export default class ScrollableTabView extends React.Component {
           style={[
             { flex: 1 },
             this.props.enableCachePage && this.state.checkedIndex != index && { maxHeight: screenHeight },
-            this.props.enableCachePage && this.props.fixedTabs && this.state.checkedIndex == index && { minHeight: this._getMaximumScreenHeight() },
+            this.props.enableCachePage && this.state.checkedIndex == index && this.props.fillScreen && { minHeight: screenHeight },
+            this.props.enableCachePage && this.state.checkedIndex == index && this.props.fixedTabs && { minHeight: this._getMaximumScreenHeight() },
             !this.props.enableCachePage && this.state.checkedIndex == index && { minHeight: screenHeight },
           ]}
         >
