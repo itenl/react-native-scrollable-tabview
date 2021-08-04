@@ -137,9 +137,9 @@ All props are optional
 
 Prop              | Type     | Default     | Description
 ----------------- | -------- | ----------- | -----------
-stacks            | Array    | []          | 页面栈 < 阅读 [Stack Property](#StackProperty) >
+stacks            | Array    | []          | 页面栈 < [阅读 Stack Property](#StackProperty) >
 mappingProps      | Object   | {}          | 关联映射数据到 Stack / Sticky
-badges            | Array    | []          | 针对每个Tab的徽章 < 阅读 [badge](#BadgeProperty) >
+badges            | Array    | []          | 针对每个Tab的徽章 < [阅读 Badge Property](#BadgeProperty) >
 tabsStyle            | Object    | {}          | 整个Tabs样式
 tabWrapStyle            | Object    | []          | 单个Tab包装样式
 tabStyle            | Object    | {}          | 单个Tab样式
@@ -157,20 +157,20 @@ oneTabHidden            | Boolean    | false          | 仅一个Tab时将隐藏
 enableCachePage            | Boolean    | true          | 是否持久化页面切换后不销毁
 carouselProps            | Object    | {}          | 传递给 Carousel 的剩余属性 < [阅读 Carousel 属性](https://github.com/meliorence/react-native-snap-carousel/blob/master/doc/PROPS_METHODS_AND_GETTERS.md) >
 sectionListProps            | Object    | {}          | 传递给 SectionList 的剩余属性 < [阅读 SectionList 属性](https://reactnative.dev/docs/sectionlist) >
-toHeaderOnTab            | Boolean    | false          | 触发已激活的Tab将回到Header(高优先级)
-toTabsOnTab            | Boolean    | false          | 触发已激活的Tab将回到Tabs
+toHeaderOnTab            | Boolean    | false          | 点击触发已激活的Tab将回到Header(高优先级)
+toTabsOnTab            | Boolean    | false          | 点击触发已激活的Tab将回到Tabs
 tabsShown            | Boolean    | true          | 配置 Tabs 显示隐藏
 fixedTabs            | Boolean    | false          | 在enableCachePage为true的情况下滑动切换Screen设置最小高度保障Header与Tabs不会弹跳
 fixedHeader            | Boolean    | false          | 与Tabs一同渲染，固定顶部Header，不跟随滚动
 useScroll            | Boolean    | false          | Tabs是否支持横向滚动(存在多个类目Tab的情况需要启用，建议 tabStyle 传入固定宽度)
-fillScreen            | Boolean    | true          | 填充整个屏幕
+fillScreen            | Boolean    | true          | 填充整个 Screen
 
 ## <a name="StackProperty"/>Stack Property
 
 Name              | Type     | Description
 ----------------- | -------- | -----------
-screen            | Class Component   | TabView 类组件 / 函数组件
-sticky            | Class Component   | 吸顶 类组件 / 函数组件 实例内将返回该类组件的上下文
+screen            | Class Component   | TabView 类组件
+sticky            | Class Component   | 吸顶 类组件 实例内将返回该类组件的上下文
 tabLabel            | String   | Tab 昵称
 tabLabelRender            | Function   | 自定义 Tab渲染函数，优先级高于 tabLabel
 badge            | Array    | 针对当前 Tab 的徽章，与 badges 属性互斥，优先级高于最外层属性 badges < 阅读 [badge](#BadgeProperty) >
