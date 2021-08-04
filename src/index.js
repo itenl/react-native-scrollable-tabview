@@ -262,7 +262,9 @@ export default class ScrollableTabView extends React.Component {
           style={[styles.tabStyle, tabStyle]}
         >
           <View>
-            <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>{item.tabLabelRender && typeof item.tabLabelRender == 'function' ? item.tabLabelRender(item.tabLabel) : item.tabLabel}</Text>
+            <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
+              {item.tabLabelRender && typeof item.tabLabelRender == 'function' ? item.tabLabelRender(item.tabLabel) : item.tabLabel}
+            </Text>
             {checked && <View style={[styles.tabUnderlineStyle, tabUnderlineStyle]}></View>}
           </View>
         </TouchableOpacity>
@@ -275,7 +277,24 @@ export default class ScrollableTabView extends React.Component {
     const renderTab = !(oneTabHidden && this.tabs && this.tabs.length == 1) && tabsShown;
     const _tabsStyle = Object.assign({}, !useScroll && { alignItems: 'center', justifyContent: 'space-around' }, styles.tabsStyle, tabsStyle);
     this.layoutHeight['tabs'] = renderTab ? _tabsStyle.height : 0;
-    return renderTab && this.tabs && !!this.tabs.length && (useScroll ? <FlatList ref={rf => (this.flatlist = rf)} data={this.tabs} renderItem={this._renderTab.bind(this)} style={_tabsStyle} horizontal={true} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}></FlatList> : <View style={_tabsStyle}>{this.tabs.map((tab, index) => this._renderTab({ item: tab, index }))}</View>);
+    return (
+      renderTab &&
+      this.tabs &&
+      !!this.tabs.length &&
+      (useScroll ? (
+        <FlatList
+          ref={rf => (this.flatlist = rf)}
+          data={this.tabs}
+          renderItem={this._renderTab.bind(this)}
+          style={_tabsStyle}
+          horizontal={true}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+        ></FlatList>
+      ) : (
+        <View style={_tabsStyle}>{this.tabs.map((tab, index) => this._renderTab({ item: tab, index }))}</View>
+      ))
+    );
   }
 
   _renderSectionHeader() {
@@ -340,7 +359,15 @@ export default class ScrollableTabView extends React.Component {
       (this.props.enableCachePage ? this.props.enableCachePage : this.state.checkedIndex == index) &&
       (this.getCurrentRef(index) || this.getCurrentRef(index) == undefined) &&
       this._getLazyIndexs(index) && (
-        <View style={[{ flex: 1 }, this.props.enableCachePage && this.state.checkedIndex != index && { maxHeight: screenHeight }, this.props.enableCachePage && this.state.checkedIndex == index && this.props.fillScreen && { minHeight: screenHeight }, this.props.enableCachePage && this.state.checkedIndex == index && this.props.fixedTabs && { minHeight: this._getMaximumScreenHeight() }, !this.props.enableCachePage && this.state.checkedIndex == index && { minHeight: screenHeight }]}>
+        <View
+          style={[
+            { flex: 1 },
+            this.props.enableCachePage && this.state.checkedIndex != index && { maxHeight: screenHeight },
+            this.props.enableCachePage && this.state.checkedIndex == index && this.props.fillScreen && { minHeight: screenHeight },
+            this.props.enableCachePage && this.state.checkedIndex == index && this.props.fixedTabs && { minHeight: this._getMaximumScreenHeight() },
+            !this.props.enableCachePage && this.state.checkedIndex == index && { minHeight: screenHeight }
+          ]}
+        >
           <item.screen {...this._getProps(this.props.mappingProps)} {...(item.toProps || {})} />
         </View>
       )
@@ -428,6 +455,7 @@ export default class ScrollableTabView extends React.Component {
               />
             );
           }}
+          onScrollToIndexFailed={() => {}}
           {...this.props.sectionListProps}
         ></SectionList>
       </View>
