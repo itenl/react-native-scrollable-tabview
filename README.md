@@ -173,7 +173,7 @@ screen            | Class Component   | TabView 类组件
 sticky            | Class Component   | 吸顶 类组件 实例内将返回该类组件的上下文
 tabLabel            | String   | Tab 昵称
 tabLabelRender            | Function   | 自定义 Tab渲染函数，优先级高于 tabLabel
-badge            | Array    | 针对当前 Tab 的徽章，与 badges 属性互斥，优先级高于最外层属性 badges < 阅读 [badge](#BadgeProperty) >
+badge            | Array    | 针对当前 Tab 的徽章，与 badges 属性互斥，优先级高于最外层属性 badges < [阅读 Badge Property](#BadgeProperty) >
 toProps            | Object    | toProps 仅传递给 Screen，不作数据关联
 
 ## <a name="BadgeProperty"/>Badge Property
