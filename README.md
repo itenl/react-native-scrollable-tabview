@@ -13,7 +13,7 @@ When TabBar and Sticky reach a certain position, they will be attached to the to
 * [Props](#props)
 * [Stack Property](#StackProperty)
 * [Badge Property](#BadgeProperty)
-* [Injection lifecycle to screen](#InjectionLifecycle)
+* [Injection lifecycle to Screen](#InjectionLifecycle)
 * [Injection props to Screen](#InjectionScreenProps)
 * [Injection props to Sticky](#InjectionStickyProps)
 * [Snapshot](#Snapshot)
