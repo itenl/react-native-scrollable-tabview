@@ -1,6 +1,6 @@
 {
   "name": "@itenl/react-native-scrollable-tabview",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "react-native-scrollable-tabview",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,6 @@
     "url": "https://github.com/itenl/react-native-scrollable-tabview.git"
   },
   "author": "itenl",
-  "license": "ISC",
+  "license": "MIT",
   "homepage": "https://github.com/itenl/react-native-scrollable-tabview"
 }
