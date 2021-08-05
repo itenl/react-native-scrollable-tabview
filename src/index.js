@@ -8,9 +8,7 @@ const deviceWidth = Dimensions.get('window').width;
 const deviceHeight = Dimensions.get('window').height;
 
 /**
- *  该组件内不推荐再次嵌套 SectionList / FlatList / ScrollView 等类似组件
- *  Screen 内上下文将提供 onRefresh(toggled) / onEndReached 方法用于方便触发对应业务，其中 toggled 用于切换loading状态，可传指定true/false参数，不传将默认与上个状态进行切换
- *  for - Value
+ * @author itenl
  * @export
  * @class ScrollableTabView
  * @extends {React.Component}
@@ -20,7 +18,7 @@ export default class ScrollableTabView extends React.Component {
     stacks: PropTypes.array.isRequired,
     firstIndex: PropTypes.number,
     mappingProps: PropTypes.object,
-    header: PropTypes.function,
+    header: PropTypes.func,
     badges: PropTypes.array,
     tabsStyle: PropTypes.object,
     tabWrapStyle: PropTypes.object,
@@ -43,6 +41,7 @@ export default class ScrollableTabView extends React.Component {
     fixedTabs: PropTypes.bool,
     fixedHeader: PropTypes.bool,
     useScroll: PropTypes.bool,
+    fillScreen: PropTypes.bool
   };
 
   static defaultProps = {
@@ -72,6 +71,7 @@ export default class ScrollableTabView extends React.Component {
     fixedTabs: false,
     fixedHeader: false,
     useScroll: false,
+    fillScreen: true
   };
 
   constructor(props) {
@@ -80,13 +80,13 @@ export default class ScrollableTabView extends React.Component {
       checkedIndex: this._getFirstIndex(),
       refsObj: {},
       lazyIndexs: [this._getFirstIndex()],
-      isRefreshing: false,
+      isRefreshing: false
     };
     this.layoutHeight = {
       container: 0,
       header: 0,
       tabs: 0,
-      screen: 0,
+      screen: 0
     };
     this._initial();
   }
@@ -109,7 +109,10 @@ export default class ScrollableTabView extends React.Component {
    */
   _fixData(props) {
     if (props.stacks && props.stacks.length && props.stacks.length != this.stacks.length && props.firstIndex != this.state.checkedIndex) {
-      this._onTabviewChange(props.firstIndex);
+      const timer = setTimeout(() => {
+        this._onTabviewChange(props.firstIndex);
+        clearTimeout(timer);
+      });
     }
   }
 
@@ -120,7 +123,7 @@ export default class ScrollableTabView extends React.Component {
         return {
           tabLabel: item.tabLabel || item.screen?.name,
           tabLabelRender: item.tabLabelRender ?? null,
-          index,
+          index
         };
       })
     );
@@ -157,7 +160,7 @@ export default class ScrollableTabView extends React.Component {
       if (this.state.refsObj[index] && this.state.refsObj[index] === ref) return;
       this.state.refsObj[index] = ref;
       this.setState({
-        refsObj: this.state.refsObj,
+        refsObj: this.state.refsObj
       });
     };
   }
@@ -189,7 +192,7 @@ export default class ScrollableTabView extends React.Component {
       this.section &&
         this.section.scrollToLocation({
           itemIndex: 0,
-          viewOffset: 0 - y,
+          viewOffset: 0 - y
         });
     }
   };
@@ -212,9 +215,9 @@ export default class ScrollableTabView extends React.Component {
         refresh: this._refresh,
         scrollTo: this._scrollTo,
         toTabView: this.toTabView,
-        layoutHeight: this.layoutHeight,
+        layoutHeight: this.layoutHeight
       },
-      props || {},
+      props || {}
     );
   }
 
@@ -319,19 +322,19 @@ export default class ScrollableTabView extends React.Component {
     this.setState(
       {
         checkedIndex: index,
-        lazyIndexs: this.state.lazyIndexs,
+        lazyIndexs: this.state.lazyIndexs
       },
       () => {
         if (onTabviewChanged) {
           const tab = this.tabs[this.state.checkedIndex];
           onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel);
         }
-      },
+      }
     );
     this._snapToItem(index);
     if (useScroll && this.flatlist)
       this.flatlist.scrollToIndex({
-        index: index,
+        index: index
       });
     // 切换后强制重置刷新状态
     this._toggledRefreshing(false);
@@ -360,8 +363,9 @@ export default class ScrollableTabView extends React.Component {
           style={[
             { flex: 1 },
             this.props.enableCachePage && this.state.checkedIndex != index && { maxHeight: screenHeight },
-            this.props.enableCachePage && this.props.fixedTabs && this.state.checkedIndex == index && { minHeight: this._getMaximumScreenHeight() },
-            !this.props.enableCachePage && this.state.checkedIndex == index && { minHeight: screenHeight },
+            this.props.enableCachePage && this.state.checkedIndex == index && this.props.fillScreen && { minHeight: screenHeight },
+            this.props.enableCachePage && this.state.checkedIndex == index && this.props.fixedTabs && { minHeight: this._getMaximumScreenHeight() },
+            !this.props.enableCachePage && this.state.checkedIndex == index && { minHeight: screenHeight }
           ]}
         >
           <item.screen {...this._getProps(this.props.mappingProps)} {...(item.toProps || {})} />
@@ -381,7 +385,7 @@ export default class ScrollableTabView extends React.Component {
 
   _toggledRefreshing(status) {
     this.setState({
-      isRefreshing: status ?? !this.state.isRefreshing,
+      isRefreshing: status ?? !this.state.isRefreshing
     });
   }
 
@@ -394,19 +398,21 @@ export default class ScrollableTabView extends React.Component {
     onBeforeRefresh && typeof onBeforeRefresh === 'function' ? onBeforeRefresh(next, this._toggledRefreshing.bind(this)) : next();
   }
 
-  _renderHeader() {
-    if (!this.props.header) return null;
+  _renderHeader = () => {
+    const { header } = this.props;
     return (
-      <View
-        onLayout={({ nativeEvent }) => {
-          const { height } = nativeEvent.layout;
-          this.layoutHeight['header'] = height;
-        }}
-      >
-        {this.props.header()}
-      </View>
+      header && (
+        <View
+          onLayout={({ nativeEvent }) => {
+            const { height } = nativeEvent.layout;
+            this.layoutHeight['header'] = height;
+          }}
+        >
+          {typeof header === 'function' ? header() : header}
+        </View>
+      )
     );
-  }
+  };
 
   render() {
     return (
@@ -426,7 +432,7 @@ export default class ScrollableTabView extends React.Component {
           refreshControl={<RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh.bind(this)} />}
           sections={[{ data: [1] }]}
           stickySectionHeadersEnabled={true}
-          ListHeaderComponent={!this.props.fixedHeader && this._renderHeader.bind(this)}
+          ListHeaderComponent={!this.props.fixedHeader && this._renderHeader()}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           renderItem={() => {
@@ -445,12 +451,13 @@ export default class ScrollableTabView extends React.Component {
                 getItemLayout={(data, index) => ({
                   length: deviceWidth,
                   offset: deviceWidth * index,
-                  index,
+                  index
                 })}
                 {...this.props.carouselProps}
               />
             );
           }}
+          onScrollToIndexFailed={() => {}}
           {...this.props.sectionListProps}
         ></SectionList>
       </View>
@@ -463,5 +470,5 @@ const styles = StyleSheet.create({
   tabsStyle: { flex: 1, zIndex: 100, flexDirection: 'row', backgroundColor: '#ffffff', height: 35, marginBottom: -0.5 },
   tabStyle: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' },
   textStyle: { height: 20, fontSize: 12, color: '#11111180', textAlign: 'center', lineHeight: 20 },
-  tabUnderlineStyle: { top: 6, height: 2, borderRadius: 2, backgroundColor: '#00aced' },
+  tabUnderlineStyle: { top: 6, height: 2, borderRadius: 2, backgroundColor: '#00aced' }
 });
