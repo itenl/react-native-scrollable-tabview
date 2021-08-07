@@ -7,6 +7,7 @@ When TabBar and Sticky reach a certain position, they will be attached to the to
 
 ##### Table of Contents
 * [Example](https://github.com/itenl/react-native-scrollable-tabview-example-app)
+* [Example-TikTok](https://github.com/itenl/react-native-scrollable-tabview-example-tiktok)
 * [Features](#features)
 * [Installation](#installation)
 * [Usage](#usage)
