@@ -18,7 +18,7 @@ export default class ScrollableTabView extends React.Component {
     stacks: PropTypes.array.isRequired,
     firstIndex: PropTypes.number,
     mappingProps: PropTypes.object,
-    header: PropTypes.func,
+    header: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     badges: PropTypes.array,
     tabsStyle: PropTypes.object,
     tabWrapStyle: PropTypes.object,
@@ -411,6 +411,7 @@ export default class ScrollableTabView extends React.Component {
           onLayout={({ nativeEvent }) => {
             const { height } = nativeEvent.layout;
             this.layoutHeight['header'] = height;
+            if (height !== 0) this._refresh();
           }}
         >
           {typeof header === 'function' ? header() : header}
@@ -425,6 +426,7 @@ export default class ScrollableTabView extends React.Component {
         onLayout={({ nativeEvent }) => {
           const { height } = nativeEvent.layout;
           this.layoutHeight['container'] = height;
+          if (height !== 0) this._refresh();
         }}
         style={[styles.container, this.props.style]}
       >
