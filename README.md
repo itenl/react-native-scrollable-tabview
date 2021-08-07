@@ -6,7 +6,7 @@ Based on pure JS scripts without native dependencies, the components of Header /
 When TabBar and Sticky reach a certain position, they will be attached to the top.
 
 ##### Table of Contents
-* [Example](https://github.com/itenl/react-native-scrollable-tabview-example-app)
+* [Example-API](https://github.com/itenl/react-native-scrollable-tabview-example-app)
 * [Example-TikTok](https://github.com/itenl/react-native-scrollable-tabview-example-tiktok)
 * [Features](#features)
 * [Installation](#installation)
