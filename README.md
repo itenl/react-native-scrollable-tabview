@@ -95,6 +95,8 @@ function App() {
         ]}
         tabsStyle={{}}
         tabWrapStyle={{}}
+        tabInnerStyle={{}}
+        tabActiveOpacity={0.6}
         tabStyle={{}}
         textStyle={{}}
         textActiveStyle={{}}
@@ -141,7 +143,9 @@ stacks            | Array    | []          | 页面栈 < [阅读 Stack Property]
 mappingProps      | Object   | {}          | 关联映射数据到 Stack / Sticky
 badges            | Array    | []          | 针对每个Tab的徽章 < [阅读 Badge Property](#BadgeProperty) >
 tabsStyle            | Object    | {}          | 整个Tabs样式
-tabWrapStyle            | Object    | []          | 单个Tab包装样式
+tabWrapStyle            | Object    | {}          | 单个Tab外包装样式
+tabInnerStyle            | Object    | {}          | 单个Tab内包装样式
+tabActiveOpacity            | Number    | 0.6          | Tab按钮点击后透明度
 tabStyle            | Object    | {}          | 单个Tab样式
 textStyle            | Object    | {}          | Tab内文本样式
 textActiveStyle            | Object    | {}          | 选中激活的text样式

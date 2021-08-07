@@ -22,6 +22,8 @@ export default class ScrollableTabView extends React.Component {
     badges: PropTypes.array,
     tabsStyle: PropTypes.object,
     tabWrapStyle: PropTypes.object,
+    tabInnerStyle: PropTypes.object,
+    tabActiveOpacity: PropTypes.number,
     tabStyle: PropTypes.object,
     textStyle: PropTypes.object,
     textActiveStyle: PropTypes.object,
@@ -52,6 +54,8 @@ export default class ScrollableTabView extends React.Component {
     badges: [],
     tabsStyle: {},
     tabWrapStyle: {},
+    tabInnerStyle: {},
+    tabActiveOpacity: 0.6,
     tabStyle: {},
     textStyle: {},
     textActiveStyle: {},
@@ -250,18 +254,19 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderTab({ item, index }) {
-    const { tabWrapStyle, tabStyle, textStyle, textActiveStyle, tabUnderlineStyle } = this.props;
+    const { tabActiveOpacity, tabWrapStyle, tabInnerStyle, tabStyle, textStyle, textActiveStyle, tabUnderlineStyle } = this.props;
     const checked = this.state.checkedIndex == index;
     return (
       <View key={index} style={tabWrapStyle}>
         {this._renderBadges(index)}
         <TouchableOpacity
+          activeOpacity={tabActiveOpacity}
           onPress={() => {
             this._onTabviewChange(index);
           }}
           style={[styles.tabStyle, tabStyle]}
         >
-          <View>
+          <View style={tabInnerStyle}>
             <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
               {item.tabLabelRender && typeof item.tabLabelRender == 'function' ? item.tabLabelRender(item.tabLabel) : item.tabLabel}
             </Text>
