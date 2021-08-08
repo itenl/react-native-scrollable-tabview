@@ -81,7 +81,7 @@ export default class ScrollableTabView extends React.Component {
     fillScreen: true,
     title: null,
     titleArgs: {
-      styles: {},
+      style: {},
       interpolateOpacity: {},
       interpolateHeight: {}
     },
