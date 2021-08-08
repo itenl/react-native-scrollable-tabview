@@ -173,7 +173,7 @@ Prop              | Type     | Default     | Description
 **`useScroll`**             | Boolean    | false          | Tabs是否支持横向滚动(存在多个类目Tab的情况需要启用，建议 **`tabStyle`** 传入固定宽度)
 **`fillScreen`**             | Boolean    | true          | 填充整个 Screen
 **`title`**             | Function / JSX Element / Class Component    | null          | 动画标题
-**`titleArgs`**             | Object    | **`{  styles: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | 标题配置 < [阅读 interpolate](https://reactnative.dev/docs/animations#interpolation) >
+**`titleArgs`**             | Object    | **`{  style: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | 标题配置 < [阅读 interpolate](https://reactnative.dev/docs/animations#interpolation) >
 **`onScroll`**             | Function    | null          | 滚动事件监听
 
 ## <a name="method"/>Method

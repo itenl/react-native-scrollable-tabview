@@ -173,7 +173,7 @@ Prop              | Type     | Default     | Description
 **`useScroll`**             | Boolean    | false          | Does Tabs support horizontal scrolling (it needs to be enabled when there are multiple category Tabs, it is recommended that **`tabStyle`** pass in a fixed width)
 **`fillScreen`**             | Boolean    | true          | Fill the entire Screen
 **`title`**             | Function / JSX Element / Class Component    | null          | Animation title
-**`titleArgs`**             | Object    | **`{  styles: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | Title parameter configuration < [Read interpolate](https://reactnative.dev/docs/animations#interpolation) >
+**`titleArgs`**             | Object    | **`{  style: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | Title parameter configuration < [Read interpolate](https://reactnative.dev/docs/animations#interpolation) >
 **`onScroll`**             | Function    | null          | Scroll event monitoring
 
 ## <a name="method"/>Method
