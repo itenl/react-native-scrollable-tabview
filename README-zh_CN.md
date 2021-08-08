@@ -4,7 +4,7 @@
 
 [English](./README.md) | 简体中文
 
-基于纯 `JS` 脚本，不依赖原生，无需 `react-native link`，`Header` / `Tabs` / `Sticky` / `Screen` 组件可灵活配置，其中 `Tabs` / `Sticky` 可在滑动到顶部时会进行吸顶；我们所支持的是以栈的形式独立管理自身的 `Sticky` / `Screen` / `Badge` / `tabLabel` 各项配置，并且为 `Screen` 注入[生命周期](#InjectionLifecycle) `onRefresh` / `onEndReached`它们将在下拉刷新与滚动条触底时触发，最后还为 `Screen` / `Sticky` 注入了更多 [props](#InjectionScreenProps)
+基于纯 `JS` 脚本，不依赖原生，无需 `react-native link`，`Title` / `Header` / `Tabs` / `Sticky` / `Screen` 组件可灵活配置，其中 `Tabs` / `Sticky` 可在滑动到顶部时会进行吸顶；我们所支持的是以栈的形式独立管理自身的 `Sticky` / `Screen` / `Badge` / `tabLabel` 各项配置，并且为 `Screen` 注入[生命周期](#InjectionLifecycle) `onRefresh` / `onEndReached`它们将在下拉刷新与滚动条触底时触发，最后还为 `Screen` / `Sticky` 注入了更多 [props](#InjectionScreenProps)
 
 ##### Table of Contents
 * [Example-API](https://github.com/itenl/react-native-scrollable-tabview-example-app)
