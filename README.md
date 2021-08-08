@@ -27,6 +27,7 @@ Based on pure `JS` scripts, without relying on native, no need for `react-native
 * Allow to set up each Screen’s own Sticky component
 * Custom badges can be configured for each Tab
 * Support pull down to refresh and slide up to load more pre-functions `onBeforeRefresh` / `onBeforeEndReached` 
+* Support animation title, can support animation as `interpolate.opacity` and `interpolate.height`
 
 ## <a name="installation"/>Installation
 
@@ -159,7 +160,7 @@ Prop              | Type     | Default     | Description
 **`onBeforeRefresh`**             | Function    | null          | Pull down to refresh the pre-functions, execute **`next`** to execute **`onRefresh`** function in Screen, execute **`toggled`** to switch system loading, you can pass true / false to specify (callback contains **`next`**, **`toggled`** two formal parameters)
 **`onBeforeEndReached`**             | Function    | null          | Slide up to load more pre-functions, execute next will execute the **`onEndReached`** function in the Screen (callback contains **`next`** formal parameters)
 **`onTabviewChanged`**             | Function    | null          | Tab switch completion callback (callback contains **`index`**, **`tabLabel`** two formal parameters)
-**`header`**             | Function / JSX Element    | null          | Top component (if the function needs to return Element)
+**`header`**             | Function / JSX Element / Class Component    | null          | Top component (if the function needs to return Element)
 **`oneTabHidden`**             | Boolean    | false          | Hide itself when there is only one Tab
 **`enableCachePage`**             | Boolean    | true          | Whether the persistent page will not be destroyed after switching
 **`carouselProps`**             | Object    | {}          | The remaining attributes passed to Carousel < [Read Carousel](https://github.com/meliorence/react-native-snap-carousel/blob/master/doc/PROPS_METHODS_AND_GETTERS.md) >
@@ -171,6 +172,9 @@ Prop              | Type     | Default     | Description
 **`fixedHeader`**             | Boolean    | false          | Render together with Tabs, fix the top Header, do not follow the scroll
 **`useScroll`**             | Boolean    | false          | Does Tabs support horizontal scrolling (it needs to be enabled when there are multiple category Tabs, it is recommended that **`tabStyle`** pass in a fixed width)
 **`fillScreen`**             | Boolean    | true          | Fill the entire Screen
+**`title`**             | Function / JSX Element / Class Component    | null          | Animation title
+**`titleArgs`**             | Object    | **`{  styles: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | Title parameter configuration < [Read interpolate](https://reactnative.dev/docs/animations#interpolation) >
+**`onScroll`**             | Function    | null          | Scroll event monitoring
 
 ## <a name="method"/>Method
 

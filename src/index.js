@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity, FlatList, Animated } from 'react-native';
 import PropTypes from 'prop-types';
 import Carousel from 'react-native-snap-carousel';
 import { Dimensions, PixelRatio } from 'react-native';
@@ -43,7 +43,10 @@ export default class ScrollableTabView extends React.Component {
     fixedTabs: PropTypes.bool,
     fixedHeader: PropTypes.bool,
     useScroll: PropTypes.bool,
-    fillScreen: PropTypes.bool
+    fillScreen: PropTypes.bool,
+    title: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
+    titleArgs: PropTypes.object,
+    onScroll: PropTypes.func
   };
 
   static defaultProps = {
@@ -75,7 +78,14 @@ export default class ScrollableTabView extends React.Component {
     fixedTabs: false,
     fixedHeader: false,
     useScroll: false,
-    fillScreen: true
+    fillScreen: true,
+    title: null,
+    titleArgs: {
+      styles: {},
+      interpolateOpacity: {},
+      interpolateHeight: {}
+    },
+    onScroll: null
   };
 
   constructor(props) {
@@ -84,13 +94,26 @@ export default class ScrollableTabView extends React.Component {
       checkedIndex: this._getFirstIndex(),
       refsObj: {},
       lazyIndexs: [this._getFirstIndex()],
-      isRefreshing: false
+      isRefreshing: false,
+      scrollY: new Animated.Value(0)
     };
     this.layoutHeight = {
       container: 0,
       header: 0,
       tabs: 0,
       screen: 0
+    };
+    this.interpolate = {
+      height: {
+        inputRange: [0, 160],
+        outputRange: [0, 80],
+        extrapolate: 'clamp'
+      },
+      opacity: {
+        inputRange: [160, 320],
+        outputRange: [0.2, 1],
+        extrapolate: 'clamp'
+      }
     };
     this._initial();
   }
@@ -420,6 +443,24 @@ export default class ScrollableTabView extends React.Component {
     );
   };
 
+  _renderTitle = () => {
+    const { title, titleArgs } = this.props;
+    const { style, interpolateHeight, interpolateOpacity } = titleArgs;
+    return (
+      <Animated.View
+        style={[
+          {
+            height: this.state.scrollY.interpolate(Object.assign(this.interpolate.height, interpolateHeight)),
+            opacity: this.state.scrollY.interpolate(Object.assign(this.interpolate.opacity, interpolateOpacity))
+          },
+          style
+        ]}
+      >
+        {typeof title === 'function' ? title() : title}
+      </Animated.View>
+    );
+  };
+
   render() {
     return (
       <View
@@ -430,6 +471,7 @@ export default class ScrollableTabView extends React.Component {
         }}
         style={[styles.container, this.props.style]}
       >
+        {!!this.props.title && this._renderTitle()}
         <SectionList
           ref={rf => (this.section = rf)}
           keyExtractor={(item, index) => `scrollable-tab-view-wrap-${index}`}
@@ -465,6 +507,22 @@ export default class ScrollableTabView extends React.Component {
             );
           }}
           onScrollToIndexFailed={() => {}}
+          onScroll={
+            !!this.props.title
+              ? Animated.event(
+                  [
+                    {
+                      nativeEvent: { contentOffset: { y: this.state.scrollY } }
+                    }
+                  ],
+                  {
+                    listener: !!this.props.onScroll && this.props.onScroll.bind(this)
+                  }
+                )
+              : !!this.props.onScroll
+              ? this.props.onScroll.bind(this)
+              : null
+          }
           {...this.props.sectionListProps}
         ></SectionList>
       </View>
