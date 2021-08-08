@@ -27,6 +27,7 @@
 * 允许为每个 `Screen` 独立配置 `Sticky` 组件
 * 允许为每个 `Tab` 独立配置自定义的徽章
 * 支持下拉刷新与上滑加载更多前置函数 `onBeforeRefresh` / `onBeforeEndReached` 
+* 支持动画标题，可支持动画为 `interpolate.opacity` 与 `interpolate.height`
 
 ## <a name="installation"/>Installation
 
@@ -159,11 +160,11 @@ Prop              | Type     | Default     | Description
 **`onBeforeRefresh`**             | Function    | null          | 下拉刷新前置函数, 执行 **`next`** 将执行Screen中 **`onRefresh`** 函数，执行 **`toggled`** 将切换系统loading,可传 true / false 进行指定 (回调含有 **`next`** , **`toggled`** 两个形参)
 **`onBeforeEndReached`**             | Function    | null          | 上滑加载更多前置函数, 执行next将执行Screen中 **`onEndReached`** 函数 (回调含有 **`next`** 形参)
 **`onTabviewChanged`**             | Function    | null          | Tab切换完成回调 (回调含有 **`index`**, **`tabLabel`** 两个形参)
-**`header`**             | Function / JSX Element    | null          | 顶部组件 (若是函数需要返回 Element)
+**`header`**             | Function / JSX Element / Class Component    | null          | 顶部组件 (若是函数需要返回 Element)
 **`oneTabHidden`**             | Boolean    | false          | 仅一个Tab时将隐藏自身
 **`enableCachePage`**             | Boolean    | true          | 是否持久化页面切换后不销毁
-**`carouselProps`**             | Object    | {}          | 传递给 Carousel 的剩余属性 < [阅读 Carousel 属性](https://github.com/meliorence/react-native-snap-carousel/blob/master/doc/PROPS_METHODS_AND_GETTERS.md) >
-**`sectionListProps`**             | Object    | {}          | 传递给 SectionList 的剩余属性 < [阅读 SectionList 属性](https://reactnative.dev/docs/sectionlist) >
+**`carouselProps`**             | Object    | {}          | 传递给 Carousel 的剩余属性 < [阅读 Carousel](https://github.com/meliorence/react-native-snap-carousel/blob/master/doc/PROPS_METHODS_AND_GETTERS.md) >
+**`sectionListProps`**             | Object    | {}          | 传递给 SectionList 的剩余属性 < [阅读 SectionList](https://reactnative.dev/docs/sectionlist) >
 **`toHeaderOnTab`**             | Boolean    | false          | 点击触发已激活的Tab将回到Header(高优先级)
 **`toTabsOnTab`**             | Boolean    | false          | 点击触发已激活的Tab将回到Tabs
 **`tabsShown`**             | Boolean    | true          | 配置 Tabs 显示隐藏
@@ -171,6 +172,9 @@ Prop              | Type     | Default     | Description
 **`fixedHeader`**             | Boolean    | false          | 与Tabs一同渲染，固定顶部Header，不跟随滚动
 **`useScroll`**             | Boolean    | false          | Tabs是否支持横向滚动(存在多个类目Tab的情况需要启用，建议 **`tabStyle`** 传入固定宽度)
 **`fillScreen`**             | Boolean    | true          | 填充整个 Screen
+**`title`**             | Function / JSX Element / Class Component    | null          | 动画标题
+**`titleArgs`**             | Object    | **`{  styles: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | 标题配置 < [阅读 interpolate](https://reactnative.dev/docs/animations#interpolation) >
+**`onScroll`**             | Function    | null          | 滚动事件监听
 
 ## <a name="method"/>Method
 
