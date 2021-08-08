@@ -4,7 +4,7 @@
 
 English | [简体中文](./README-zh_CN.md)
 
-Based on pure `JS` scripts, without relying on native, no need for `react-native link`, `Header` / `Tabs` / `Sticky` / `Screen` components can be flexibly configured, among which `Tabs` / `Sticky` can slide When it reaches the top, it will be topped; what we support is to independently manage its own `Sticky` / `Screen` / `Badge` / `tabLabel` configuration in the form of a stack, and inject the `Screen` [lifecycle](#InjectionLifecycle) `onRefresh` / `onEndReached` They will be triggered when the pull-down refresh and the scroll bar hit the bottom, and finally inject more into `Screen` / `Sticky` [props](#InjectionScreenProps)
+Based on pure `JS` scripts, without relying on native, no need for `react-native link`,`Title` / `Header` / `Tabs` / `Sticky` / `Screen` components can be flexibly configured, among which `Tabs` / `Sticky` can slide When it reaches the top, it will be topped; what we support is to independently manage its own `Sticky` / `Screen` / `Badge` / `tabLabel` configuration in the form of a stack, and inject the `Screen` [lifecycle](#InjectionLifecycle) `onRefresh` / `onEndReached` They will be triggered when the pull-down refresh and the scroll bar hit the bottom, and finally inject more into `Screen` / `Sticky` [props](#InjectionScreenProps)
 
 ##### Table of Contents
 * [Example-API](https://github.com/itenl/react-native-scrollable-tabview-example-app)
