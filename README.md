@@ -2,8 +2,9 @@
 
 [![NPM Version](http://img.shields.io/npm/v/@itenl/react-native-scrollable-tabview.svg?style=flat)](https://www.npmjs.com/package/@itenl/react-native-scrollable-tabview)
 
-Based on pure JS scripts without native dependencies, the components of Header / TabBar / Sticky / View can be flexibly configured. Header / View can be slid according to TabBar. 
-When TabBar and Sticky reach a certain position, they will be attached to the top.
+English | [简体中文](./README-zh_CN.md)
+
+Based on pure `JS` scripts, without relying on native, no need for `react-native link`, `Header` / `Tabs` / `Sticky` / `Screen` components can be flexibly configured, among which `Tabs` / `Sticky` can slide When it reaches the top, it will be topped; what we support is to independently manage its own `Sticky` / `Screen` / `Badge` / `tabLabel` configuration in the form of a stack, and inject the `Screen` [lifecycle](#InjectionLifecycle) `onRefresh` / `onEndReached` They will be triggered when the pull-down refresh and the scroll bar hit the bottom, and finally inject more into `Screen` / `Sticky` [props](#InjectionScreenProps)
 
 ##### Table of Contents
 * [Example-API](https://github.com/itenl/react-native-scrollable-tabview-example-app)
@@ -25,7 +26,7 @@ When TabBar and Sticky reach a certain position, they will be attached to the to
 * Flex Tabs and multiple Tabs horizontal scrolling support configuration method
 * Allow to set up each Screen’s own Sticky component
 * Custom badges can be configured for each Tab
-* Support pull down to refresh and slide up to load more pre-functions
+* Support pull down to refresh and slide up to load more pre-functions `onBeforeRefresh` / `onBeforeEndReached` 
 
 ## <a name="installation"/>Installation
 
@@ -141,35 +142,35 @@ All props are optional
 
 Prop              | Type     | Default     | Description
 ----------------- | -------- | ----------- | -----------
-**`stacks`**            | Array    | []          | 页面栈 < [阅读 Stack Property](#StackProperty) >
-**`mappingProps`**      | Object   | {}          | 关联映射数据到 Stack / Sticky
-**`badges`**             | Array    | []          | 针对每个Tab的徽章 < [阅读 Badge Property](#BadgeProperty) >
-**`tabsStyle`**             | Object    | {}          | 整个Tabs样式
-**`tabWrapStyle`**             | Object    | {}          | 单个Tab外包装样式
-**`tabInnerStyle`**             | Object    | {}          | 单个Tab内包装样式
-**`tabActiveOpacity`**             | Number    | 0.6          | Tab按钮点击后透明度
-**`tabStyle`**             | Object    | {}          | 单个Tab样式
-**`textStyle`**             | Object    | {}          | Tab内文本样式
-**`textActiveStyle`**             | Object    | {}          | 选中激活的text样式
-**`tabUnderlineStyle`**             | Object    | {}          | 选中激活的下划线样式
-**`firstIndex`**             | Number    | 0          | 默认选中index
-**`syncToSticky`**             | Boolean    | true          | 是否同步(Screen中发生 **`render`** 触发 **`componentDidUpdate`** 将更新Sticky)
-**`onEndReachedThreshold`**             | Number    | 0.2          | 触底回调阈值
-**`onBeforeRefresh`**             | Function    | null          | 下拉刷新前置函数, 执行 **`next`** 将执行Screen中 **`onRefresh`** 函数，执行 **`toggled`** 将切换系统loading,可传 true / false 进行指定 (回调含有 **`next`** , **`toggled`** 两个形参)
-**`onBeforeEndReached`**             | Function    | null          | 上滑加载更多前置函数, 执行next将执行Screen中 **`onEndReached`** 函数 (回调含有 **`next`** 形参)
-**`onTabviewChanged`**             | Function    | null          | Tab切换完成回调 (回调含有 **`index`**, **`tabLabel`** 两个形参)
-**`header`**             | Function / JSX Element    | null          | 顶部组件 (若是函数需要返回 Element)
-**`oneTabHidden`**             | Boolean    | false          | 仅一个Tab时将隐藏自身
-**`enableCachePage`**             | Boolean    | true          | 是否持久化页面切换后不销毁
-**`carouselProps`**             | Object    | {}          | 传递给 Carousel 的剩余属性 < [阅读 Carousel 属性](https://github.com/meliorence/react-native-snap-carousel/blob/master/doc/PROPS_METHODS_AND_GETTERS.md) >
-**`sectionListProps`**             | Object    | {}          | 传递给 SectionList 的剩余属性 < [阅读 SectionList 属性](https://reactnative.dev/docs/sectionlist) >
-**`toHeaderOnTab`**             | Boolean    | false          | 点击触发已激活的Tab将回到Header(高优先级)
-**`toTabsOnTab`**             | Boolean    | false          | 点击触发已激活的Tab将回到Tabs
-**`tabsShown`**             | Boolean    | true          | 配置 Tabs 显示隐藏
-**`fixedTabs`**             | Boolean    | false          | 在 **`enableCachePage`** 为true的情况下滑动切换Screen设置最小高度保障Header与Tabs不会弹跳
-**`fixedHeader`**             | Boolean    | false          | 与Tabs一同渲染，固定顶部Header，不跟随滚动
-**`useScroll`**             | Boolean    | false          | Tabs是否支持横向滚动(存在多个类目Tab的情况需要启用，建议 **`tabStyle`** 传入固定宽度)
-**`fillScreen`**             | Boolean    | true          | 填充整个 Screen
+**`stacks`**            | Array    | []          | Page Stack < [Read Stack Property](#StackProperty) >
+**`mappingProps`**      | Object   | {}          | Associate mapping data to Stack / Sticky
+**`badges`**             | Array    | []          | Badges for each Tab < [Read Badge Property](#BadgeProperty) >
+**`tabsStyle`**             | Object    | {}          | The entire Tabs style
+**`tabWrapStyle`**             | Object    | {}          | Single Tab wrap style
+**`tabInnerStyle`**             | Object    | {}          | Single Tab inner style
+**`tabActiveOpacity`**             | Number    | 0.6          | Transparency after Tab button click
+**`tabStyle`**             | Object    | {}          | Single Tab style
+**`textStyle`**             | Object    | {}          | Text style in Tab
+**`textActiveStyle`**             | Object    | {}          | Select the active text style
+**`tabUnderlineStyle`**             | Object    | {}          | Select the active underline style
+**`firstIndex`**             | Number    | 0          | Index is selected by default
+**`syncToSticky`**             | Boolean    | true          | Whether it is synchronized (**`render`** triggered in the Screen **`componentDidUpdate`** will update Sticky)
+**`onEndReachedThreshold`**             | Number    | 0.2          | Bottom callback threshold
+**`onBeforeRefresh`**             | Function    | null          | Pull down to refresh the pre-functions, execute **`next`** to execute **`onRefresh`** function in Screen, execute **`toggled`** to switch system loading, you can pass true / false to specify (callback contains **`next`**, **`toggled`** two formal parameters)
+**`onBeforeEndReached`**             | Function    | null          | Slide up to load more pre-functions, execute next will execute the **`onEndReached`** function in the Screen (callback contains **`next`** formal parameters)
+**`onTabviewChanged`**             | Function    | null          | Tab switch completion callback (callback contains **`index`**, **`tabLabel`** two formal parameters)
+**`header`**             | Function / JSX Element    | null          | Top component (if the function needs to return Element)
+**`oneTabHidden`**             | Boolean    | false          | Hide itself when there is only one Tab
+**`enableCachePage`**             | Boolean    | true          | Whether the persistent page will not be destroyed after switching
+**`carouselProps`**             | Object    | {}          | The remaining attributes passed to Carousel < [Read Carousel](https://github.com/meliorence/react-native-snap-carousel/blob/master/doc/PROPS_METHODS_AND_GETTERS.md) >
+**`sectionListProps`**             | Object    | {}          | Remaining attributes passed to SectionList < [Read SectionList](https://reactnative.dev/docs/sectionlist) >
+**`toHeaderOnTab`**             | Boolean    | false          | Click to trigger the activated Tab will scroll to Header (high priority)
+**`toTabsOnTab`**             | Boolean    | false          | Click to trigger the activated Tab will scroll to Tabs
+**`tabsShown`**             | Boolean    | true          | Configure Tabs display and hide
+**`fixedTabs`**             | Boolean    | false          | When **`enableCachePage`** is true, slide to switch Screen to set the minimum height to ensure that the Header and Tabs will not bounce
+**`fixedHeader`**             | Boolean    | false          | Render together with Tabs, fix the top Header, do not follow the scroll
+**`useScroll`**             | Boolean    | false          | Does Tabs support horizontal scrolling (it needs to be enabled when there are multiple category Tabs, it is recommended that **`tabStyle`** pass in a fixed width)
+**`fillScreen`**             | Boolean    | true          | Fill the entire Screen
 
 ## <a name="method"/>Method
 
@@ -184,52 +185,52 @@ Prop              | Type     | Default     | Description
 
 Name              | Description
 ----------------- | -----------
-**`getCurrentRef(index: number.optional)`**            | 获取当前活动的视图的实例，可传 **`index`** 获取指定实例
-**`toTabView(index: number.required / label: string.required)`**            | 跳到指定 Screen
+**`getCurrentRef(index: number.optional)`**            | Get the instance of the currently active view, you can pass **`index`** to get the specified instance
+**`toTabView(index: number.required / label: string.required)`**            | Jump to the specified Screen
 
 ## <a name="StackProperty"/>Stack Property
 
 Name              | Type     | Description
 ----------------- | -------- | -----------
-**`screen`**            | Class Component   | TabView 类组件
-**`sticky`**            | Class Component   | 吸顶 类组件 实例内将返回该类组件的上下文
-**`tabLabel`**            | String   | Tab 昵称
-**`tabLabelRender`**            | Function   | 自定义 Tab渲染函数，优先级高于 **`tabLabel`**
-**`badge`**            | Array    | 针对当前 Tab 的徽章，与 **`badges`** 属性互斥，优先级高于最外层属性 **`badges`** < [阅读 Badge Property](#BadgeProperty) >
-**`toProps`**            | Object    | **`toProps`** 仅传递给 Screen，不作数据关联
+**`screen`**            | Class Component   | Screen class components
+**`sticky`**            | Class Component   | Sticky component, The context of this type of component will be returned in the instance
+**`tabLabel`**            | String   | Tab display name
+**`tabLabelRender`**            | Function   | Custom Tab rendering function, priority is higher than **`tabLabel`**
+**`badge`**            | Array    | For the current Tab badge, it is mutually exclusive with the **`badges`** attribute, and has a higher priority than the outermost attribute **`badges`** < [Read Badge Property](#BadgeProperty) >
+**`toProps`**            | Object    | **`toProps`** Only pass to Screen without data association
 
 ## <a name="BadgeProperty"/>Badge Property
 
 Type     | Description
 -------- | -----------
-JSX Element   | 基于当前Tab进行渲染的 徽章 / 悬浮 Tips 等
+JSX Element   | Badges/Hovering Tips, etc. rendered based on the current Tab
 
 
 ##  <a name="InjectionLifecycle"/>Injection lifecycle to Screen
 
 Name              | Type     | Description
 ----------------- | -------- | -----------
-**`onRefresh`**            | Function   | 下拉刷新时触发,形参 **`toggled`** 函数用于切换原生 loading 状态的显隐，若在 loading 中用户切换 tab 将会强制隐藏并重置状态
-**`onEndReached`**            | Function   | 上滑加载更多触发
+**`onRefresh`**            | Function   | Triggered when pull-down refresh, the formal parameter **`toggled`** function is used to switch the display of the native loading state, if the user switches the tab during loading, it will be forced to hide and reset the state
+**`onEndReached`**            | Function   | Swipe up to load more triggers
 
 
 ##  <a name="InjectionScreenProps"/>Injection props to Screen
 
 Name              | Type     | Description
 ----------------- | -------- | -----------
-**`refresh`**            | Function   | 手动触发刷新、同步Screen状态至Sticky
-**`scrollTo`**            | Function   | 上下滑动至指定位置 (传入 0 默认定位至 tabs / 传入负数则置顶)
-**`toTabView`**            | Function   | 跳转至其他 Tab (可传入 **`index`** 或 **`tabLabel`**)
-**`layoutHeight.container`**            | Number   | Container 容器总高度
-**`layoutHeight.header`**            | Number   | Header 高度
-**`layoutHeight.tabs`**            | Number   | Tabs 高度
-**`layoutHeight.screen`**            | Number   | 视图 高度
+**`refresh`**            | Function   | Manually trigger refresh and synchronize Screen status to Sticky
+**`scrollTo`**            | Function   | Swipe up and down to the specified position (passing in 0 is the default positioning to tabs / passing in a negative number is set to the top)
+**`toTabView`**            | Function   | Jump to other Tab (you can pass in **`index`** or **`tabLabel`**)
+**`layoutHeight.container`**            | Number | Total height of the Container
+**`layoutHeight.header`**            | Number   | otal height of the Header
+**`layoutHeight.tabs`**            | Number   | Total height of the Tabs
+**`layoutHeight.screen`**            | Number   | Total height of the Screen
 
 ##  <a name="InjectionStickyProps"/>Injection props to Sticky
 
 Name              | Type     | Description
 ----------------- | -------- | -----------
-**`screenContext`**            | Object   | 获取 Screen 上下文
+**`screenContext`**            | Object   | Get Screen context
 
 
 ## <a name="Snapshot"/>Snapshot
