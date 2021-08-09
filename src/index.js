@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity, FlatList, Animated } from 'react-native';
 import PropTypes from 'prop-types';
 import Carousel from 'react-native-snap-carousel';
 import { Dimensions, PixelRatio } from 'react-native';
@@ -18,11 +18,14 @@ export default class ScrollableTabView extends React.Component {
     stacks: PropTypes.array.isRequired,
     firstIndex: PropTypes.number,
     mappingProps: PropTypes.object,
-    header: PropTypes.func,
+    header: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     badges: PropTypes.array,
     tabsStyle: PropTypes.object,
     tabWrapStyle: PropTypes.object,
+    tabInnerStyle: PropTypes.object,
+    tabActiveOpacity: PropTypes.number,
     tabStyle: PropTypes.object,
+    tabsEnableAnimated: PropTypes.bool,
     textStyle: PropTypes.object,
     textActiveStyle: PropTypes.object,
     tabUnderlineStyle: PropTypes.object,
@@ -41,7 +44,10 @@ export default class ScrollableTabView extends React.Component {
     fixedTabs: PropTypes.bool,
     fixedHeader: PropTypes.bool,
     useScroll: PropTypes.bool,
-    fillScreen: PropTypes.bool
+    fillScreen: PropTypes.bool,
+    title: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
+    titleArgs: PropTypes.object,
+    onScroll: PropTypes.func
   };
 
   static defaultProps = {
@@ -52,7 +58,10 @@ export default class ScrollableTabView extends React.Component {
     badges: [],
     tabsStyle: {},
     tabWrapStyle: {},
+    tabInnerStyle: {},
+    tabActiveOpacity: 0.6,
     tabStyle: {},
+    tabsEnableAnimated: false,
     textStyle: {},
     textActiveStyle: {},
     tabUnderlineStyle: {},
@@ -71,7 +80,14 @@ export default class ScrollableTabView extends React.Component {
     fixedTabs: false,
     fixedHeader: false,
     useScroll: false,
-    fillScreen: true
+    fillScreen: true,
+    title: null,
+    titleArgs: {
+      style: {},
+      interpolateOpacity: {},
+      interpolateHeight: {}
+    },
+    onScroll: null
   };
 
   constructor(props) {
@@ -80,13 +96,28 @@ export default class ScrollableTabView extends React.Component {
       checkedIndex: this._getFirstIndex(),
       refsObj: {},
       lazyIndexs: [this._getFirstIndex()],
-      isRefreshing: false
+      isRefreshing: false,
+      sectionListScrollY: new Animated.Value(0),
+      carouselScrollX: new Animated.Value(0)
     };
+    this.tabsMeasurements = [];
     this.layoutHeight = {
       container: 0,
       header: 0,
       tabs: 0,
       screen: 0
+    };
+    this.interpolate = {
+      height: {
+        inputRange: [0, 160],
+        outputRange: [0, 80],
+        extrapolate: 'clamp'
+      },
+      opacity: {
+        inputRange: [160, 320],
+        outputRange: [0.2, 1],
+        extrapolate: 'clamp'
+      }
     };
     this._initial();
   }
@@ -249,31 +280,65 @@ export default class ScrollableTabView extends React.Component {
     return null;
   }
 
+  _measureTab(pageIndex, { nativeEvent }) {
+    const { x, width, height } = nativeEvent.layout;
+    this.tabsMeasurements[pageIndex] = { left: x, right: x + width, width, height };
+  }
+
   _renderTab({ item, index }) {
-    const { tabWrapStyle, tabStyle, textStyle, textActiveStyle, tabUnderlineStyle } = this.props;
+    const { tabActiveOpacity, tabWrapStyle, tabInnerStyle, tabStyle, textStyle, textActiveStyle, tabUnderlineStyle, tabsEnableAnimated } = this.props;
     const checked = this.state.checkedIndex == index;
     return (
-      <View key={index} style={tabWrapStyle}>
+      <View onLayout={this._measureTab.bind(this, index)} key={index} style={tabWrapStyle}>
         {this._renderBadges(index)}
         <TouchableOpacity
+          activeOpacity={tabActiveOpacity}
           onPress={() => {
             this._onTabviewChange(index);
           }}
           style={[styles.tabStyle, tabStyle]}
         >
-          <View>
+          <View style={tabInnerStyle}>
             <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
               {item.tabLabelRender && typeof item.tabLabelRender == 'function' ? item.tabLabelRender(item.tabLabel) : item.tabLabel}
             </Text>
-            {checked && <View style={[styles.tabUnderlineStyle, tabUnderlineStyle]}></View>}
+            {!tabsEnableAnimated && checked && <View style={[styles.tabUnderlineStyle, tabUnderlineStyle]}></View>}
           </View>
         </TouchableOpacity>
       </View>
     );
   }
 
+  _renderAnimatedTabUnderline(width) {
+    const { useScroll, tabUnderlineStyle } = this.props;
+    const _tabUnderlineStyle = Object.assign({}, { zIndex: 100, width: width, position: 'absolute' }, styles.tabUnderlineStyle, tabUnderlineStyle);
+    // const index = this.state.checkedIndex;
+    // const tabsMeasurements = this.tabsMeasurements[index];
+    // const { left, right, width, height } = tabsMeasurements;
+    return (
+      <Animated.View
+        style={[
+          styles.tabUnderlineStyle,
+          _tabUnderlineStyle,
+          {
+            transform: [
+              {
+                translateX: this.state.carouselScrollX.interpolate({
+                  inputRange: [0, this.tabs.length * deviceWidth],
+                  outputRange: [0, useScroll ? this.tabs.length * width : deviceWidth]
+                })
+              }
+            ]
+          }
+        ]}
+      ></Animated.View>
+    );
+  }
+
   _renderTabs() {
-    const { oneTabHidden, tabsShown, tabsStyle, useScroll } = this.props;
+    const { oneTabHidden, tabsShown, tabsStyle, tabStyle, useScroll, tabsEnableAnimated } = this.props;
+    const { width } = tabStyle;
+    if (tabsEnableAnimated && tabStyle && width == undefined) throw new Error('When tabsEnableAnimated is true, the width must be specified for tabStyle');
     const renderTab = !(oneTabHidden && this.tabs && this.tabs.length == 1) && tabsShown;
     const _tabsStyle = Object.assign({}, !useScroll && { alignItems: 'center', justifyContent: 'space-around' }, styles.tabsStyle, tabsStyle);
     this.layoutHeight['tabs'] = renderTab ? _tabsStyle.height : 0;
@@ -282,17 +347,23 @@ export default class ScrollableTabView extends React.Component {
       this.tabs &&
       !!this.tabs.length &&
       (useScroll ? (
-        <FlatList
-          ref={rf => (this.flatlist = rf)}
-          data={this.tabs}
-          renderItem={this._renderTab.bind(this)}
-          style={_tabsStyle}
-          horizontal={true}
-          showsVerticalScrollIndicator={false}
-          showsHorizontalScrollIndicator={false}
-        ></FlatList>
+        <View>
+          <FlatList
+            ref={rf => (this.flatlist = rf)}
+            data={this.tabs}
+            renderItem={this._renderTab.bind(this)}
+            style={_tabsStyle}
+            horizontal={true}
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
+          ></FlatList>
+          {tabsEnableAnimated && this._renderAnimatedTabUnderline(width)}
+        </View>
       ) : (
-        <View style={_tabsStyle}>{this.tabs.map((tab, index) => this._renderTab({ item: tab, index }))}</View>
+        <View style={_tabsStyle}>
+          {this.tabs.map((tab, index) => this._renderTab({ item: tab, index }))}
+          {tabsEnableAnimated && this._renderAnimatedTabUnderline(width)}
+        </View>
       ))
     );
   }
@@ -406,11 +477,30 @@ export default class ScrollableTabView extends React.Component {
           onLayout={({ nativeEvent }) => {
             const { height } = nativeEvent.layout;
             this.layoutHeight['header'] = height;
+            if (height !== 0) this._refresh();
           }}
         >
           {typeof header === 'function' ? header() : header}
         </View>
       )
+    );
+  };
+
+  _renderTitle = () => {
+    const { title, titleArgs } = this.props;
+    const { style, interpolateHeight, interpolateOpacity } = titleArgs;
+    return (
+      <Animated.View
+        style={[
+          {
+            height: this.state.sectionListScrollY.interpolate(Object.assign(this.interpolate.height, interpolateHeight)),
+            opacity: this.state.sectionListScrollY.interpolate(Object.assign(this.interpolate.opacity, interpolateOpacity))
+          },
+          style
+        ]}
+      >
+        {typeof title === 'function' ? title() : title}
+      </Animated.View>
     );
   };
 
@@ -420,9 +510,11 @@ export default class ScrollableTabView extends React.Component {
         onLayout={({ nativeEvent }) => {
           const { height } = nativeEvent.layout;
           this.layoutHeight['container'] = height;
+          if (height !== 0) this._refresh();
         }}
         style={[styles.container, this.props.style]}
       >
+        {!!this.props.title && this._renderTitle()}
         <SectionList
           ref={rf => (this.section = rf)}
           keyExtractor={(item, index) => `scrollable-tab-view-wrap-${index}`}
@@ -453,11 +545,35 @@ export default class ScrollableTabView extends React.Component {
                   offset: deviceWidth * index,
                   index
                 })}
+                onScroll={
+                  this.props.tabsEnableAnimated &&
+                  Animated.event([
+                    {
+                      nativeEvent: { contentOffset: { x: this.state.carouselScrollX } }
+                    }
+                  ])
+                }
                 {...this.props.carouselProps}
               />
             );
           }}
           onScrollToIndexFailed={() => {}}
+          onScroll={
+            !!this.props.title
+              ? Animated.event(
+                  [
+                    {
+                      nativeEvent: { contentOffset: { y: this.state.sectionListScrollY } }
+                    }
+                  ],
+                  {
+                    listener: !!this.props.onScroll && this.props.onScroll.bind(this)
+                  }
+                )
+              : !!this.props.onScroll
+              ? this.props.onScroll.bind(this)
+              : null
+          }
           {...this.props.sectionListProps}
         ></SectionList>
       </View>
