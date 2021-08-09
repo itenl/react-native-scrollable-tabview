@@ -185,12 +185,14 @@ Prop              | Type     | Default     | Description
   </ScrollableTabView> 
   this.scrollableTabView.getCurrentRef();
   this.scrollableTabView.toTabView(1);
+  this.scrollableTabView.scrollTo(0);
 ```
 
-Name              | Description
------------------ | -----------
-**`getCurrentRef(index: number.optional)`**            | Get the instance of the currently active view, you can pass **`index`** to get the specified instance
-**`toTabView(index: number.required / label: string.required)`**            | Jump to the specified Screen
+Name              | Type     | Description
+----------------- | -------- | -----------
+**`getCurrentRef(index: number.optional)`**            | Function   | Get the instance of the currently active view, you can pass **`index`** to get the specified instance
+**`toTabView(index: number.required / label: string.required)`**            | Function   | Jump to the specified Screen
+**`scrollTo(index: number.required)`**            | Function   | Swipe up and down to the specified position (passing in 0 is the default positioning to tabs / passing in a negative number is set to the top)
 
 ## <a name="StackProperty"/>Stack Property
 
@@ -222,9 +224,9 @@ Name              | Type     | Description
 
 Name              | Type     | Description
 ----------------- | -------- | -----------
-**`refresh`**            | Function   | Manually trigger refresh and synchronize Screen status to Sticky
-**`scrollTo`**            | Function   | Swipe up and down to the specified position (passing in 0 is the default positioning to tabs / passing in a negative number is set to the top)
-**`toTabView`**            | Function   | Jump to other Tab (you can pass in **`index`** or **`tabLabel`**)
+**`refresh()`**            | Function   | Manually trigger refresh and synchronize Screen status to Sticky
+**`scrollTo(index: number.required)`**            | Function   | Swipe up and down to the specified position (passing in 0 is the default positioning to tabs / passing in a negative number is set to the top)
+**`toTabView(index: number.required / label: string.required)`**            | Function   | Jump to the specified Screen
 **`layoutHeight.container`**            | Number | Total height of the Container
 **`layoutHeight.header`**            | Number   | otal height of the Header
 **`layoutHeight.tabs`**            | Number   | Total height of the Tabs

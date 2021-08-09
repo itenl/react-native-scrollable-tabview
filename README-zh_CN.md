@@ -187,10 +187,11 @@ Prop              | Type     | Default     | Description
   this.scrollableTabView.toTabView(1);
 ```
 
-Name              | Description
------------------ | -----------
-**`getCurrentRef(index: number.optional)`**            | 获取当前活动的视图的实例，可传 **`index`** 获取指定实例
-**`toTabView(index: number.required / label: string.required)`**            | 跳到指定 Screen
+Name              | Type     | Description
+----------------- | -------- | -----------
+**`getCurrentRef(index: number.optional)`**            | Function   | 获取当前活动的视图的实例，可传 **`index`** 获取指定实例
+**`toTabView(index: number.required / label: string.required)`**            | Function   | 跳到指定 Screen
+**`scrollTo(index: number.required)`**            | Function   | 上下滑动至指定位置 (传入 0 默认定位至 tabs / 传入负数则置顶)
 
 ## <a name="StackProperty"/>Stack Property
 
@@ -222,9 +223,9 @@ Name              | Type     | Description
 
 Name              | Type     | Description
 ----------------- | -------- | -----------
-**`refresh`**            | Function   | 手动触发刷新、同步Screen状态至Sticky
-**`scrollTo`**            | Function   | 上下滑动至指定位置 (传入 0 默认定位至 tabs / 传入负数则置顶)
-**`toTabView`**            | Function   | 跳转至其他 Tab (可传入 **`index`** 或 **`tabLabel`**)
+**`refresh()`**            | Function   | 手动触发刷新、同步Screen状态至Sticky
+**`scrollTo(index: number.required)`**            | Function   | 上下滑动至指定位置 (传入 0 默认定位至 tabs / 传入负数则置顶)
+**`toTabView(index: number.required / label: string.required)`**            | Function   | 跳到指定 Screen
 **`layoutHeight.container`**            | Number   | Container 容器总高度
 **`layoutHeight.header`**            | Number   | Header 高度
 **`layoutHeight.tabs`**            | Number   | Tabs 高度
