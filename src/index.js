@@ -1,8 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity, FlatList, Animated } from 'react-native';
+import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity, FlatList, Animated, Dimensions } from 'react-native';
 import PropTypes from 'prop-types';
 import Carousel from 'react-native-snap-carousel';
-import { Dimensions, PixelRatio } from 'react-native';
 import HocComponent from './HocComponent';
 const deviceWidth = Dimensions.get('window').width;
 const deviceHeight = Dimensions.get('window').height;
@@ -287,6 +286,7 @@ export default class ScrollableTabView extends React.Component {
 
   _renderTab({ item, index }) {
     const { tabActiveOpacity, tabWrapStyle, tabInnerStyle, tabStyle, textStyle, textActiveStyle, tabUnderlineStyle, tabsEnableAnimated } = this.props;
+    const _tabUnderlineStyle = Object.assign({ top: 6 }, styles.tabUnderlineStyle, tabUnderlineStyle);
     const checked = this.state.checkedIndex == index;
     return (
       <View onLayout={this._measureTab.bind(this, index)} key={index} style={tabWrapStyle}>
@@ -302,16 +302,17 @@ export default class ScrollableTabView extends React.Component {
             <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
               {item.tabLabelRender && typeof item.tabLabelRender == 'function' ? item.tabLabelRender(item.tabLabel) : item.tabLabel}
             </Text>
-            {!tabsEnableAnimated && checked && <View style={[styles.tabUnderlineStyle, tabUnderlineStyle]}></View>}
+            {!tabsEnableAnimated && checked && <View style={_tabUnderlineStyle}></View>}
           </View>
         </TouchableOpacity>
       </View>
     );
   }
 
-  _renderAnimatedTabUnderline(width) {
+  _renderAnimatedTabUnderline(tabWidth) {
     const { useScroll, tabUnderlineStyle } = this.props;
-    const _tabUnderlineStyle = Object.assign({}, { zIndex: 100, width: width, position: 'absolute' }, styles.tabUnderlineStyle, tabUnderlineStyle);
+    const _tabUnderlineStyle = Object.assign({ zIndex: 100, width: tabWidth, position: 'absolute' }, styles.tabUnderlineStyle, tabUnderlineStyle);
+    if (!_tabUnderlineStyle.top && _tabUnderlineStyle.height) _tabUnderlineStyle.top = this.layoutHeight['tabs'] - _tabUnderlineStyle.height;
     // const index = this.state.checkedIndex;
     // const tabsMeasurements = this.tabsMeasurements[index];
     // const { left, right, width, height } = tabsMeasurements;
@@ -325,7 +326,8 @@ export default class ScrollableTabView extends React.Component {
               {
                 translateX: this.state.carouselScrollX.interpolate({
                   inputRange: [0, this.tabs.length * deviceWidth],
-                  outputRange: [0, useScroll ? this.tabs.length * width : deviceWidth]
+                  // if useScroll is True, will conflict with this.flatlist.scrollToIndex
+                  outputRange: [0, useScroll ? this.tabs.length * tabWidth : deviceWidth]
                 })
               }
             ]
@@ -356,6 +358,7 @@ export default class ScrollableTabView extends React.Component {
             horizontal={true}
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
+            keyExtractor={(item, index) => `scrollable-tab-view-wrap-tab-${index}`}
           ></FlatList>
           {tabsEnableAnimated && this._renderAnimatedTabUnderline(width)}
         </View>
@@ -407,6 +410,7 @@ export default class ScrollableTabView extends React.Component {
       this.flatlist.scrollToIndex({
         index: index
       });
+
     // 切换后强制重置刷新状态
     this._toggledRefreshing(false);
   }
@@ -547,11 +551,20 @@ export default class ScrollableTabView extends React.Component {
                 })}
                 onScroll={
                   this.props.tabsEnableAnimated &&
-                  Animated.event([
+                  Animated.event(
+                    [
+                      {
+                        nativeEvent: { contentOffset: { x: this.state.carouselScrollX } }
+                      }
+                    ],
                     {
-                      nativeEvent: { contentOffset: { x: this.state.carouselScrollX } }
+                      // listener: ({ nativeEvent }) => {
+                      //   console.log(nativeEvent.contentOffset.x);
+                      // },
+                      // If useNativeDriver is True, the listener cannot be triggered
+                      useNativeDriver: true
                     }
-                  ])
+                  )
                 }
                 {...this.props.carouselProps}
               />
@@ -567,7 +580,8 @@ export default class ScrollableTabView extends React.Component {
                     }
                   ],
                   {
-                    listener: !!this.props.onScroll && this.props.onScroll.bind(this)
+                    listener: !!this.props.onScroll && this.props.onScroll.bind(this),
+                    useNativeDriver: false
                   }
                 )
               : !!this.props.onScroll
@@ -586,5 +600,5 @@ const styles = StyleSheet.create({
   tabsStyle: { flex: 1, zIndex: 100, flexDirection: 'row', backgroundColor: '#ffffff', height: 35, marginBottom: -0.5 },
   tabStyle: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' },
   textStyle: { height: 20, fontSize: 12, color: '#11111180', textAlign: 'center', lineHeight: 20 },
-  tabUnderlineStyle: { top: 6, height: 2, borderRadius: 2, backgroundColor: '#00aced' }
+  tabUnderlineStyle: { height: 2, borderRadius: 2, backgroundColor: '#00aced' }
 });
