@@ -154,7 +154,7 @@ Prop              | Type     | Default     | Description
 **`textStyle`**             | Object    | {}          | Text style in Tab
 **`textActiveStyle`**             | Object    | {}          | Select the active text style
 **`tabUnderlineStyle`**             | Object    | {}          | Select the active underline style
-**`firstIndex`**             | Number    | 0          | Index is selected by default
+**`firstIndex`**             | Number / Null    | null          | Set the stack of **`firstIndex`** to active (make sure that the number of **`stacks`** is greater than to **`firstIndex`** when setting the **`firstIndex`** value)
 **`syncToSticky`**             | Boolean    | true          | Whether it is synchronized (**`render`** triggered in the Screen **`componentDidUpdate`** will update Sticky)
 **`onEndReachedThreshold`**             | Number    | 0.2          | Bottom callback threshold
 **`onBeforeRefresh`**             | Function    | null          | Pull down to refresh the pre-functions, execute **`next`** to execute **`onRefresh`** function in Screen, execute **`toggled`** to switch system loading, you can pass true / false to specify (callback contains **`next`**, **`toggled`** two formal parameters)
