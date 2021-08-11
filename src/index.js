@@ -131,6 +131,7 @@ export default class ScrollableTabView extends React.Component {
     this.tabs = this._getTabs(props);
     this.badges = this._getBadges(props);
     this.stacks = this._getWrapChildren(props);
+    if (props.firstIndex > Math.max(this.stacks.length - 1, 0)) throw new Error('firstIndex cannot exceed the total number of stacks.length');
   }
 
   /**
@@ -377,8 +378,17 @@ export default class ScrollableTabView extends React.Component {
     return this.tabview && this.tabview.snapToItem(index);
   };
 
+  _tabTranslateX(index = this.state.checkedIndex) {
+    const { useScroll } = this.props;
+    if (useScroll && this.scrollview && this.tabWidth) {
+      this.scrollview.scrollTo({
+        x: (index - 1) * this.tabWidth + this.tabWidth / 2
+      });
+    }
+  }
+
   _onTabviewChange(index, isCarouselScroll = false) {
-    const { toHeaderOnTab, toTabsOnTab, onTabviewChanged, useScroll } = this.props;
+    const { toHeaderOnTab, toTabsOnTab, onTabviewChanged } = this.props;
     if (index == this.state.checkedIndex) {
       if (toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
       if (toTabsOnTab) return this._scrollTo(0);
@@ -397,12 +407,8 @@ export default class ScrollableTabView extends React.Component {
         }
       }
     );
-    this._snapToItem(index);
-    if (useScroll && this.scrollview && this.tabWidth) {
-      this.scrollview.scrollTo({
-        x: (index - 1) * this.tabWidth + this.tabWidth / 2
-      });
-    }
+    // this._snapToItem(index);
+    this._tabTranslateX(index);
     // 切换后强制重置刷新状态
     this._toggledRefreshing(false);
   }
@@ -526,6 +532,7 @@ export default class ScrollableTabView extends React.Component {
           renderItem={() => {
             return (
               <Carousel
+                pagingEnabled={true}
                 ref={c => (this.tabview = c)}
                 inactiveSlideScale={1}
                 data={this.stacks}
@@ -535,6 +542,7 @@ export default class ScrollableTabView extends React.Component {
                 onBeforeSnapToItem={index => {
                   this._onTabviewChange(index, true);
                 }}
+                initialScrollIndex={this.state.checkedIndex}
                 firstItem={this.state.checkedIndex}
                 getItemLayout={(data, index) => ({
                   length: deviceWidth,
