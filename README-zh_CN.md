@@ -154,7 +154,7 @@ Prop              | Type     | Default     | Description
 **`textStyle`**             | Object    | {}          | Tab内文本样式
 **`textActiveStyle`**             | Object    | {}          | 选中激活的text样式
 **`tabUnderlineStyle`**             | Object    | {}          | 选中激活的下划线样式
-**`firstIndex`**             | Number    | 0          | 默认选中index
+**`firstIndex`**             | Number / Null    | null          | 设置 **`firstIndex`** 的栈为活动状态 (请在设定 **`firstIndex`** 值的时候确保 **`stacks`** 的个数大于 **`firstIndex`** )
 **`syncToSticky`**             | Boolean    | true          | 是否同步(Screen中发生 **`render`** 触发 **`componentDidUpdate`** 将更新Sticky)
 **`onEndReachedThreshold`**             | Number    | 0.2          | 触底回调阈值
 **`onBeforeRefresh`**             | Function    | null          | 下拉刷新前置函数, 执行 **`next`** 将执行Screen中 **`onRefresh`** 函数，执行 **`toggled`** 将切换系统loading,可传 true / false 进行指定 (回调含有 **`next`** , **`toggled`** 两个形参)

@@ -51,7 +51,7 @@ export default class ScrollableTabView extends React.Component {
 
   static defaultProps = {
     stacks: [],
-    firstIndex: 0,
+    firstIndex: null,
     mappingProps: {},
     header: null,
     badges: [],
@@ -94,7 +94,7 @@ export default class ScrollableTabView extends React.Component {
     this.state = {
       checkedIndex: this._getFirstIndex(),
       refsObj: {},
-      lazyIndexs: [this._getFirstIndex()],
+      lazyIndexs: this._initLazyIndexs(),
       isRefreshing: false
     };
     this.sectionListScrollY = new Animated.Value(0);
@@ -229,8 +229,20 @@ export default class ScrollableTabView extends React.Component {
     }
   };
 
+  _initLazyIndexs() {
+    let lazyIndexs = [],
+      firstIndex = this._getFirstIndex();
+    if (firstIndex != null) lazyIndexs.push(firstIndex);
+    return lazyIndexs;
+  }
+
   _getFirstIndex() {
-    return this.props.firstIndex ?? 0;
+    const { firstIndex, stacks } = this.props;
+    if (typeof firstIndex === 'number' && stacks && stacks.length) {
+      return this.props.firstIndex;
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -407,7 +419,6 @@ export default class ScrollableTabView extends React.Component {
         }
       }
     );
-    // this._snapToItem(index);
     this._tabTranslateX(index);
     // 切换后强制重置刷新状态
     this._toggledRefreshing(false);
@@ -496,7 +507,8 @@ export default class ScrollableTabView extends React.Component {
         style={[
           {
             height: this.sectionListScrollY.interpolate(Object.assign(this.interpolate.height, interpolateHeight)),
-            opacity: this.sectionListScrollY.interpolate(Object.assign(this.interpolate.opacity, interpolateOpacity))
+            opacity: this.sectionListScrollY.interpolate(Object.assign(this.interpolate.opacity, interpolateOpacity)),
+            overflow: 'hidden'
           },
           style
         ]}
@@ -507,6 +519,7 @@ export default class ScrollableTabView extends React.Component {
   };
 
   render() {
+    console.log(`${this.props.firstIndex}|${this.state.checkedIndex}`);
     return (
       <View
         onLayout={({ nativeEvent }) => {
