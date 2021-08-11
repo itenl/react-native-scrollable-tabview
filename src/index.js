@@ -519,7 +519,6 @@ export default class ScrollableTabView extends React.Component {
   };
 
   render() {
-    console.log(`${this.props.firstIndex}|${this.state.checkedIndex}`);
     return (
       <View
         onLayout={({ nativeEvent }) => {
