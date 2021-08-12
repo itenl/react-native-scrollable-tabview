@@ -126,8 +126,8 @@ export default class ScrollableTabView extends React.Component {
     this._initial(newProps, true);
   }
 
-  _initial(props = this.props, isFix = false) {
-    isFix && this._fixData(props);
+  _initial(props = this.props, isProcess = false) {
+    isProcess && this._toProcess(props);
     this.tabs = this._getTabs(props);
     this.badges = this._getBadges(props);
     this.stacks = this._getWrapChildren(props);
@@ -139,7 +139,7 @@ export default class ScrollableTabView extends React.Component {
    * @param {*} props
    * @memberof ScrollableTabView
    */
-  _fixData(props) {
+  _toProcess(props) {
     if (props.stacks && props.stacks.length && props.stacks.length != this.stacks.length && props.firstIndex != this.state.checkedIndex) {
       const timer = setTimeout(() => {
         this._onTabviewChange(props.firstIndex);
@@ -387,7 +387,13 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _snapToItem = index => {
-    return this.tabview && this.tabview.snapToItem(index);
+    // 任务队列最后执行可解决
+    // 开启tabsEnableAnimated情况下动画Tab动画抖动问题
+    // 关闭enableCachePage状态下导致滑动切换Screen后再次点击Tab显示异常问题
+    const timer = setTimeout(() => {
+      this.tabview && this.tabview.snapToItem(index);
+      clearTimeout(timer);
+    });
   };
 
   _tabTranslateX(index = this.state.checkedIndex) {
@@ -420,6 +426,8 @@ export default class ScrollableTabView extends React.Component {
       }
     );
     this._tabTranslateX(index);
+    // 非滑动触发的情况下需要同步index，避免Carousel无法正常显示
+    !isCarouselScroll && this._snapToItem(index);
     // 切换后强制重置刷新状态
     this._toggledRefreshing(false);
   }
