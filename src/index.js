@@ -26,7 +26,7 @@ export default class ScrollableTabView extends React.Component {
     tabActiveOpacity: PropTypes.number,
     tabStyle: PropTypes.object,
     tabsEnableAnimated: PropTypes.bool,
-    tabsEnableAnimatedStyle: PropTypes.object,
+    useScrollStyle: PropTypes.object,
     textStyle: PropTypes.object,
     textActiveStyle: PropTypes.object,
     tabUnderlineStyle: PropTypes.object,
@@ -64,7 +64,7 @@ export default class ScrollableTabView extends React.Component {
     tabActiveOpacity: 0.6,
     tabStyle: {},
     tabsEnableAnimated: false,
-    tabsEnableAnimatedStyle: {},
+    useScrollStyle: {},
     textStyle: {},
     textActiveStyle: {},
     tabUnderlineStyle: {},
@@ -329,8 +329,8 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderAnimatedTabUnderline() {
-    const { useScroll, tabUnderlineStyle, tabsEnableAnimatedStyle } = this.props;
-    const { paddingLeft, paddingHorizontal } = tabsEnableAnimatedStyle;
+    const { useScroll, tabUnderlineStyle, useScrollStyle } = this.props;
+    const { paddingLeft, paddingHorizontal } = useScrollStyle;
     const _tabUnderlineStyle = Object.assign({ zIndex: 100, width: this.tabWidth, position: 'absolute' }, styles.tabUnderlineStyle, tabUnderlineStyle);
     if (!_tabUnderlineStyle.top && _tabUnderlineStyle.height) _tabUnderlineStyle.top = this.layoutHeight['tabs'] - _tabUnderlineStyle.height;
     let outputLeft = paddingLeft || paddingHorizontal || 0;
@@ -361,7 +361,7 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderTabs() {
-    const { oneTabHidden, tabsShown, tabsStyle, tabStyle, useScroll, tabsEnableAnimated, tabsEnableAnimatedStyle } = this.props;
+    const { oneTabHidden, tabsShown, tabsStyle, tabStyle, useScroll, tabsEnableAnimated, useScrollStyle } = this.props;
     const { width } = tabStyle;
     if (tabsEnableAnimated && tabStyle && width == undefined) throw new Error('When tabsEnableAnimated is true, the width must be specified for tabStyle');
     const renderTab = !(oneTabHidden && this.tabs && this.tabs.length == 1) && tabsShown;
@@ -374,7 +374,7 @@ export default class ScrollableTabView extends React.Component {
       !!this.tabs.length &&
       (useScroll ? (
         <ScrollView
-          contentContainerStyle={tabsEnableAnimatedStyle}
+          contentContainerStyle={useScrollStyle}
           style={_tabsStyle}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
