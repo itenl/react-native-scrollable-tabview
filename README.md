@@ -172,12 +172,13 @@ Prop              | Type     | Default     | Description
 **`fixedTabs`**             | Boolean    | false          | When **`enableCachePage`** is true, slide to switch Screen to set the minimum height to ensure that the Header and Tabs will not bounce
 **`fixedHeader`**             | Boolean    | false          | Render together with Tabs, fix the top Header, do not follow the scroll
 **`useScroll`**             | Boolean    | false          | Does Tabs support horizontal scrolling (it needs to be enabled when there are multiple category Tabs, it is recommended that **`tabStyle`** pass in a fixed width)
+**`useScrollStyle`**             | Object    | {}          | Set **`contentContainerStyle`** for scrolling **`Tabs`**, usually add margins to the left and right sides **`paddingLeft`** **`paddingHorizontal`**
 **`fillScreen`**             | Boolean    | true          | Fill the entire Screen
 **`title`**             | Function / JSX Element / Class Component    | null          | Animation title
 **`titleArgs`**             | Object    | **`{  style: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | Title parameter configuration < [Read interpolate](https://reactnative.dev/docs/animations#interpolation) >
 **`onScroll`**             | Function    | null          | Scroll event monitoring
 **`tabsEnableAnimated`**             | Boolean    | false          | Enable sliding effect for Tabs, Need to specify **`width`** for **`tabStyle`**
-**`tabsEnableAnimatedStyle`**             | Object    | {}          | Set the style for the Tabs sliding effect. It is common to add margins on the left and right sides **`paddingLeft`** **`paddingHorizontal`**
+
 ## <a name="method"/>Method
 
 ``` javascript

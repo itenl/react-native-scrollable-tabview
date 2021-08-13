@@ -172,12 +172,12 @@ Prop              | Type     | Default     | Description
 **`fixedTabs`**             | Boolean    | false          | 在 **`enableCachePage`** 为true的情况下滑动切换Screen设置最小高度保障Header与Tabs不会弹跳
 **`fixedHeader`**             | Boolean    | false          | 与Tabs一同渲染，固定顶部Header，不跟随滚动
 **`useScroll`**             | Boolean    | false          | Tabs是否支持横向滚动(存在多个类目Tab的情况需要启用，建议 **`tabStyle`** 传入固定宽度)
+**`useScrollStyle`**             | Object    | {}          | 为滚动的 **`Tabs`** 设置 **`contentContainerStyle`**，常见为左右两侧添加边距 **`paddingLeft`** **`paddingHorizontal`**
 **`fillScreen`**             | Boolean    | true          | 填充整个 Screen
 **`title`**             | Function / JSX Element / Class Component    | null          | 动画标题
 **`titleArgs`**             | Object    | **`{  style: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | 标题配置 < [阅读 interpolate](https://reactnative.dev/docs/animations#interpolation) >
 **`onScroll`**             | Function    | null          | 滚动事件监听
 **`tabsEnableAnimated`**             | Boolean    | false          | 为Tabs启用滑动效果，需要为 **`tabStyle`** 指定 **`width`**
-**`tabsEnableAnimatedStyle`**             | Object    | {}          | 为Tabs滑动效果设置样式，常见为左右两侧添加边距 **`paddingLeft`** **`paddingHorizontal`**
 
 ## <a name="method"/>Method
 
