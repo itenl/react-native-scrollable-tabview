@@ -26,6 +26,7 @@ export default class ScrollableTabView extends React.Component {
     tabActiveOpacity: PropTypes.number,
     tabStyle: PropTypes.object,
     tabsEnableAnimated: PropTypes.bool,
+    tabsEnableAnimatedStyle: PropTypes.object,
     textStyle: PropTypes.object,
     textActiveStyle: PropTypes.object,
     tabUnderlineStyle: PropTypes.object,
@@ -63,6 +64,7 @@ export default class ScrollableTabView extends React.Component {
     tabActiveOpacity: 0.6,
     tabStyle: {},
     tabsEnableAnimated: false,
+    tabsEnableAnimatedStyle: {},
     textStyle: {},
     textActiveStyle: {},
     tabUnderlineStyle: {},
@@ -285,11 +287,14 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderBadges(tabIndex) {
-    let badges = this.badges[tabIndex] || this.props.badges[tabIndex];
-    if (badges && badges.length)
-      return badges.map(item => {
+    const { useScroll, badges } = this.props;
+    const _badges = this.badges[tabIndex] || badges[tabIndex];
+    if (_badges && _badges.length) {
+      if (useScroll) console.warn('When useScroll and badges exist at the same time, the badge will not overflow the Tabs container');
+      return _badges.map(item => {
         return item;
       });
+    }
     return null;
   }
 
@@ -324,9 +329,14 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderAnimatedTabUnderline() {
-    const { useScroll, tabUnderlineStyle } = this.props;
+    const { useScroll, tabUnderlineStyle, tabsEnableAnimatedStyle } = this.props;
+    const { paddingLeft, paddingHorizontal } = tabsEnableAnimatedStyle;
     const _tabUnderlineStyle = Object.assign({ zIndex: 100, width: this.tabWidth, position: 'absolute' }, styles.tabUnderlineStyle, tabUnderlineStyle);
     if (!_tabUnderlineStyle.top && _tabUnderlineStyle.height) _tabUnderlineStyle.top = this.layoutHeight['tabs'] - _tabUnderlineStyle.height;
+    let outputLeft = paddingLeft || paddingHorizontal || 0;
+    let outputRight = deviceWidth;
+    if (useScroll) outputRight = this.tabs.length * this.tabWidth;
+    if (outputLeft) outputRight = outputRight + outputLeft;
     // const index = this.state.checkedIndex;
     // const tabsMeasurements = this.tabsMeasurements[index];
     // const { left, right, width, height } = tabsMeasurements;
@@ -340,7 +350,7 @@ export default class ScrollableTabView extends React.Component {
               {
                 translateX: this.carouselScrollX.interpolate({
                   inputRange: [0, this.tabs.length * deviceWidth],
-                  outputRange: [0, useScroll ? this.tabs.length * this.tabWidth : deviceWidth]
+                  outputRange: [outputLeft, outputRight]
                 })
               }
             ]
@@ -351,7 +361,7 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderTabs() {
-    const { oneTabHidden, tabsShown, tabsStyle, tabStyle, useScroll, tabsEnableAnimated } = this.props;
+    const { oneTabHidden, tabsShown, tabsStyle, tabStyle, useScroll, tabsEnableAnimated, tabsEnableAnimatedStyle } = this.props;
     const { width } = tabStyle;
     if (tabsEnableAnimated && tabStyle && width == undefined) throw new Error('When tabsEnableAnimated is true, the width must be specified for tabStyle');
     const renderTab = !(oneTabHidden && this.tabs && this.tabs.length == 1) && tabsShown;
@@ -363,7 +373,14 @@ export default class ScrollableTabView extends React.Component {
       this.tabs &&
       !!this.tabs.length &&
       (useScroll ? (
-        <ScrollView style={_tabsStyle} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} ref={rf => (this.scrollview = rf)} horizontal={true}>
+        <ScrollView
+          contentContainerStyle={tabsEnableAnimatedStyle}
+          style={_tabsStyle}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          ref={rf => (this.scrollview = rf)}
+          horizontal={true}
+        >
           {this.tabs.map((tab, index) => this._renderTab({ item: tab, index }))}
           {tabsEnableAnimated && this._renderAnimatedTabUnderline()}
         </ScrollView>

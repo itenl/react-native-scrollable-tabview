@@ -177,7 +177,7 @@ Prop              | Type     | Default     | Description
 **`titleArgs`**             | Object    | **`{  style: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | Title parameter configuration < [Read interpolate](https://reactnative.dev/docs/animations#interpolation) >
 **`onScroll`**             | Function    | null          | Scroll event monitoring
 **`tabsEnableAnimated`**             | Boolean    | false          | Enable sliding effect for Tabs, Need to specify **`width`** for **`tabStyle`**
-
+**`tabsEnableAnimatedStyle`**             | Object    | {}          | Set the style for the Tabs sliding effect. It is common to add margins on the left and right sides **`paddingLeft`** **`paddingHorizontal`**
 ## <a name="method"/>Method
 
 ``` javascript
