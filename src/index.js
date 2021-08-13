@@ -558,7 +558,7 @@ export default class ScrollableTabView extends React.Component {
                 renderItem={this._renderItem.bind(this)}
                 sliderWidth={deviceWidth}
                 itemWidth={deviceWidth}
-                cnScrollIndexChanged={_throttle(this._onTabviewChange.bind(this), this.props.screenScrollThrottle, {
+                onScrollIndexChanged={_throttle(this._onTabviewChange.bind(this), this.props.screenScrollThrottle, {
                   leading: false,
                   trailing: true
                 })}
