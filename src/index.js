@@ -146,7 +146,10 @@ export default class ScrollableTabView extends React.Component {
    */
   _toProcess(props) {
     if (props.stacks && props.stacks.length && props.stacks.length != this.stacks.length && props.firstIndex != this.state.checkedIndex) {
-      this._onTabviewChange(props.firstIndex);
+      const timer = setTimeout(() => {
+        this._onTabviewChange(props.firstIndex);
+        clearTimeout(timer);
+      });
     }
   }
 
