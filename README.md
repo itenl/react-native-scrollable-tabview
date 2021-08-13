@@ -147,7 +147,7 @@ Prop              | Type     | Default     | Description
 **`mappingProps`**      | Object   | {}          | Associate mapping data to Stack / Sticky
 **`badges`**             | Array    | []          | Badges for each Tab < [Read Badge Property](#BadgeProperty) >
 **`tabsStyle`**             | Object    | {}          | The entire Tabs style
-**`tabWrapStyle`**             | Object    | {}          | Single Tab wrap style
+**`tabWrapStyle`**             | Object / Function    | {}          | Single Tab wrap style (The function parameters provide item, index, and need to return the style object, eg. **`return index == 1 && {zIndex: 10}`**)
 **`tabInnerStyle`**             | Object    | {}          | Single Tab inner style
 **`tabActiveOpacity`**             | Number    | 0.6          | Transparency after Tab button click
 **`tabStyle`**             | Object    | {}          | Single Tab style

@@ -21,7 +21,7 @@ export default class ScrollableTabView extends React.Component {
     header: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     badges: PropTypes.array,
     tabsStyle: PropTypes.object,
-    tabWrapStyle: PropTypes.object,
+    tabWrapStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     tabInnerStyle: PropTypes.object,
     tabActiveOpacity: PropTypes.number,
     tabStyle: PropTypes.object,
@@ -310,8 +310,9 @@ export default class ScrollableTabView extends React.Component {
     const { tabActiveOpacity, tabWrapStyle, tabInnerStyle, tabStyle, textStyle, textActiveStyle, tabUnderlineStyle, tabsEnableAnimated } = this.props;
     const _tabUnderlineStyle = Object.assign({ top: 6 }, styles.tabUnderlineStyle, tabUnderlineStyle);
     const checked = this.state.checkedIndex == index;
+    const _tabWrapStyle = typeof tabWrapStyle === 'function' ? tabWrapStyle(item, index) : tabWrapStyle;
     return (
-      <View onLayout={this._measureTab.bind(this, index)} key={index} style={tabWrapStyle}>
+      <View onLayout={this._measureTab.bind(this, index)} key={index} style={_tabWrapStyle}>
         {this._renderBadges(index)}
         <TouchableOpacity
           activeOpacity={tabActiveOpacity}
