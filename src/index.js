@@ -147,7 +147,7 @@ export default class ScrollableTabView extends React.Component {
   _toProcess(props) {
     if (props.stacks && props.stacks.length && props.stacks.length != this.stacks.length && props.firstIndex != this.state.checkedIndex) {
       const timer = setTimeout(() => {
-        this._onTabviewChange(props.firstIndex);
+        this._onTabviewChange(false, props.firstIndex);
         clearTimeout(timer);
       });
     }
@@ -209,12 +209,12 @@ export default class ScrollableTabView extends React.Component {
   toTabView = indexOrLabel => {
     switch (typeof indexOrLabel) {
       case 'number':
-        this._onTabviewChange(indexOrLabel);
+        this._onTabviewChange(false, indexOrLabel);
         break;
       case 'string':
         const tab = this.tabs.filter(f => f.tabLabel == indexOrLabel)[0];
         if (tab) {
-          this._onTabviewChange(tab.index);
+          this._onTabviewChange(false, tab.index);
         }
         break;
     }
@@ -314,13 +314,7 @@ export default class ScrollableTabView extends React.Component {
     return (
       <View onLayout={this._measureTab.bind(this, index)} key={index} style={_tabWrapStyle}>
         {this._renderBadges(index)}
-        <TouchableOpacity
-          activeOpacity={tabActiveOpacity}
-          onPress={() => {
-            this._onTabviewChange(index);
-          }}
-          style={[styles.tabStyle, tabStyle]}
-        >
+        <TouchableOpacity activeOpacity={tabActiveOpacity} onPress={() => this._onTabviewChange(false, index)} style={[styles.tabStyle, tabStyle]}>
           <View style={tabInnerStyle}>
             <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
               {item.tabLabelRender && typeof item.tabLabelRender == 'function' ? item.tabLabelRender(item.tabLabel) : item.tabLabel}
@@ -426,11 +420,11 @@ export default class ScrollableTabView extends React.Component {
     }
   }
 
-  _onTabviewChange(index, isCarouselScroll = false) {
+  _onTabviewChange(isCarouselScroll, index) {
     const { toHeaderOnTab, toTabsOnTab, onTabviewChanged } = this.props;
     if (index == this.state.checkedIndex) {
-      if (toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
-      if (toTabsOnTab) return this._scrollTo(0);
+      if (!isCarouselScroll && toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
+      if (!isCarouselScroll && toTabsOnTab) return this._scrollTo(0);
       return void 0;
     }
     if (!this.state.lazyIndexs.includes(index)) this.state.lazyIndexs.push(index);
@@ -579,7 +573,7 @@ export default class ScrollableTabView extends React.Component {
                 renderItem={this._renderItem.bind(this)}
                 sliderWidth={deviceWidth}
                 itemWidth={deviceWidth}
-                onScrollIndexChanged={_throttle(this._onTabviewChange.bind(this), this.props.screenScrollThrottle, {
+                onScrollIndexChanged={_throttle(this._onTabviewChange.bind(this, true), this.props.screenScrollThrottle, {
                   leading: false,
                   trailing: true
                 })}
