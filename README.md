@@ -230,7 +230,7 @@ Name              | Type     | Description
 **`scrollTo(index: number.required)`**            | Function   | Swipe up and down to the specified position (passing in 0 is the default positioning to tabs / passing in a negative number is set to the top)
 **`toTabView(index: number.required / label: string.required)`**            | Function   | Jump to the specified Screen
 **`layoutHeight.container`**            | Number | Total height of the Container
-**`layoutHeight.header`**            | Number   | otal height of the Header
+**`layoutHeight.header`**            | Number   | Total height of the Header
 **`layoutHeight.tabs`**            | Number   | Total height of the Tabs
 **`layoutHeight.screen`**            | Number   | Total height of the Screen
 
