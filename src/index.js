@@ -5,7 +5,6 @@ import Carousel from 'react-native-snap-carousel';
 import HocComponent from './HocComponent';
 import _throttle from 'lodash.throttle';
 const deviceWidth = Dimensions.get('window').width;
-const deviceHeight = Dimensions.get('window').height;
 
 /**
  * @author itenl
@@ -124,6 +123,10 @@ export default class ScrollableTabView extends React.Component {
         extrapolate: 'clamp'
       }
     };
+    this._throttleCallback = _throttle(this._onTabviewChange.bind(this, true), props.screenScrollThrottle, {
+      leading: false,
+      trailing: true
+    });
     this._initial();
   }
 
@@ -573,10 +576,7 @@ export default class ScrollableTabView extends React.Component {
                 renderItem={this._renderItem.bind(this)}
                 sliderWidth={deviceWidth}
                 itemWidth={deviceWidth}
-                onScrollIndexChanged={_throttle(this._onTabviewChange.bind(this, true), this.props.screenScrollThrottle, {
-                  leading: false,
-                  trailing: true
-                })}
+                onScrollIndexChanged={this._throttleCallback}
                 initialScrollIndex={this.state.checkedIndex}
                 firstItem={this.state.checkedIndex}
                 getItemLayout={(data, index) => ({
