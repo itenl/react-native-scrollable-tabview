@@ -177,6 +177,7 @@ Prop              | Type     | Default     | Description
 **`titleArgs`**             | Object    | **`{  style: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | 标题配置 < [阅读 interpolate](https://reactnative.dev/docs/animations#interpolation) >
 **`onScroll`**             | Function    | null          | 滚动事件监听
 **`tabsEnableAnimated`**             | Boolean    | false          | 为Tabs启用滑动效果，需要为 **`tabStyle`** 指定 **`width`**
+**`tabsEnableAnimatedStyle`**             | Object    | {}          | 为Tabs滑动效果设置样式，常见为左右两侧添加边距 **`paddingLeft`** **`paddingHorizontal`**
 
 ## <a name="method"/>Method
 
