@@ -147,7 +147,7 @@ Prop              | Type     | Default     | Description
 **`mappingProps`**      | Object   | {}          | 关联映射数据到 Stack / Sticky
 **`badges`**             | Array    | []          | 针对每个Tab的徽章 < [阅读 Badge Property](#BadgeProperty) >
 **`tabsStyle`**             | Object    | {}          | 整个Tabs样式
-**`tabWrapStyle`**             | Object    | {}          | 单个Tab外包装样式
+**`tabWrapStyle`**             | Object / Function    | {}          | 单个Tab外包装样式 (函数参数提供了item, index, 需要返回样式对象，eg. **`return index == 1 && { zIndex : 10}`**)
 **`tabInnerStyle`**             | Object    | {}          | 单个Tab内包装样式
 **`tabActiveOpacity`**             | Number    | 0.6          | Tab按钮点击后透明度
 **`tabStyle`**             | Object    | {}          | 单个Tab样式
