@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity, 
 import PropTypes from 'prop-types';
 import Carousel from 'react-native-snap-carousel';
 import HocComponent from './HocComponent';
+import _throttle from 'lodash.throttle';
 const deviceWidth = Dimensions.get('window').width;
 const deviceHeight = Dimensions.get('window').height;
 
@@ -46,7 +47,8 @@ export default class ScrollableTabView extends React.Component {
     fillScreen: PropTypes.bool,
     title: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     titleArgs: PropTypes.object,
-    onScroll: PropTypes.func
+    onScroll: PropTypes.func,
+    screenScrollThrottle: PropTypes.number
   };
 
   static defaultProps = {
@@ -86,7 +88,8 @@ export default class ScrollableTabView extends React.Component {
       interpolateOpacity: {},
       interpolateHeight: {}
     },
-    onScroll: null
+    onScroll: null,
+    screenScrollThrottle: 60
   };
 
   constructor(props) {
@@ -141,10 +144,7 @@ export default class ScrollableTabView extends React.Component {
    */
   _toProcess(props) {
     if (props.stacks && props.stacks.length && props.stacks.length != this.stacks.length && props.firstIndex != this.state.checkedIndex) {
-      const timer = setTimeout(() => {
-        this._onTabviewChange(props.firstIndex);
-        clearTimeout(timer);
-      });
+      this._onTabviewChange(props.firstIndex);
     }
   }
 
@@ -427,7 +427,7 @@ export default class ScrollableTabView extends React.Component {
     );
     this._tabTranslateX(index);
     // 非滑动触发的情况下需要同步index，避免Carousel无法正常显示
-    !isCarouselScroll && this._snapToItem(index);
+    // !isCarouselScroll && this._snapToItem(index);
     // 切换后强制重置刷新状态
     this._toggledRefreshing(false);
   }
@@ -552,16 +552,16 @@ export default class ScrollableTabView extends React.Component {
           renderItem={() => {
             return (
               <Carousel
-                pagingEnabled={true}
                 ref={c => (this.tabview = c)}
                 inactiveSlideScale={1}
                 data={this.stacks}
                 renderItem={this._renderItem.bind(this)}
                 sliderWidth={deviceWidth}
                 itemWidth={deviceWidth}
-                onBeforeSnapToItem={index => {
-                  this._onTabviewChange(index, true);
-                }}
+                cnScrollIndexChanged={_throttle(this._onTabviewChange.bind(this), this.props.screenScrollThrottle, {
+                  leading: false,
+                  trailing: true
+                })}
                 initialScrollIndex={this.state.checkedIndex}
                 firstItem={this.state.checkedIndex}
                 getItemLayout={(data, index) => ({
@@ -580,7 +580,7 @@ export default class ScrollableTabView extends React.Component {
                     {
                       // listener: ({ nativeEvent }) => console.log(nativeEvent.contentOffset.x),
                       // If useNativeDriver is True, the listener cannot be triggered
-                      useNativeDriver: !__DEV__
+                      useNativeDriver: true
                     }
                   )
                 }
