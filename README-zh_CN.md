@@ -147,7 +147,7 @@ Prop              | Type     | Default     | Description
 **`mappingProps`**      | Object   | {}          | 关联映射数据到 Stack / Sticky
 **`badges`**             | Array    | []          | 针对每个Tab的徽章 < [阅读 Badge Property](#BadgeProperty) >
 **`tabsStyle`**             | Object    | {}          | 整个Tabs样式
-**`tabWrapStyle`**             | Object    | {}          | 单个Tab外包装样式
+**`tabWrapStyle`**             | Object / Function    | {}          | 单个Tab外包装样式 (函数参数提供了item, index, 需要返回样式对象，eg. **`return index == 1 && { zIndex : 10}`**)
 **`tabInnerStyle`**             | Object    | {}          | 单个Tab内包装样式
 **`tabActiveOpacity`**             | Number    | 0.6          | Tab按钮点击后透明度
 **`tabStyle`**             | Object    | {}          | 单个Tab样式
@@ -160,6 +160,7 @@ Prop              | Type     | Default     | Description
 **`onBeforeRefresh`**             | Function    | null          | 下拉刷新前置函数, 执行 **`next`** 将执行Screen中 **`onRefresh`** 函数，执行 **`toggled`** 将切换系统loading,可传 true / false 进行指定 (回调含有 **`next`** , **`toggled`** 两个形参)
 **`onBeforeEndReached`**             | Function    | null          | 上滑加载更多前置函数, 执行next将执行Screen中 **`onEndReached`** 函数 (回调含有 **`next`** 形参)
 **`onTabviewChanged`**             | Function    | null          | Tab切换完成回调 (回调含有 **`index`**, **`tabLabel`** 两个形参)
+**`screenScrollThrottle`**             | Number    | 60          | **`Screen`** 横向滑动时节流参数,单位 (毫秒)
 **`header`**             | Function / JSX Element / Class Component    | null          | 顶部组件 (若是函数需要返回 Element)
 **`oneTabHidden`**             | Boolean    | false          | 仅一个Tab时将隐藏自身
 **`enableCachePage`**             | Boolean    | true          | 是否持久化页面切换后不销毁
@@ -171,6 +172,7 @@ Prop              | Type     | Default     | Description
 **`fixedTabs`**             | Boolean    | false          | 在 **`enableCachePage`** 为true的情况下滑动切换Screen设置最小高度保障Header与Tabs不会弹跳
 **`fixedHeader`**             | Boolean    | false          | 与Tabs一同渲染，固定顶部Header，不跟随滚动
 **`useScroll`**             | Boolean    | false          | Tabs是否支持横向滚动(存在多个类目Tab的情况需要启用，建议 **`tabStyle`** 传入固定宽度)
+**`useScrollStyle`**             | Object    | {}          | 为滚动的 **`Tabs`** 设置 **`contentContainerStyle`**，常见为左右两侧添加边距 **`paddingLeft`** **`paddingHorizontal`**
 **`fillScreen`**             | Boolean    | true          | 填充整个 Screen
 **`title`**             | Function / JSX Element / Class Component    | null          | 动画标题
 **`titleArgs`**             | Object    | **`{  style: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | 标题配置 < [阅读 interpolate](https://reactnative.dev/docs/animations#interpolation) >

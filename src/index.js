@@ -3,8 +3,8 @@ import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity, 
 import PropTypes from 'prop-types';
 import Carousel from 'react-native-snap-carousel';
 import HocComponent from './HocComponent';
+import _throttle from 'lodash.throttle';
 const deviceWidth = Dimensions.get('window').width;
-const deviceHeight = Dimensions.get('window').height;
 
 /**
  * @author itenl
@@ -20,11 +20,12 @@ export default class ScrollableTabView extends React.Component {
     header: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     badges: PropTypes.array,
     tabsStyle: PropTypes.object,
-    tabWrapStyle: PropTypes.object,
+    tabWrapStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     tabInnerStyle: PropTypes.object,
     tabActiveOpacity: PropTypes.number,
     tabStyle: PropTypes.object,
     tabsEnableAnimated: PropTypes.bool,
+    useScrollStyle: PropTypes.object,
     textStyle: PropTypes.object,
     textActiveStyle: PropTypes.object,
     tabUnderlineStyle: PropTypes.object,
@@ -46,7 +47,8 @@ export default class ScrollableTabView extends React.Component {
     fillScreen: PropTypes.bool,
     title: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     titleArgs: PropTypes.object,
-    onScroll: PropTypes.func
+    onScroll: PropTypes.func,
+    screenScrollThrottle: PropTypes.number
   };
 
   static defaultProps = {
@@ -61,6 +63,7 @@ export default class ScrollableTabView extends React.Component {
     tabActiveOpacity: 0.6,
     tabStyle: {},
     tabsEnableAnimated: false,
+    useScrollStyle: {},
     textStyle: {},
     textActiveStyle: {},
     tabUnderlineStyle: {},
@@ -86,7 +89,8 @@ export default class ScrollableTabView extends React.Component {
       interpolateOpacity: {},
       interpolateHeight: {}
     },
-    onScroll: null
+    onScroll: null,
+    screenScrollThrottle: 60
   };
 
   constructor(props) {
@@ -119,6 +123,10 @@ export default class ScrollableTabView extends React.Component {
         extrapolate: 'clamp'
       }
     };
+    this._throttleCallback = _throttle(this._onTabviewChange.bind(this, true), props.screenScrollThrottle, {
+      leading: false,
+      trailing: true
+    });
     this._initial();
   }
 
@@ -126,8 +134,8 @@ export default class ScrollableTabView extends React.Component {
     this._initial(newProps, true);
   }
 
-  _initial(props = this.props, isFix = false) {
-    isFix && this._fixData(props);
+  _initial(props = this.props, isProcess = false) {
+    isProcess && this._toProcess(props);
     this.tabs = this._getTabs(props);
     this.badges = this._getBadges(props);
     this.stacks = this._getWrapChildren(props);
@@ -139,10 +147,10 @@ export default class ScrollableTabView extends React.Component {
    * @param {*} props
    * @memberof ScrollableTabView
    */
-  _fixData(props) {
+  _toProcess(props) {
     if (props.stacks && props.stacks.length && props.stacks.length != this.stacks.length && props.firstIndex != this.state.checkedIndex) {
       const timer = setTimeout(() => {
-        this._onTabviewChange(props.firstIndex);
+        this._onTabviewChange(false, props.firstIndex);
         clearTimeout(timer);
       });
     }
@@ -204,12 +212,12 @@ export default class ScrollableTabView extends React.Component {
   toTabView = indexOrLabel => {
     switch (typeof indexOrLabel) {
       case 'number':
-        this._onTabviewChange(indexOrLabel);
+        this._onTabviewChange(false, indexOrLabel);
         break;
       case 'string':
         const tab = this.tabs.filter(f => f.tabLabel == indexOrLabel)[0];
         if (tab) {
-          this._onTabviewChange(tab.index);
+          this._onTabviewChange(false, tab.index);
         }
         break;
     }
@@ -285,11 +293,14 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderBadges(tabIndex) {
-    let badges = this.badges[tabIndex] || this.props.badges[tabIndex];
-    if (badges && badges.length)
-      return badges.map(item => {
+    const { useScroll, badges } = this.props;
+    const _badges = this.badges[tabIndex] || badges[tabIndex];
+    if (_badges && _badges.length) {
+      if (useScroll) console.warn('When useScroll and badges exist at the same time, the badge will not overflow the Tabs container');
+      return _badges.map(item => {
         return item;
       });
+    }
     return null;
   }
 
@@ -302,16 +313,11 @@ export default class ScrollableTabView extends React.Component {
     const { tabActiveOpacity, tabWrapStyle, tabInnerStyle, tabStyle, textStyle, textActiveStyle, tabUnderlineStyle, tabsEnableAnimated } = this.props;
     const _tabUnderlineStyle = Object.assign({ top: 6 }, styles.tabUnderlineStyle, tabUnderlineStyle);
     const checked = this.state.checkedIndex == index;
+    const _tabWrapStyle = typeof tabWrapStyle === 'function' ? tabWrapStyle(item, index) : tabWrapStyle;
     return (
-      <View onLayout={this._measureTab.bind(this, index)} key={index} style={tabWrapStyle}>
+      <View onLayout={this._measureTab.bind(this, index)} key={index} style={_tabWrapStyle}>
         {this._renderBadges(index)}
-        <TouchableOpacity
-          activeOpacity={tabActiveOpacity}
-          onPress={() => {
-            this._onTabviewChange(index);
-          }}
-          style={[styles.tabStyle, tabStyle]}
-        >
+        <TouchableOpacity activeOpacity={tabActiveOpacity} onPress={() => this._onTabviewChange(false, index)} style={[styles.tabStyle, tabStyle]}>
           <View style={tabInnerStyle}>
             <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
               {item.tabLabelRender && typeof item.tabLabelRender == 'function' ? item.tabLabelRender(item.tabLabel) : item.tabLabel}
@@ -324,9 +330,14 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderAnimatedTabUnderline() {
-    const { useScroll, tabUnderlineStyle } = this.props;
+    const { useScroll, tabUnderlineStyle, useScrollStyle } = this.props;
+    const { paddingLeft, paddingHorizontal } = useScrollStyle;
     const _tabUnderlineStyle = Object.assign({ zIndex: 100, width: this.tabWidth, position: 'absolute' }, styles.tabUnderlineStyle, tabUnderlineStyle);
     if (!_tabUnderlineStyle.top && _tabUnderlineStyle.height) _tabUnderlineStyle.top = this.layoutHeight['tabs'] - _tabUnderlineStyle.height;
+    let outputLeft = paddingLeft || paddingHorizontal || 0;
+    let outputRight = deviceWidth;
+    if (useScroll) outputRight = this.tabs.length * this.tabWidth;
+    if (outputLeft) outputRight = outputRight + outputLeft;
     // const index = this.state.checkedIndex;
     // const tabsMeasurements = this.tabsMeasurements[index];
     // const { left, right, width, height } = tabsMeasurements;
@@ -340,7 +351,7 @@ export default class ScrollableTabView extends React.Component {
               {
                 translateX: this.carouselScrollX.interpolate({
                   inputRange: [0, this.tabs.length * deviceWidth],
-                  outputRange: [0, useScroll ? this.tabs.length * this.tabWidth : deviceWidth]
+                  outputRange: [outputLeft, outputRight]
                 })
               }
             ]
@@ -351,7 +362,7 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderTabs() {
-    const { oneTabHidden, tabsShown, tabsStyle, tabStyle, useScroll, tabsEnableAnimated } = this.props;
+    const { oneTabHidden, tabsShown, tabsStyle, tabStyle, useScroll, tabsEnableAnimated, useScrollStyle } = this.props;
     const { width } = tabStyle;
     if (tabsEnableAnimated && tabStyle && width == undefined) throw new Error('When tabsEnableAnimated is true, the width must be specified for tabStyle');
     const renderTab = !(oneTabHidden && this.tabs && this.tabs.length == 1) && tabsShown;
@@ -363,7 +374,14 @@ export default class ScrollableTabView extends React.Component {
       this.tabs &&
       !!this.tabs.length &&
       (useScroll ? (
-        <ScrollView style={_tabsStyle} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} ref={rf => (this.scrollview = rf)} horizontal={true}>
+        <ScrollView
+          contentContainerStyle={useScrollStyle}
+          style={_tabsStyle}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          ref={rf => (this.scrollview = rf)}
+          horizontal={true}
+        >
           {this.tabs.map((tab, index) => this._renderTab({ item: tab, index }))}
           {tabsEnableAnimated && this._renderAnimatedTabUnderline()}
         </ScrollView>
@@ -387,7 +405,13 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _snapToItem = index => {
-    return this.tabview && this.tabview.snapToItem(index);
+    // 任务队列最后执行可解决
+    // 开启tabsEnableAnimated情况下动画Tab动画抖动问题
+    // 关闭enableCachePage状态下导致滑动切换Screen后再次点击Tab显示异常问题
+    const timer = setTimeout(() => {
+      this.tabview && this.tabview.snapToItem(index);
+      clearTimeout(timer);
+    });
   };
 
   _tabTranslateX(index = this.state.checkedIndex) {
@@ -399,11 +423,11 @@ export default class ScrollableTabView extends React.Component {
     }
   }
 
-  _onTabviewChange(index, isCarouselScroll = false) {
+  _onTabviewChange(isCarouselScroll, index) {
     const { toHeaderOnTab, toTabsOnTab, onTabviewChanged } = this.props;
     if (index == this.state.checkedIndex) {
-      if (toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
-      if (toTabsOnTab) return this._scrollTo(0);
+      if (!isCarouselScroll && toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
+      if (!isCarouselScroll && toTabsOnTab) return this._scrollTo(0);
       return void 0;
     }
     if (!this.state.lazyIndexs.includes(index)) this.state.lazyIndexs.push(index);
@@ -420,6 +444,8 @@ export default class ScrollableTabView extends React.Component {
       }
     );
     this._tabTranslateX(index);
+    // 非滑动触发的情况下需要同步index，避免Carousel无法正常显示
+    // !isCarouselScroll && this._snapToItem(index);
     // 切换后强制重置刷新状态
     this._toggledRefreshing(false);
   }
@@ -544,16 +570,13 @@ export default class ScrollableTabView extends React.Component {
           renderItem={() => {
             return (
               <Carousel
-                pagingEnabled={true}
                 ref={c => (this.tabview = c)}
                 inactiveSlideScale={1}
                 data={this.stacks}
                 renderItem={this._renderItem.bind(this)}
                 sliderWidth={deviceWidth}
                 itemWidth={deviceWidth}
-                onBeforeSnapToItem={index => {
-                  this._onTabviewChange(index, true);
-                }}
+                onScrollIndexChanged={this._throttleCallback}
                 initialScrollIndex={this.state.checkedIndex}
                 firstItem={this.state.checkedIndex}
                 getItemLayout={(data, index) => ({
@@ -572,7 +595,7 @@ export default class ScrollableTabView extends React.Component {
                     {
                       // listener: ({ nativeEvent }) => console.log(nativeEvent.contentOffset.x),
                       // If useNativeDriver is True, the listener cannot be triggered
-                      useNativeDriver: !__DEV__
+                      useNativeDriver: true
                     }
                   )
                 }
