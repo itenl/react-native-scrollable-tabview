@@ -147,7 +147,7 @@ Prop              | Type     | Default     | Description
 **`mappingProps`**      | Object   | {}          | Associate mapping data to Stack / Sticky
 **`badges`**             | Array    | []          | Badges for each Tab < [Read Badge Property](#BadgeProperty) >
 **`tabsStyle`**             | Object    | {}          | The entire Tabs style
-**`tabWrapStyle`**             | Object    | {}          | Single Tab wrap style
+**`tabWrapStyle`**             | Object / Function    | {}          | Single Tab wrap style (The function parameters provide item, index, and need to return the style object, eg. **`return index == 1 && {zIndex: 10}`**)
 **`tabInnerStyle`**             | Object    | {}          | Single Tab inner style
 **`tabActiveOpacity`**             | Number    | 0.6          | Transparency after Tab button click
 **`tabStyle`**             | Object    | {}          | Single Tab style
@@ -160,6 +160,7 @@ Prop              | Type     | Default     | Description
 **`onBeforeRefresh`**             | Function    | null          | Pull down to refresh the pre-functions, execute **`next`** to execute **`onRefresh`** function in Screen, execute **`toggled`** to switch system loading, you can pass true / false to specify (callback contains **`next`**, **`toggled`** two formal parameters)
 **`onBeforeEndReached`**             | Function    | null          | Slide up to load more pre-functions, execute next will execute the **`onEndReached`** function in the Screen (callback contains **`next`** formal parameters)
 **`onTabviewChanged`**             | Function    | null          | Tab switch completion callback (callback contains **`index`**, **`tabLabel`** two formal parameters)
+**`screenScrollThrottle`**             | Number    | 60          | **`Screen`** Throttle parameters during lateral sliding, Unit (ms)
 **`header`**             | Function / JSX Element / Class Component    | null          | Top component (if the function needs to return Element)
 **`oneTabHidden`**             | Boolean    | false          | Hide itself when there is only one Tab
 **`enableCachePage`**             | Boolean    | true          | Whether the persistent page will not be destroyed after switching
@@ -171,6 +172,7 @@ Prop              | Type     | Default     | Description
 **`fixedTabs`**             | Boolean    | false          | When **`enableCachePage`** is true, slide to switch Screen to set the minimum height to ensure that the Header and Tabs will not bounce
 **`fixedHeader`**             | Boolean    | false          | Render together with Tabs, fix the top Header, do not follow the scroll
 **`useScroll`**             | Boolean    | false          | Does Tabs support horizontal scrolling (it needs to be enabled when there are multiple category Tabs, it is recommended that **`tabStyle`** pass in a fixed width)
+**`useScrollStyle`**             | Object    | {}          | Set **`contentContainerStyle`** for scrolling **`Tabs`**, usually add margins to the left and right sides **`paddingLeft`** **`paddingHorizontal`**
 **`fillScreen`**             | Boolean    | true          | Fill the entire Screen
 **`title`**             | Function / JSX Element / Class Component    | null          | Animation title
 **`titleArgs`**             | Object    | **`{  style: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | Title parameter configuration < [Read interpolate](https://reactnative.dev/docs/animations#interpolation) >
@@ -229,7 +231,7 @@ Name              | Type     | Description
 **`scrollTo(index: number.required)`**            | Function   | Swipe up and down to the specified position (passing in 0 is the default positioning to tabs / passing in a negative number is set to the top)
 **`toTabView(index: number.required / label: string.required)`**            | Function   | Jump to the specified Screen
 **`layoutHeight.container`**            | Number | Total height of the Container
-**`layoutHeight.header`**            | Number   | otal height of the Header
+**`layoutHeight.header`**            | Number   | Total height of the Header
 **`layoutHeight.tabs`**            | Number   | Total height of the Tabs
 **`layoutHeight.screen`**            | Number   | Total height of the Screen
 
