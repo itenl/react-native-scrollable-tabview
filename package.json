@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "lodash.throttle": "^4.1.1",
-    "react-native-snap-carousel": "^4.0.0-beta.6"
+    "react-native-snap-carousel": "git+https://github.com/itenl/react-native-snap-carousel.git#8b7f0fcad966e56ef1b86fc6ff90dcefdaed9527"
   },
   "keywords": [
     "react",
