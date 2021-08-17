@@ -423,26 +423,31 @@ export default class ScrollableTabView extends React.Component {
     }
   }
 
+  _resetOtherRefs() {
+    const checkedIndex = this.state.checkedIndex;
+    if (this.state.refsObj && this.state.refsObj[checkedIndex]) this.state.refsObj[checkedIndex] = null;
+    return this.state.refsObj;
+  }
+
   _onTabviewChange(isCarouselScroll, index) {
-    const { toHeaderOnTab, toTabsOnTab, onTabviewChanged } = this.props;
+    const { enableCachePage, toHeaderOnTab, toTabsOnTab, onTabviewChanged } = this.props;
     if (index == this.state.checkedIndex) {
       if (!isCarouselScroll && toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
       if (!isCarouselScroll && toTabsOnTab) return this._scrollTo(0);
       return void 0;
     }
     if (!this.state.lazyIndexs.includes(index)) this.state.lazyIndexs.push(index);
-    this.setState(
-      {
-        checkedIndex: index,
-        lazyIndexs: this.state.lazyIndexs
-      },
-      () => {
-        if (onTabviewChanged) {
-          const tab = this.tabs[this.state.checkedIndex];
-          onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel);
-        }
+    let state = {
+      checkedIndex: index,
+      lazyIndexs: this.state.lazyIndexs
+    };
+    if (!enableCachePage) state.refsObj = this._resetOtherRefs();
+    this.setState(state, () => {
+      if (onTabviewChanged) {
+        const tab = this.tabs[this.state.checkedIndex];
+        onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel);
       }
-    );
+    });
     this._tabTranslateX(index);
     // 非滑动触发的情况下需要同步index，避免Carousel无法正常显示
     // !isCarouselScroll && this._snapToItem(index);
