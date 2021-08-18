@@ -365,6 +365,7 @@ export default class ScrollableTabView extends React.Component {
     const { oneTabHidden, tabsShown, tabsStyle, tabStyle, useScroll, tabsEnableAnimated, useScrollStyle } = this.props;
     const { width } = tabStyle;
     if (tabsEnableAnimated && tabStyle && width == undefined) throw new Error('When tabsEnableAnimated is true, the width must be specified for tabStyle');
+    if (useScroll && tabStyle && width == undefined) throw new Error('When useScroll is true, the width must be specified for tabStyle');
     const renderTab = !(oneTabHidden && this.tabs && this.tabs.length == 1) && tabsShown;
     const _tabsStyle = Object.assign({}, !useScroll && { alignItems: 'center', justifyContent: 'space-around' }, styles.tabsStyle, tabsStyle);
     this.layoutHeight['tabs'] = renderTab ? _tabsStyle.height : 0;
@@ -414,6 +415,7 @@ export default class ScrollableTabView extends React.Component {
     });
   };
 
+  // 启用 useScroll 情况下保证滚动条跟随
   _tabTranslateX(index = this.state.checkedIndex) {
     const { useScroll } = this.props;
     if (useScroll && this.scrollview && this.tabWidth) {
