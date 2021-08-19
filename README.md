@@ -19,6 +19,7 @@ Based on pure `JS` scripts, without relying on native, no need for `react-native
 * [Injection lifecycle to Screen](#InjectionLifecycle)
 * [Injection props to Screen](#InjectionScreenProps)
 * [Injection props to Sticky](#InjectionStickyProps)
+* [Known Issues](#KnownIssues)
 * [Snapshot](#Snapshot)
 
 ## <a name="features"/>Features
@@ -243,6 +244,8 @@ Name              | Type     | Description
 ----------------- | -------- | -----------
 **`screenContext`**            | Object   | Get Screen context
 
+## <a name="KnownIssues"/>Known Issues
+- If you just add a `Stack`, you can use `Push`, but if you need to update or delete a `Stack`, please use [clearStacks](#Method). The index of `Stacks` and the management of old and new `Stacks have not been performed yet .
 
 ## <a name="Snapshot"/>Snapshot
 

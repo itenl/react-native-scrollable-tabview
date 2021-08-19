@@ -19,6 +19,7 @@
 * [Injection lifecycle to Screen](#InjectionLifecycle)
 * [Injection props to Screen](#InjectionScreenProps)
 * [Injection props to Sticky](#InjectionStickyProps)
+* [Known Issues](#KnownIssues)
 * [Snapshot](#Snapshot)
 
 ## <a name="features"/>Features
@@ -244,6 +245,8 @@ Name              | Type     | Description
 ----------------- | -------- | -----------
 **`screenContext`**            | Object   | 获取 Screen 上下文
 
+## <a name="KnownIssues"/>Known Issues
+- 如果你仅仅是新增 `Stack` 可以 `Push` 即可，但如果需要更新或者删除 `Stack` 请使用 [clearStacks](#Method) 目前还未进行 `Stacks` 的索引与新旧 `Stack` 管理。
 
 ## <a name="Snapshot"/>Snapshot
 
