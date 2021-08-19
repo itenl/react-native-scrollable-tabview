@@ -199,11 +199,27 @@ export default class ScrollableTabView extends React.Component {
     return ref => {
       if (this.state.refsObj[index] && this.state.refsObj[index] === ref) return;
       this.state.refsObj[index] = ref;
+      this.state.refsObj[index].__id__ = id;
       this.setState({
         refsObj: this.state.refsObj
       });
     };
   }
+
+  clearStacks = callback => {
+    this.tabs = [];
+    this.badges = [];
+    this.stacks = [];
+    this.setState(
+      {
+        checkedIndex: this._getFirstIndex(),
+        refsObj: {},
+        lazyIndexs: this._initLazyIndexs(),
+        isRefreshing: false
+      },
+      () => typeof callback === 'function' && callback()
+    );
+  };
 
   getCurrentRef(index) {
     return this.state.refsObj[index ?? this.state.checkedIndex];
