@@ -188,6 +188,9 @@ Prop              | Type     | Default     | Description
   </ScrollableTabView> 
   this.scrollableTabView.getCurrentRef();
   this.scrollableTabView.toTabView(1);
+  this.scrollableTabView.scrollTo(0);
+  this.scrollableTabView.clearStacks(()=>alert('done'));
+  
 ```
 
 Name              | Type     | Description
@@ -195,6 +198,7 @@ Name              | Type     | Description
 **`getCurrentRef(index: number.optional)`**            | Function   | 获取当前活动的视图的实例，可传 **`index`** 获取指定实例
 **`toTabView(index: number.required / label: string.required)`**            | Function   | 跳到指定 Screen
 **`scrollTo(index: number.required)`**            | Function   | 上下滑动至指定位置 (传入 0 默认定位至 tabs / 传入负数则置顶)
+**`clearStacks(callback: function.optional)`**            | Function   | 清空栈以及相关状态 (Tabs / Badge / Stacks))
 
 ## <a name="StackProperty"/>Stack Property
 
