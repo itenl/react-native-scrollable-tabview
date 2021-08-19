@@ -245,7 +245,7 @@ Name              | Type     | Description
 **`screenContext`**            | Object   | Get Screen context
 
 ## <a name="KnownIssues"/>Known Issues
-- If you just add a `Stack`, you can use `Push`, but if you need to update or delete a `Stack`, please use [clearStacks](#Method). The index of `Stacks` and the management of old and new `Stacks have not been performed yet .
+- If you just add a `Stack`, you can `Push`, but if you need to update or delete a `Stack`, please use [clearStacks](#Method) and then add the `Stacks` you need
 
 ## <a name="Snapshot"/>Snapshot
 
