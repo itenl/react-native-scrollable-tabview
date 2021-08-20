@@ -510,6 +510,7 @@ export default class ScrollableTabView extends React.Component {
   _onEndReached() {
     const next = () => {
       const ref = this.getCurrentRef();
+      !ref && console.warn(`The Screen Ref is lost when calling onEndReached. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
       if (ref && ref.onEndReached && typeof ref.onEndReached == 'function') ref.onEndReached();
     };
     const { onBeforeEndReached } = this.props;
@@ -525,6 +526,7 @@ export default class ScrollableTabView extends React.Component {
   _onRefresh() {
     const next = () => {
       const ref = this.getCurrentRef();
+      !ref && console.warn(`The Screen Ref is lost when calling onRefresh. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
       if (ref && ref.onRefresh && typeof ref.onRefresh == 'function') ref.onRefresh(this._toggledRefreshing.bind(this));
     };
     const { onBeforeRefresh } = this.props;
