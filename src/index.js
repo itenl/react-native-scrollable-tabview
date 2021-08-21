@@ -490,21 +490,22 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderItem({ item, index }) {
+    const { enableCachePage, fillScreen, fixedTabs, mappingProps } = this.props;
     const screenHeight = this._getScreenHeight();
     return (
-      (this.props.enableCachePage ? this.props.enableCachePage : this.state.checkedIndex == index) &&
+      (enableCachePage ? enableCachePage : this.state.checkedIndex == index) &&
       (this.getCurrentRef(index) || this.getCurrentRef(index) == undefined) &&
       this._getLazyIndexs(index) && (
         <View
           style={[
             { flex: 1 },
-            this.props.enableCachePage && this.state.checkedIndex != index && { maxHeight: screenHeight },
-            this.props.enableCachePage && this.state.checkedIndex == index && this.props.fillScreen && { minHeight: screenHeight },
-            this.props.enableCachePage && this.state.checkedIndex == index && this.props.fixedTabs && { minHeight: this._getMaximumScreenHeight() },
-            !this.props.enableCachePage && this.state.checkedIndex == index && { minHeight: screenHeight }
+            enableCachePage && this.state.checkedIndex != index && { maxHeight: screenHeight },
+            enableCachePage && this.state.checkedIndex == index && fillScreen && { minHeight: screenHeight },
+            enableCachePage && this.state.checkedIndex == index && fixedTabs && { minHeight: this._getMaximumScreenHeight() },
+            !enableCachePage && this.state.checkedIndex == index && { minHeight: screenHeight }
           ]}
         >
-          <item.screen {...this._getProps(this.props.mappingProps)} {...(item.toProps || {})} />
+          <item.screen {...this._getProps(mappingProps)} {...(item.toProps || {})} />
         </View>
       )
     );
