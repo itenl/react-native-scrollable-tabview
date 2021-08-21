@@ -19,6 +19,7 @@ Based on pure `JS` scripts, without relying on native, no need for `react-native
 * [Injection lifecycle to Screen](#InjectionLifecycle)
 * [Injection props to Screen](#InjectionScreenProps)
 * [Injection props to Sticky](#InjectionStickyProps)
+* [Known Issues](#KnownIssues)
 * [Snapshot](#Snapshot)
 
 ## <a name="features"/>Features
@@ -189,6 +190,7 @@ Prop              | Type     | Default     | Description
   this.scrollableTabView.getCurrentRef();
   this.scrollableTabView.toTabView(1);
   this.scrollableTabView.scrollTo(0);
+  this.scrollableTabView.clearStacks(()=>alert('done'));
 ```
 
 Name              | Type     | Description
@@ -196,6 +198,7 @@ Name              | Type     | Description
 **`getCurrentRef(index: number.optional)`**            | Function   | Get the instance of the currently active view, you can pass **`index`** to get the specified instance
 **`toTabView(index: number.required / label: string.required)`**            | Function   | Jump to the specified Screen
 **`scrollTo(index: number.required)`**            | Function   | Swipe up and down to the specified position (passing in 0 is the default positioning to tabs / passing in a negative number is set to the top)
+**`clearStacks(callback: function.optional)`**            | Function   | Clear the Stacks and related state (Tabs / Badge / Stacks))
 
 ## <a name="StackProperty"/>Stack Property
 
@@ -241,6 +244,8 @@ Name              | Type     | Description
 ----------------- | -------- | -----------
 **`screenContext`**            | Object   | Get Screen context
 
+## <a name="KnownIssues"/>Known Issues
+- If you just add a `Stack`, you can `Push`, but if you need to update or delete a `Stack`, please use [clearStacks](#Method) and then add the `Stacks` you need
 
 ## <a name="Snapshot"/>Snapshot
 

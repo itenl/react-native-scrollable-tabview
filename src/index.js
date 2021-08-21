@@ -96,10 +96,7 @@ export default class ScrollableTabView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      checkedIndex: this._getFirstIndex(),
-      refsObj: {},
-      lazyIndexs: this._initLazyIndexs(),
-      isRefreshing: false
+      ...this._initialState()
     };
     this.sectionListScrollY = new Animated.Value(0);
     this.carouselScrollX = new Animated.Value(0);
@@ -132,6 +129,15 @@ export default class ScrollableTabView extends React.Component {
 
   componentWillReceiveProps(newProps) {
     this._initial(newProps, true);
+  }
+
+  _initialState() {
+    return {
+      checkedIndex: this._getFirstIndex(),
+      refsObj: {},
+      lazyIndexs: this._initLazyIndexs(),
+      isRefreshing: false
+    };
   }
 
   _initial(props = this.props, isProcess = false) {
@@ -199,11 +205,24 @@ export default class ScrollableTabView extends React.Component {
     return ref => {
       if (this.state.refsObj[index] && this.state.refsObj[index] === ref) return;
       this.state.refsObj[index] = ref;
+      this.state.refsObj[index].__id__ = id;
       this.setState({
         refsObj: this.state.refsObj
       });
     };
   }
+
+  clearStacks = callback => {
+    this.tabs = [];
+    this.badges = [];
+    this.stacks = [];
+    this.setState(
+      {
+        ...this._initialState()
+      },
+      () => typeof callback === 'function' && callback()
+    );
+  };
 
   getCurrentRef(index) {
     return this.state.refsObj[index ?? this.state.checkedIndex];
@@ -365,6 +384,7 @@ export default class ScrollableTabView extends React.Component {
     const { oneTabHidden, tabsShown, tabsStyle, tabStyle, useScroll, tabsEnableAnimated, useScrollStyle } = this.props;
     const { width } = tabStyle;
     if (tabsEnableAnimated && tabStyle && width == undefined) throw new Error('When tabsEnableAnimated is true, the width must be specified for tabStyle');
+    if (useScroll && tabStyle && width == undefined) throw new Error('When useScroll is true, the width must be specified for tabStyle');
     const renderTab = !(oneTabHidden && this.tabs && this.tabs.length == 1) && tabsShown;
     const _tabsStyle = Object.assign({}, !useScroll && { alignItems: 'center', justifyContent: 'space-around' }, styles.tabsStyle, tabsStyle);
     this.layoutHeight['tabs'] = renderTab ? _tabsStyle.height : 0;
@@ -414,6 +434,7 @@ export default class ScrollableTabView extends React.Component {
     });
   };
 
+  // 启用 useScroll 情况下保证滚动条跟随
   _tabTranslateX(index = this.state.checkedIndex) {
     const { useScroll } = this.props;
     if (useScroll && this.scrollview && this.tabWidth) {
@@ -423,26 +444,31 @@ export default class ScrollableTabView extends React.Component {
     }
   }
 
+  _resetOtherRefs() {
+    const checkedIndex = this.state.checkedIndex;
+    if (this.state.refsObj && this.state.refsObj[checkedIndex]) this.state.refsObj[checkedIndex] = null;
+    return this.state.refsObj;
+  }
+
   _onTabviewChange(isCarouselScroll, index) {
-    const { toHeaderOnTab, toTabsOnTab, onTabviewChanged } = this.props;
+    const { enableCachePage, toHeaderOnTab, toTabsOnTab, onTabviewChanged } = this.props;
     if (index == this.state.checkedIndex) {
       if (!isCarouselScroll && toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
       if (!isCarouselScroll && toTabsOnTab) return this._scrollTo(0);
       return void 0;
     }
     if (!this.state.lazyIndexs.includes(index)) this.state.lazyIndexs.push(index);
-    this.setState(
-      {
-        checkedIndex: index,
-        lazyIndexs: this.state.lazyIndexs
-      },
-      () => {
-        if (onTabviewChanged) {
-          const tab = this.tabs[this.state.checkedIndex];
-          onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel);
-        }
+    let state = {
+      checkedIndex: index,
+      lazyIndexs: this.state.lazyIndexs
+    };
+    if (!enableCachePage) state.refsObj = this._resetOtherRefs();
+    this.setState(state, () => {
+      if (onTabviewChanged) {
+        const tab = this.tabs[this.state.checkedIndex];
+        onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel);
       }
-    );
+    });
     this._tabTranslateX(index);
     // 非滑动触发的情况下需要同步index，避免Carousel无法正常显示
     // !isCarouselScroll && this._snapToItem(index);
@@ -464,21 +490,22 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderItem({ item, index }) {
+    const { enableCachePage, fillScreen, fixedTabs, mappingProps } = this.props;
     const screenHeight = this._getScreenHeight();
     return (
-      (this.props.enableCachePage ? this.props.enableCachePage : this.state.checkedIndex == index) &&
+      (enableCachePage ? enableCachePage : this.state.checkedIndex == index) &&
       (this.getCurrentRef(index) || this.getCurrentRef(index) == undefined) &&
       this._getLazyIndexs(index) && (
         <View
           style={[
             { flex: 1 },
-            this.props.enableCachePage && this.state.checkedIndex != index && { maxHeight: screenHeight },
-            this.props.enableCachePage && this.state.checkedIndex == index && this.props.fillScreen && { minHeight: screenHeight },
-            this.props.enableCachePage && this.state.checkedIndex == index && this.props.fixedTabs && { minHeight: this._getMaximumScreenHeight() },
-            !this.props.enableCachePage && this.state.checkedIndex == index && { minHeight: screenHeight }
+            enableCachePage && this.state.checkedIndex != index && { maxHeight: screenHeight },
+            enableCachePage && this.state.checkedIndex == index && fillScreen && { minHeight: screenHeight },
+            enableCachePage && this.state.checkedIndex == index && fixedTabs && { minHeight: this._getMaximumScreenHeight() },
+            !enableCachePage && this.state.checkedIndex == index && { minHeight: screenHeight }
           ]}
         >
-          <item.screen {...this._getProps(this.props.mappingProps)} {...(item.toProps || {})} />
+          <item.screen {...this._getProps(mappingProps)} {...(item.toProps || {})} />
         </View>
       )
     );
@@ -487,6 +514,7 @@ export default class ScrollableTabView extends React.Component {
   _onEndReached() {
     const next = () => {
       const ref = this.getCurrentRef();
+      !ref && console.warn(`The Screen Ref is lost when calling onEndReached. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
       if (ref && ref.onEndReached && typeof ref.onEndReached == 'function') ref.onEndReached();
     };
     const { onBeforeEndReached } = this.props;
@@ -502,6 +530,7 @@ export default class ScrollableTabView extends React.Component {
   _onRefresh() {
     const next = () => {
       const ref = this.getCurrentRef();
+      !ref && console.warn(`The Screen Ref is lost when calling onRefresh. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
       if (ref && ref.onRefresh && typeof ref.onRefresh == 'function') ref.onRefresh(this._toggledRefreshing.bind(this));
     };
     const { onBeforeRefresh } = this.props;
@@ -545,6 +574,7 @@ export default class ScrollableTabView extends React.Component {
   };
 
   render() {
+    const { style, title, onEndReachedThreshold, fixedHeader, tabsEnableAnimated, carouselProps, onScroll, sectionListProps } = this.props;
     return (
       <View
         onLayout={({ nativeEvent }) => {
@@ -552,25 +582,26 @@ export default class ScrollableTabView extends React.Component {
           this.layoutHeight['container'] = height;
           if (height !== 0) this._refresh();
         }}
-        style={[styles.container, this.props.style]}
+        style={[styles.container, style]}
       >
-        {!!this.props.title && this._renderTitle()}
+        {!!title && this._renderTitle()}
         <SectionList
           ref={rf => (this.section = rf)}
           keyExtractor={(item, index) => `scrollable-tab-view-wrap-${index}`}
           renderSectionHeader={this._renderSectionHeader.bind(this)}
           onEndReached={this._onEndReached.bind(this)}
-          onEndReachedThreshold={this.props.onEndReachedThreshold}
+          onEndReachedThreshold={onEndReachedThreshold}
           refreshControl={<RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh.bind(this)} />}
           sections={[{ data: [1] }]}
           stickySectionHeadersEnabled={true}
-          ListHeaderComponent={!this.props.fixedHeader && this._renderHeader()}
+          ListHeaderComponent={!fixedHeader && this._renderHeader()}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           renderItem={() => {
             return (
               <Carousel
                 ref={c => (this.tabview = c)}
+                pagingEnabled={true}
                 inactiveSlideScale={1}
                 data={this.stacks}
                 renderItem={this._renderItem.bind(this)}
@@ -585,7 +616,7 @@ export default class ScrollableTabView extends React.Component {
                   index
                 })}
                 onScroll={
-                  this.props.tabsEnableAnimated &&
+                  tabsEnableAnimated &&
                   Animated.event(
                     [
                       {
@@ -599,13 +630,13 @@ export default class ScrollableTabView extends React.Component {
                     }
                   )
                 }
-                {...this.props.carouselProps}
+                {...carouselProps}
               />
             );
           }}
           onScrollToIndexFailed={() => {}}
           onScroll={
-            !!this.props.title
+            !!title
               ? Animated.event(
                   [
                     {
@@ -613,15 +644,15 @@ export default class ScrollableTabView extends React.Component {
                     }
                   ],
                   {
-                    listener: !!this.props.onScroll && this.props.onScroll.bind(this),
+                    listener: !!onScroll && onScroll.bind(this),
                     useNativeDriver: false
                   }
                 )
-              : !!this.props.onScroll
-              ? this.props.onScroll.bind(this)
+              : !!onScroll
+              ? onScroll.bind(this)
               : null
           }
-          {...this.props.sectionListProps}
+          {...sectionListProps}
         ></SectionList>
       </View>
     );
