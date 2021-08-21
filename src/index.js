@@ -96,10 +96,7 @@ export default class ScrollableTabView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      checkedIndex: this._getFirstIndex(),
-      refsObj: {},
-      lazyIndexs: this._initLazyIndexs(),
-      isRefreshing: false
+      ...this._initialState()
     };
     this.sectionListScrollY = new Animated.Value(0);
     this.carouselScrollX = new Animated.Value(0);
@@ -132,6 +129,15 @@ export default class ScrollableTabView extends React.Component {
 
   componentWillReceiveProps(newProps) {
     this._initial(newProps, true);
+  }
+
+  _initialState() {
+    return {
+      checkedIndex: this._getFirstIndex(),
+      refsObj: {},
+      lazyIndexs: this._initLazyIndexs(),
+      isRefreshing: false
+    };
   }
 
   _initial(props = this.props, isProcess = false) {
@@ -212,10 +218,7 @@ export default class ScrollableTabView extends React.Component {
     this.stacks = [];
     this.setState(
       {
-        checkedIndex: this._getFirstIndex(),
-        refsObj: {},
-        lazyIndexs: this._initLazyIndexs(),
-        isRefreshing: false
+        ...this._initialState()
       },
       () => typeof callback === 'function' && callback()
     );
@@ -570,6 +573,7 @@ export default class ScrollableTabView extends React.Component {
   };
 
   render() {
+    const { style, title, onEndReachedThreshold, fixedHeader, tabsEnableAnimated, carouselProps, onScroll, sectionListProps } = this.props;
     return (
       <View
         onLayout={({ nativeEvent }) => {
@@ -577,19 +581,19 @@ export default class ScrollableTabView extends React.Component {
           this.layoutHeight['container'] = height;
           if (height !== 0) this._refresh();
         }}
-        style={[styles.container, this.props.style]}
+        style={[styles.container, style]}
       >
-        {!!this.props.title && this._renderTitle()}
+        {!!title && this._renderTitle()}
         <SectionList
           ref={rf => (this.section = rf)}
           keyExtractor={(item, index) => `scrollable-tab-view-wrap-${index}`}
           renderSectionHeader={this._renderSectionHeader.bind(this)}
           onEndReached={this._onEndReached.bind(this)}
-          onEndReachedThreshold={this.props.onEndReachedThreshold}
+          onEndReachedThreshold={onEndReachedThreshold}
           refreshControl={<RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh.bind(this)} />}
           sections={[{ data: [1] }]}
           stickySectionHeadersEnabled={true}
-          ListHeaderComponent={!this.props.fixedHeader && this._renderHeader()}
+          ListHeaderComponent={!fixedHeader && this._renderHeader()}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           renderItem={() => {
@@ -611,7 +615,7 @@ export default class ScrollableTabView extends React.Component {
                   index
                 })}
                 onScroll={
-                  this.props.tabsEnableAnimated &&
+                  tabsEnableAnimated &&
                   Animated.event(
                     [
                       {
@@ -625,13 +629,13 @@ export default class ScrollableTabView extends React.Component {
                     }
                   )
                 }
-                {...this.props.carouselProps}
+                {...carouselProps}
               />
             );
           }}
           onScrollToIndexFailed={() => {}}
           onScroll={
-            !!this.props.title
+            !!title
               ? Animated.event(
                   [
                     {
@@ -639,15 +643,15 @@ export default class ScrollableTabView extends React.Component {
                     }
                   ],
                   {
-                    listener: !!this.props.onScroll && this.props.onScroll.bind(this),
+                    listener: !!onScroll && onScroll.bind(this),
                     useNativeDriver: false
                   }
                 )
-              : !!this.props.onScroll
-              ? this.props.onScroll.bind(this)
+              : !!onScroll
+              ? onScroll.bind(this)
               : null
           }
-          {...this.props.sectionListProps}
+          {...sectionListProps}
         ></SectionList>
       </View>
     );
