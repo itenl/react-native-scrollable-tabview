@@ -178,6 +178,7 @@ Prop              | Type     | Default     | Description
 **`title`**             | Function / JSX Element / Class Component    | null          | 动画标题
 **`titleArgs`**             | Object    | **`{  style: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | 标题配置 < [阅读 interpolate](https://reactnative.dev/docs/animations#interpolation) >
 **`onScroll`**             | Function    | null          | 滚动事件监听
+**`onScroll2Horizontal`**             | Function    | null          | 滚动事件监听(横向)
 **`tabsEnableAnimated`**             | Boolean    | false          | 为Tabs启用滑动效果，需要为 **`tabStyle`** 指定 **`width`**
 
 ## <a name="method"/>Method

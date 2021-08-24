@@ -48,6 +48,7 @@ export default class ScrollableTabView extends React.Component {
     title: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     titleArgs: PropTypes.object,
     onScroll: PropTypes.func,
+    onScroll2Horizontal: PropTypes.func,
     screenScrollThrottle: PropTypes.number
   };
 
@@ -90,6 +91,7 @@ export default class ScrollableTabView extends React.Component {
       interpolateHeight: {}
     },
     onScroll: null,
+    onScroll2Horizontal: null,
     screenScrollThrottle: 60
   };
 
@@ -98,6 +100,25 @@ export default class ScrollableTabView extends React.Component {
     this.state = {
       ...this._initialState()
     };
+    this._initialProto();
+    this._initial();
+  }
+
+  componentWillReceiveProps(newProps) {
+    this._initial(newProps, true);
+  }
+
+  _initialState() {
+    return {
+      checkedIndex: this._getFirstIndex(),
+      refsObj: {},
+      lazyIndexs: this._initLazyIndexs(),
+      isRefreshing: false
+    };
+  }
+
+  _initialProto() {
+    const { screenScrollThrottle } = this.props;
     this.sectionListScrollY = new Animated.Value(0);
     this.carouselScrollX = new Animated.Value(0);
     this.tabsMeasurements = [];
@@ -120,24 +141,19 @@ export default class ScrollableTabView extends React.Component {
         extrapolate: 'clamp'
       }
     };
-    this._throttleCallback = _throttle(this._onTabviewChange.bind(this, true), props.screenScrollThrottle, {
+    this._throttleCallback = _throttle(this._onTabviewChange.bind(this, true), screenScrollThrottle, {
       leading: false,
       trailing: true
     });
-    this._initial();
-  }
-
-  componentWillReceiveProps(newProps) {
-    this._initial(newProps, true);
-  }
-
-  _initialState() {
-    return {
-      checkedIndex: this._getFirstIndex(),
-      refsObj: {},
-      lazyIndexs: this._initLazyIndexs(),
-      isRefreshing: false
-    };
+    this._renderSectionHeader = this._renderSectionHeader.bind(this);
+    this._onRefresh = this._onRefresh.bind(this);
+    this._onEndReached = this._onEndReached.bind(this);
+    this._renderItem = this._renderItem.bind(this);
+    this._toggledRefreshing = this._toggledRefreshing.bind(this);
+    this._onScroll2Vertical = this._onScroll2Vertical.bind(this);
+    this._onScroll2Horizontal = this._onScroll2Horizontal.bind(this);
+    this._setScrollHandler2Vertical();
+    this._setScrollHandler2Horizontal();
   }
 
   _initial(props = this.props, isProcess = false) {
@@ -531,10 +547,10 @@ export default class ScrollableTabView extends React.Component {
     const next = () => {
       const ref = this.getCurrentRef();
       !ref && console.warn(`The Screen Ref is lost when calling onRefresh. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
-      ref ? ref.onRefresh && typeof ref.onRefresh == 'function' && ref.onRefresh(this._toggledRefreshing.bind(this)) : this._toggledRefreshing(false);
+      ref ? ref.onRefresh && typeof ref.onRefresh == 'function' && ref.onRefresh(this._toggledRefreshing) : this._toggledRefreshing(false);
     };
     const { onBeforeRefresh } = this.props;
-    onBeforeRefresh && typeof onBeforeRefresh === 'function' ? onBeforeRefresh(next, this._toggledRefreshing.bind(this)) : next();
+    onBeforeRefresh && typeof onBeforeRefresh === 'function' ? onBeforeRefresh(next, this._toggledRefreshing) : next();
   }
 
   _renderHeader = () => {
@@ -556,6 +572,7 @@ export default class ScrollableTabView extends React.Component {
 
   _renderTitle = () => {
     const { title, titleArgs } = this.props;
+    if (!title) return null;
     const { style, interpolateHeight, interpolateOpacity } = titleArgs;
     return (
       <Animated.View
@@ -575,11 +592,47 @@ export default class ScrollableTabView extends React.Component {
 
   _refreshControl() {
     const ref = this.getCurrentRef();
-    return <RefreshControl enabled={!!(ref && ref.onRefresh)} refreshing={this.state.isRefreshing} onRefresh={this._onRefresh.bind(this)} />;
+    return <RefreshControl enabled={!!(ref && ref.onRefresh)} refreshing={this.state.isRefreshing} onRefresh={this._onRefresh} />;
+  }
+
+  _onScroll2Vertical(event) {
+    const { onScroll } = this.props;
+    // TODO...
+    if (typeof onScroll === 'function' && event) onScroll(event);
+  }
+
+  _setScrollHandler2Vertical() {
+    const { title } = this.props;
+    const scrollEventConfig = {
+      listener: this._onScroll2Vertical,
+      useNativeDriver: false
+    };
+    const argMapping = [];
+    if (title) argMapping.push({ nativeEvent: { contentOffset: { y: this.sectionListScrollY } } });
+    this._onScrollHandler2Vertical = Animated.event(argMapping, scrollEventConfig);
+  }
+
+  _onScroll2Horizontal(event) {
+    const { onScroll2Horizontal } = this.props;
+    // TODO...
+    if (typeof onScroll2Horizontal === 'function' && event) onScroll2Horizontal(event);
+  }
+
+  _setScrollHandler2Horizontal() {
+    const { tabsEnableAnimated } = this.props;
+    const scrollEventConfig = {
+      listener: this._onScroll2Horizontal,
+      // listener: ({ nativeEvent }) => console.log(nativeEvent.contentOffset.x),
+      // If useNativeDriver is True, the listener cannot be triggered
+      useNativeDriver: true //!__DEV__
+    };
+    const argMapping = [];
+    if (tabsEnableAnimated) argMapping.push({ nativeEvent: { contentOffset: { x: this.carouselScrollX } } });
+    this._onScrollHandler2Horizontal = Animated.event(argMapping, scrollEventConfig);
   }
 
   render() {
-    const { style, title, onEndReachedThreshold, fixedHeader, tabsEnableAnimated, carouselProps, onScroll, sectionListProps } = this.props;
+    const { style, onEndReachedThreshold, fixedHeader, carouselProps, sectionListProps } = this.props;
     return (
       <View
         onLayout={({ nativeEvent }) => {
@@ -589,12 +642,12 @@ export default class ScrollableTabView extends React.Component {
         }}
         style={[styles.container, style]}
       >
-        {!!title && this._renderTitle()}
+        {this._renderTitle()}
         <SectionList
           ref={rf => (this.section = rf)}
           keyExtractor={(item, index) => `scrollable-tab-view-wrap-${index}`}
-          renderSectionHeader={this._renderSectionHeader.bind(this)}
-          onEndReached={this._onEndReached.bind(this)}
+          renderSectionHeader={this._renderSectionHeader}
+          onEndReached={this._onEndReached}
           onEndReachedThreshold={onEndReachedThreshold}
           refreshControl={this._refreshControl()}
           sections={[{ data: [1] }]}
@@ -609,54 +662,19 @@ export default class ScrollableTabView extends React.Component {
                 pagingEnabled={true}
                 inactiveSlideScale={1}
                 data={this.stacks}
-                renderItem={this._renderItem.bind(this)}
+                renderItem={this._renderItem}
                 sliderWidth={deviceWidth}
                 itemWidth={deviceWidth}
                 onScrollIndexChanged={this._throttleCallback}
                 initialScrollIndex={this.state.checkedIndex}
                 firstItem={this.state.checkedIndex}
-                getItemLayout={(data, index) => ({
-                  length: deviceWidth,
-                  offset: deviceWidth * index,
-                  index
-                })}
-                onScroll={
-                  tabsEnableAnimated &&
-                  Animated.event(
-                    [
-                      {
-                        nativeEvent: { contentOffset: { x: this.carouselScrollX } }
-                      }
-                    ],
-                    {
-                      // listener: ({ nativeEvent }) => console.log(nativeEvent.contentOffset.x),
-                      // If useNativeDriver is True, the listener cannot be triggered
-                      useNativeDriver: true
-                    }
-                  )
-                }
+                onScroll={this._onScrollHandler2Horizontal}
                 {...carouselProps}
               />
             );
           }}
           onScrollToIndexFailed={() => {}}
-          onScroll={
-            !!title
-              ? Animated.event(
-                  [
-                    {
-                      nativeEvent: { contentOffset: { y: this.sectionListScrollY } }
-                    }
-                  ],
-                  {
-                    listener: !!onScroll && onScroll.bind(this),
-                    useNativeDriver: false
-                  }
-                )
-              : !!onScroll
-              ? onScroll.bind(this)
-              : null
-          }
+          onScroll={this._onScrollHandler2Vertical}
           {...sectionListProps}
         ></SectionList>
       </View>

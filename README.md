@@ -178,6 +178,7 @@ Prop              | Type     | Default     | Description
 **`title`**             | Function / JSX Element / Class Component    | null          | Animation title
 **`titleArgs`**             | Object    | **`{  style: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | Title parameter configuration < [Read interpolate](https://reactnative.dev/docs/animations#interpolation) >
 **`onScroll`**             | Function    | null          | Scroll event monitoring
+**`onScroll2Horizontal`**             | Function    | null          | Scroll event monitoring for orizontal
 **`tabsEnableAnimated`**             | Boolean    | false          | Enable sliding effect for Tabs, Need to specify **`width`** for **`tabStyle`**
 
 ## <a name="method"/>Method
