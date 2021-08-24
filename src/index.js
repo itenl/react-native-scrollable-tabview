@@ -25,6 +25,7 @@ export default class ScrollableTabView extends React.Component {
     tabActiveOpacity: PropTypes.number,
     tabStyle: PropTypes.object,
     tabsEnableAnimated: PropTypes.bool,
+    tabsEnableAnimatedUnderlineWidth: PropTypes.number,
     useScrollStyle: PropTypes.object,
     textStyle: PropTypes.object,
     textActiveStyle: PropTypes.object,
@@ -64,6 +65,7 @@ export default class ScrollableTabView extends React.Component {
     tabActiveOpacity: 0.6,
     tabStyle: {},
     tabsEnableAnimated: false,
+    tabsEnableAnimatedUnderlineWidth: 0,
     useScrollStyle: {},
     textStyle: {},
     textActiveStyle: {},
@@ -129,7 +131,7 @@ export default class ScrollableTabView extends React.Component {
       tabs: 0,
       screen: 0
     };
-    this.interpolate = {
+    this.titleInterpolateArgs = {
       height: {
         inputRange: [0, 160],
         outputRange: [0, 80],
@@ -140,6 +142,11 @@ export default class ScrollableTabView extends React.Component {
         outputRange: [0.2, 1],
         extrapolate: 'clamp'
       }
+    };
+    this.tabUnderlineInterpolateArgs = {
+      inputRange: [],
+      outputRange: [],
+      extrapolate: 'clamp'
     };
     this._throttleCallback = _throttle(this._onTabviewChange.bind(this, true), screenScrollThrottle, {
       leading: false,
@@ -363,8 +370,22 @@ export default class ScrollableTabView extends React.Component {
     );
   }
 
+  _getTabUnderlineInterpolateArgs(underlineWidth) {
+    const tabsCount = this.tabs.length - 1;
+    if (tabsCount * 2 + 1 === this.tabUnderlineInterpolateArgs.inputRange.length) return this.tabUnderlineInterpolateArgs;
+    const maxTranslateXVal = deviceWidth * tabsCount;
+    const _outputRange = [];
+    const _inputRange = Array.from({ length: maxTranslateXVal / (deviceWidth / 2) + 1 }, (v, k) => {
+      _outputRange.push(k % 2 ? this.tabWidth - underlineWidth : underlineWidth);
+      return k == 0 ? k : (k * deviceWidth) / 2;
+    });
+    this.tabUnderlineInterpolateArgs.inputRange = _inputRange;
+    this.tabUnderlineInterpolateArgs.outputRange = _outputRange;
+    return this.tabUnderlineInterpolateArgs;
+  }
+
   _renderAnimatedTabUnderline() {
-    const { useScroll, tabUnderlineStyle, useScrollStyle } = this.props;
+    const { useScroll, tabUnderlineStyle, useScrollStyle, tabsEnableAnimatedUnderlineWidth } = this.props;
     const { paddingLeft, paddingHorizontal } = useScrollStyle;
     const _tabUnderlineStyle = Object.assign({ zIndex: 100, width: this.tabWidth, position: 'absolute' }, styles.tabUnderlineStyle, tabUnderlineStyle);
     if (!_tabUnderlineStyle.top && _tabUnderlineStyle.height) _tabUnderlineStyle.top = this.layoutHeight['tabs'] - _tabUnderlineStyle.height;
@@ -372,27 +393,22 @@ export default class ScrollableTabView extends React.Component {
     let outputRight = deviceWidth;
     if (useScroll) outputRight = this.tabs.length * this.tabWidth;
     if (outputLeft) outputRight = outputRight + outputLeft;
-    // const index = this.state.checkedIndex;
-    // const tabsMeasurements = this.tabsMeasurements[index];
-    // const { left, right, width, height } = tabsMeasurements;
-    return (
-      <Animated.View
-        style={[
-          styles.tabUnderlineStyle,
-          _tabUnderlineStyle,
-          {
-            transform: [
-              {
-                translateX: this.carouselScrollX.interpolate({
-                  inputRange: [0, this.tabs.length * deviceWidth],
-                  outputRange: [outputLeft, outputRight]
-                })
-              }
-            ]
-          }
-        ]}
-      ></Animated.View>
-    );
+    const interpolateAnimated = {
+      transform: [
+        {
+          translateX: this.carouselScrollX.interpolate({
+            inputRange: [0, this.tabs.length * deviceWidth],
+            outputRange: [outputLeft, outputRight]
+          })
+        }
+      ]
+    };
+    if (!!tabsEnableAnimatedUnderlineWidth) {
+      if (tabsEnableAnimatedUnderlineWidth >= this.tabWidth / 2) console.warn('The value of tabsEnableAnimatedUnderlineWidth we recommend to be one-third of tabStyle.width or a fixed 30px');
+      interpolateAnimated.marginLeft = this.tabWidth / 2 - tabsEnableAnimatedUnderlineWidth / 2;
+      interpolateAnimated.width = this.carouselScrollX.interpolate(this._getTabUnderlineInterpolateArgs(tabsEnableAnimatedUnderlineWidth));
+    }
+    return <Animated.View style={[styles.tabUnderlineStyle, _tabUnderlineStyle, interpolateAnimated]}></Animated.View>;
   }
 
   _renderTabs() {
@@ -579,8 +595,8 @@ export default class ScrollableTabView extends React.Component {
       <Animated.View
         style={[
           {
-            height: this.sectionListScrollY.interpolate(Object.assign(this.interpolate.height, interpolateHeight)),
-            opacity: this.sectionListScrollY.interpolate(Object.assign(this.interpolate.opacity, interpolateOpacity)),
+            height: this.sectionListScrollY.interpolate(Object.assign(this.titleInterpolateArgs.height, interpolateHeight)),
+            opacity: this.sectionListScrollY.interpolate(Object.assign(this.titleInterpolateArgs.opacity, interpolateOpacity)),
             overflow: 'hidden'
           },
           style
@@ -620,12 +636,12 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _setScrollHandler2Horizontal() {
-    const { tabsEnableAnimated } = this.props;
+    const { tabsEnableAnimated, tabsEnableAnimatedUnderlineWidth } = this.props;
     const scrollEventConfig = {
       listener: this._onScroll2Horizontal,
       // listener: ({ nativeEvent }) => console.log(nativeEvent.contentOffset.x),
       // If useNativeDriver is True, the listener cannot be triggered
-      useNativeDriver: true //!__DEV__
+      useNativeDriver: !tabsEnableAnimatedUnderlineWidth && !__DEV__
     };
     const argMapping = [];
     if (tabsEnableAnimated) argMapping.push({ nativeEvent: { contentOffset: { x: this.carouselScrollX } } });
