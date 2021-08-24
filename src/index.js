@@ -575,7 +575,7 @@ export default class ScrollableTabView extends React.Component {
 
   _refreshControl() {
     const ref = this.getCurrentRef();
-    if (ref && ref.onRefresh) return <RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh.bind(this)} />;
+    return <RefreshControl enabled={!!(ref && ref.onRefresh)} refreshing={this.state.isRefreshing} onRefresh={this._onRefresh.bind(this)} />;
   }
 
   render() {
