@@ -573,6 +573,11 @@ export default class ScrollableTabView extends React.Component {
     );
   };
 
+  _refreshControl() {
+    const ref = this.getCurrentRef();
+    if (ref && ref.onRefresh) return <RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh.bind(this)} />;
+  }
+
   render() {
     const { style, title, onEndReachedThreshold, fixedHeader, tabsEnableAnimated, carouselProps, onScroll, sectionListProps } = this.props;
     return (
@@ -591,7 +596,7 @@ export default class ScrollableTabView extends React.Component {
           renderSectionHeader={this._renderSectionHeader.bind(this)}
           onEndReached={this._onEndReached.bind(this)}
           onEndReachedThreshold={onEndReachedThreshold}
-          refreshControl={<RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh.bind(this)} />}
+          refreshControl={this._refreshControl()}
           sections={[{ data: [1] }]}
           stickySectionHeadersEnabled={true}
           ListHeaderComponent={!fixedHeader && this._renderHeader()}
