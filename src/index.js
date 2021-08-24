@@ -431,9 +431,10 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderSectionHeader() {
+    const { fixedHeader } = this.props;
     return (
       <View style={{ flex: 1 }}>
-        {this.props.fixedHeader && this._renderHeader()}
+        {this._renderHeader(fixedHeader)}
         {this._renderTabs()}
         {this._renderSticky()}
       </View>
@@ -553,10 +554,11 @@ export default class ScrollableTabView extends React.Component {
     onBeforeRefresh && typeof onBeforeRefresh === 'function' ? onBeforeRefresh(next, this._toggledRefreshing) : next();
   }
 
-  _renderHeader = () => {
+  _renderHeader = isRender => {
     const { header } = this.props;
     return (
-      header && (
+      header &&
+      isRender && (
         <View
           onLayout={({ nativeEvent }) => {
             const { height } = nativeEvent.layout;
@@ -652,7 +654,7 @@ export default class ScrollableTabView extends React.Component {
           refreshControl={this._refreshControl()}
           sections={[{ data: [1] }]}
           stickySectionHeadersEnabled={true}
-          ListHeaderComponent={!fixedHeader && this._renderHeader()}
+          ListHeaderComponent={this._renderHeader(!fixedHeader)}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           renderItem={() => {
