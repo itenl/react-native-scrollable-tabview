@@ -531,7 +531,7 @@ export default class ScrollableTabView extends React.Component {
     const next = () => {
       const ref = this.getCurrentRef();
       !ref && console.warn(`The Screen Ref is lost when calling onRefresh. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
-      if (ref && ref.onRefresh && typeof ref.onRefresh == 'function') ref.onRefresh(this._toggledRefreshing.bind(this));
+      ref ? ref.onRefresh && typeof ref.onRefresh == 'function' && ref.onRefresh(this._toggledRefreshing.bind(this)) : this._toggledRefreshing(false);
     };
     const { onBeforeRefresh } = this.props;
     onBeforeRefresh && typeof onBeforeRefresh === 'function' ? onBeforeRefresh(next, this._toggledRefreshing.bind(this)) : next();
