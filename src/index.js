@@ -347,17 +347,16 @@ export default class ScrollableTabView extends React.Component {
   _renderTab({ item, index }) {
     const { tabActiveOpacity, tabWrapStyle, tabInnerStyle, tabStyle, textStyle, textActiveStyle, tabUnderlineStyle, tabsEnableAnimated } = this.props;
     const _tabUnderlineStyle = Object.assign({ top: 6 }, styles.tabUnderlineStyle, tabUnderlineStyle);
-    const checked = this.state.checkedIndex == index;
-    const _tabWrapStyle = typeof tabWrapStyle === 'function' ? tabWrapStyle(item, index) : tabWrapStyle;
+    const _checked = this.state.checkedIndex == index;
+    const _tabWrapStyle = typeof tabWrapStyle === 'function' ? tabWrapStyle(item, index, _checked) : tabWrapStyle;
+    const _tab = typeof item.tabLabelRender === 'function' ? item.tabLabelRender(item.tabLabel, index, _checked) : item.tabLabel;
     return (
       <View onLayout={this._measureTab.bind(this, index)} key={index} style={_tabWrapStyle}>
         {this._renderBadges(index)}
         <TouchableOpacity activeOpacity={tabActiveOpacity} onPress={() => this._onTabviewChange(false, index)} style={[styles.tabStyle, tabStyle]}>
           <View style={tabInnerStyle}>
-            <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
-              {item.tabLabelRender && typeof item.tabLabelRender == 'function' ? item.tabLabelRender(item.tabLabel) : item.tabLabel}
-            </Text>
-            {!tabsEnableAnimated && checked && <View style={_tabUnderlineStyle}></View>}
+            {typeof _tab === 'string' ? <Text style={[styles.textStyle, textStyle, _checked && textActiveStyle]}>{_tab}</Text> : _tab}
+            {!tabsEnableAnimated && _checked && <View style={_tabUnderlineStyle}></View>}
           </View>
         </TouchableOpacity>
       </View>
@@ -532,7 +531,7 @@ export default class ScrollableTabView extends React.Component {
     const next = () => {
       const ref = this.getCurrentRef();
       !ref && console.warn(`The Screen Ref is lost when calling onEndReached. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
-      if (ref && ref.onEndReached && typeof ref.onEndReached == 'function') ref.onEndReached();
+      if (ref && ref.onEndReached && typeof ref.onEndReached === 'function') ref.onEndReached();
     };
     const { onBeforeEndReached } = this.props;
     onBeforeEndReached && typeof onBeforeEndReached === 'function' ? onBeforeEndReached(next) : next();
@@ -548,7 +547,7 @@ export default class ScrollableTabView extends React.Component {
     const next = () => {
       const ref = this.getCurrentRef();
       !ref && console.warn(`The Screen Ref is lost when calling onRefresh. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
-      ref ? ref.onRefresh && typeof ref.onRefresh == 'function' && ref.onRefresh(this._toggledRefreshing) : this._toggledRefreshing(false);
+      ref ? ref.onRefresh && typeof ref.onRefresh === 'function' && ref.onRefresh(this._toggledRefreshing) : this._toggledRefreshing(false);
     };
     const { onBeforeRefresh } = this.props;
     onBeforeRefresh && typeof onBeforeRefresh === 'function' ? onBeforeRefresh(next, this._toggledRefreshing) : next();
