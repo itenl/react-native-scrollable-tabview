@@ -1,6 +1,6 @@
 {
   "name": "@itenl/react-native-scrollable-tabview",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "react-native-scrollable-tabview",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "lodash.throttle": "^4.1.1",
-    "react-native-snap-carousel": "git+https://github.com/itenl/react-native-snap-carousel.git#8b7f0fcad966e56ef1b86fc6ff90dcefdaed9527"
+    "@itenl/react-native-snap-carousel": "^4.0.0-beta.6"
   },
   "keywords": [
     "react",
