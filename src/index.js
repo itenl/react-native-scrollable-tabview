@@ -8,7 +8,6 @@ const deviceWidth = Dimensions.get('window').width;
 
 /**
  * @author itenl
- * @export
  * @class ScrollableTabView
  * @extends {React.Component}
  */
