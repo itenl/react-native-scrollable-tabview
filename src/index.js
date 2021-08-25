@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, SectionList, RefreshControl, TouchableOpacity, Animated, Dimensions, ScrollView } from 'react-native';
 import PropTypes from 'prop-types';
-import Carousel from 'react-native-snap-carousel';
+import Carousel from '@itenl/react-native-snap-carousel';
 import HocComponent from './HocComponent';
 import _throttle from 'lodash.throttle';
 const deviceWidth = Dimensions.get('window').width;
