@@ -369,13 +369,13 @@ export default class ScrollableTabView extends React.Component {
     );
   }
 
-  _getTabUnderlineInterpolateArgs(underlineWidth) {
+  _getTabUnderlineInterpolateArgs(tabsEnableAnimatedUnderlineWidth) {
     const tabsCount = this.tabs.length - 1;
     if (tabsCount * 2 + 1 === this.tabUnderlineInterpolateArgs.inputRange.length) return this.tabUnderlineInterpolateArgs;
     const maxTranslateXVal = deviceWidth * tabsCount;
     const _outputRange = [];
     const _inputRange = Array.from({ length: maxTranslateXVal / (deviceWidth / 2) + 1 }, (v, k) => {
-      _outputRange.push(k % 2 ? this.tabWidth - underlineWidth : underlineWidth);
+      _outputRange.push(k % 2 ? this.tabWidth / tabsEnableAnimatedUnderlineWidth : 1);
       return k == 0 ? k : (k * deviceWidth) / 2;
     });
     this.tabUnderlineInterpolateArgs.inputRange = _inputRange;
@@ -397,7 +397,8 @@ export default class ScrollableTabView extends React.Component {
         {
           translateX: this.carouselScrollX.interpolate({
             inputRange: [0, this.tabs.length * deviceWidth],
-            outputRange: [outputLeft, outputRight]
+            outputRange: [outputLeft, outputRight],
+            extrapolate: 'clamp'
           })
         }
       ]
@@ -405,7 +406,8 @@ export default class ScrollableTabView extends React.Component {
     if (!!tabsEnableAnimatedUnderlineWidth) {
       if (tabsEnableAnimatedUnderlineWidth >= this.tabWidth / 2) console.warn('The value of tabsEnableAnimatedUnderlineWidth we recommend to be one-third of tabStyle.width or a fixed 30px');
       interpolateAnimated.marginLeft = this.tabWidth / 2 - tabsEnableAnimatedUnderlineWidth / 2;
-      interpolateAnimated.width = this.carouselScrollX.interpolate(this._getTabUnderlineInterpolateArgs(tabsEnableAnimatedUnderlineWidth));
+      interpolateAnimated.width = tabsEnableAnimatedUnderlineWidth;
+      interpolateAnimated.transform.push({ scaleX: this.carouselScrollX.interpolate(this._getTabUnderlineInterpolateArgs(tabsEnableAnimatedUnderlineWidth)) });
     }
     return <Animated.View style={[styles.tabUnderlineStyle, _tabUnderlineStyle, interpolateAnimated]}></Animated.View>;
   }
