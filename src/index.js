@@ -4,7 +4,15 @@ import PropTypes from 'prop-types';
 import Carousel from '@itenl/react-native-snap-carousel';
 import HocComponent from './HocComponent';
 import _throttle from 'lodash.throttle';
+import packagejson from '../package.json';
 const deviceWidth = Dimensions.get('window').width;
+
+const CONSOLE_LEVEL = {
+  LOG: 'log',
+  INFO: 'info',
+  WARN: 'warn',
+  ERROR: 'error'
+};
 
 /**
  * @author itenl
@@ -101,7 +109,7 @@ export default class ScrollableTabView extends React.Component {
     this.state = {
       ...this._initialState()
     };
-    this._initialProto();
+    this._initialProperty();
     this._initial();
   }
 
@@ -118,12 +126,13 @@ export default class ScrollableTabView extends React.Component {
     };
   }
 
-  _initialProto() {
+  _initialProperty() {
     const { screenScrollThrottle } = this.props;
     this.sectionListScrollY = new Animated.Value(0);
     this.carouselScrollX = new Animated.Value(0);
     this.tabsMeasurements = [];
     this.tabWidth = 0;
+    this.tabWidthWrap = 0;
     this.layoutHeight = {
       container: 0,
       header: 0,
@@ -167,7 +176,7 @@ export default class ScrollableTabView extends React.Component {
     this.tabs = this._getTabs(props);
     this.badges = this._getBadges(props);
     this.stacks = this._getWrapChildren(props);
-    if (props.firstIndex > Math.max(this.stacks.length - 1, 0)) throw new Error('firstIndex cannot exceed the total number of stacks.length');
+    if (props.firstIndex > Math.max(this.stacks.length - 1, 0)) this._displayConsole('firstIndex cannot exceed the total number of stacks.length', CONSOLE_LEVEL.ERROR);
   }
 
   /**
@@ -337,7 +346,7 @@ export default class ScrollableTabView extends React.Component {
     const { useScroll, badges } = this.props;
     const _badges = this.badges[tabIndex] || badges[tabIndex];
     if (_badges && _badges.length) {
-      if (useScroll) console.warn('When useScroll and badges exist at the same time, the badge will not overflow the Tabs container');
+      if (useScroll) this._displayConsole('When useScroll and badges exist at the same time, the badge will not overflow the Tabs container');
       return _badges.map(item => {
         return item;
       });
@@ -384,14 +393,22 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderAnimatedTabUnderline() {
-    const { useScroll, tabUnderlineStyle, useScrollStyle, tabsEnableAnimatedUnderlineWidth } = this.props;
+    const { useScroll, tabUnderlineStyle, useScrollStyle, tabStyle, tabsEnableAnimatedUnderlineWidth } = this.props;
+    const { marginLeft, marginRight, marginHorizontal } = tabStyle;
     const { paddingLeft, paddingHorizontal } = useScrollStyle;
     const _tabUnderlineStyle = Object.assign({ zIndex: 100, width: this.tabWidth, position: 'absolute' }, styles.tabUnderlineStyle, tabUnderlineStyle);
     if (!_tabUnderlineStyle.top && _tabUnderlineStyle.height) _tabUnderlineStyle.top = this.layoutHeight['tabs'] - _tabUnderlineStyle.height;
-    let outputLeft = paddingLeft || paddingHorizontal || 0;
+    let underlineLeft = marginLeft || marginHorizontal || 0;
+    let underlineRight = marginRight || marginHorizontal || 0;
+    let outputLeft = 0;
     let outputRight = deviceWidth;
-    if (useScroll) outputRight = this.tabs.length * this.tabWidth;
-    if (outputLeft) outputRight = outputRight + outputLeft;
+    this.tabWidthWrap = this.tabWidth + underlineLeft + underlineRight;
+    if (useScroll) {
+      outputLeft = paddingLeft || paddingHorizontal || 0;
+      outputRight = this.tabWidthWrap * this.tabs.length;
+    }
+    outputLeft = outputLeft + underlineLeft;
+    outputRight = outputRight + outputLeft;
     const interpolateAnimated = {
       transform: [
         {
@@ -404,7 +421,7 @@ export default class ScrollableTabView extends React.Component {
       ]
     };
     if (!!tabsEnableAnimatedUnderlineWidth) {
-      if (tabsEnableAnimatedUnderlineWidth >= this.tabWidth / 2) console.warn('The value of tabsEnableAnimatedUnderlineWidth we recommend to be one-third of tabStyle.width or a fixed 30px');
+      if (tabsEnableAnimatedUnderlineWidth >= this.tabWidth / 2) this._displayConsole('The value of tabsEnableAnimatedUnderlineWidth we recommend to be one-third of tabStyle.width or a fixed 30px');
       interpolateAnimated.marginLeft = this.tabWidth / 2 - tabsEnableAnimatedUnderlineWidth / 2;
       interpolateAnimated.width = tabsEnableAnimatedUnderlineWidth;
       interpolateAnimated.transform.push({ scaleX: this.carouselScrollX.interpolate(this._getTabUnderlineInterpolateArgs(tabsEnableAnimatedUnderlineWidth)) });
@@ -412,15 +429,36 @@ export default class ScrollableTabView extends React.Component {
     return <Animated.View style={[styles.tabUnderlineStyle, _tabUnderlineStyle, interpolateAnimated]}></Animated.View>;
   }
 
+  _displayConsole(message, level = CONSOLE_LEVEL.WARN) {
+    const pluginName = packagejson.name;
+    console[level](`${pluginName}: ${message || ' --- '}`);
+  }
+
+  _errorProps(propName, level) {
+    const props = this.props,
+      property = props[propName],
+      errorProps = {
+        tabStyle: ['left', 'right']
+      };
+    if (errorProps[propName] && property) {
+      errorProps[propName].forEach(errorProperty => {
+        if (errorProperty in property) {
+          this._displayConsole(`Prop ${propName} is not allowed to configure the ${errorProperty} property`, level);
+        }
+      });
+    }
+  }
+
   _renderTabs() {
     const { oneTabHidden, tabsShown, tabsStyle, tabStyle, useScroll, tabsEnableAnimated, useScrollStyle } = this.props;
     const { width } = tabStyle;
-    if (tabsEnableAnimated && tabStyle && width == undefined) throw new Error('When tabsEnableAnimated is true, the width must be specified for tabStyle');
-    if (useScroll && tabStyle && width == undefined) throw new Error('When useScroll is true, the width must be specified for tabStyle');
+    if (tabsEnableAnimated && tabStyle && width == undefined) this._displayConsole('When tabsEnableAnimated is true, the width must be specified for tabStyle', CONSOLE_LEVEL.ERROR);
+    if (useScroll && tabStyle && width == undefined) this._displayConsole('When useScroll is true, the width must be specified for tabStyle', CONSOLE_LEVEL.ERROR);
     const renderTab = !(oneTabHidden && this.tabs && this.tabs.length == 1) && tabsShown;
     const _tabsStyle = Object.assign({}, !useScroll && { alignItems: 'center', justifyContent: 'space-around' }, styles.tabsStyle, tabsStyle);
     this.layoutHeight['tabs'] = renderTab ? _tabsStyle.height : 0;
     this.tabWidth = width;
+    this._errorProps('tabStyle', CONSOLE_LEVEL.ERROR);
     return (
       renderTab &&
       this.tabs &&
@@ -470,9 +508,10 @@ export default class ScrollableTabView extends React.Component {
   // 启用 useScroll 情况下保证滚动条跟随
   _tabTranslateX(index = this.state.checkedIndex) {
     const { useScroll } = this.props;
-    if (useScroll && this.scrollview && this.tabWidth) {
+    const width = this.tabWidthWrap || this.tabWidth;
+    if (useScroll && this.scrollview && width) {
       this.scrollview.scrollTo({
-        x: (index - 1) * this.tabWidth + this.tabWidth / 2
+        x: (index - 1) * width + width / 2
       });
     }
   }
@@ -547,7 +586,7 @@ export default class ScrollableTabView extends React.Component {
   _onEndReached() {
     const next = () => {
       const ref = this.getCurrentRef();
-      !ref && console.warn(`The Screen Ref is lost when calling onEndReached. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
+      !ref && this._displayConsole(`The Screen Ref is lost when calling onEndReached. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
       if (ref && ref.onEndReached && typeof ref.onEndReached === 'function') ref.onEndReached();
     };
     const { onBeforeEndReached } = this.props;
@@ -563,7 +602,7 @@ export default class ScrollableTabView extends React.Component {
   _onRefresh() {
     const next = () => {
       const ref = this.getCurrentRef();
-      !ref && console.warn(`The Screen Ref is lost when calling onRefresh. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
+      !ref && this._displayConsole(`The Screen Ref is lost when calling onRefresh. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
       ref ? ref.onRefresh && typeof ref.onRefresh === 'function' && ref.onRefresh(this._toggledRefreshing) : this._toggledRefreshing(false);
     };
     const { onBeforeRefresh } = this.props;
