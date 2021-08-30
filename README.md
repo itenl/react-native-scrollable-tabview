@@ -178,7 +178,9 @@ Prop              | Type     | Default     | Description
 **`title`**             | Function / JSX Element / Class Component    | null          | Animation title
 **`titleArgs`**             | Object    | **`{  style: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | Title parameter configuration < [Read interpolate](https://reactnative.dev/docs/animations#interpolation) >
 **`onScroll`**             | Function    | null          | Scroll event monitoring
+**`onScroll2Horizontal`**             | Function    | null          | Scroll event monitoring for orizontal
 **`tabsEnableAnimated`**             | Boolean    | false          | Enable sliding effect for Tabs, Need to specify **`width`** for **`tabStyle`**
+**`tabsEnableAnimatedUnderlineWidth`**             | Number    | 0          | To set a fixed width for the Tabs Underline and add a jumping animation, you need to enable **`tabsEnableAnimated=true`**. (It is recommended to pass in one third of **`tabStyle.width`** or a fixed 30px)
 
 ## <a name="method"/>Method
 
@@ -249,7 +251,13 @@ Name              | Type     | Description
 
 ## <a name="Snapshot"/>Snapshot
 
+### Android (Sliding Tabs)
 <img src="./snapshot/e18k6-3jmxk.gif" />
+
+### iOS (Bounce Tabs)
+<img src="./snapshot/e18k6-3jmxk-2.gif" />
+
+### API Example
 <img src="./snapshot/qoz8r-klpuc.gif" />
 <br />
 
