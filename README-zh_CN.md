@@ -252,7 +252,13 @@ Name              | Type     | Description
 
 ## <a name="Snapshot"/>Snapshot
 
+### Android (Sliding Tabs)
 <img src="./snapshot/e18k6-3jmxk.gif" />
+
+### iOS (Bounce Tabs)
+<img src="./snapshot/e18k6-3jmxk-2.gif" />
+
+### API Example
 <img src="./snapshot/qoz8r-klpuc.gif" />
 <br />
 
