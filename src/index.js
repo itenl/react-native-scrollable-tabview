@@ -529,16 +529,22 @@ export default class ScrollableTabView extends React.Component {
       if (!isCarouselScroll && toTabsOnTab) return this._scrollTo(0);
       return void 0;
     }
-    if (!this.state.lazyIndexs.includes(index)) this.state.lazyIndexs.push(index);
     let state = {
-      checkedIndex: index,
-      lazyIndexs: this.state.lazyIndexs
-    };
-    if (!enableCachePage) state.refsObj = this._resetOtherRefs();
+        checkedIndex: index,
+        lazyIndexs: this.state.lazyIndexs
+      },
+      isFirst = false;
+    if (!enableCachePage) {
+      isFirst = true;
+      state.refsObj = this._resetOtherRefs();
+      state.lazyIndexs = [index];
+    } else {
+      if (!this._getLazyIndexs(index)) state.lazyIndexs.push(index), (isFirst = true);
+    }
     this.setState(state, () => {
       if (onTabviewChanged) {
         const tab = this.tabs[this.state.checkedIndex];
-        onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel);
+        onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel, isFirst);
       }
     });
     this._tabTranslateX(index);
@@ -549,7 +555,7 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _getLazyIndexs(index) {
-    if (this.state.lazyIndexs.includes(index)) return true;
+    return this.state.lazyIndexs.includes(index);
   }
 
   _getScreenHeight() {
