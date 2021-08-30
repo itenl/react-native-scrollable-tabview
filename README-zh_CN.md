@@ -178,7 +178,9 @@ Prop              | Type     | Default     | Description
 **`title`**             | Function / JSX Element / Class Component    | null          | 动画标题
 **`titleArgs`**             | Object    | **`{  style: {}, interpolateOpacity: {}, interpolateHeight: {} }`**          | 标题配置 < [阅读 interpolate](https://reactnative.dev/docs/animations#interpolation) >
 **`onScroll`**             | Function    | null          | 滚动事件监听
+**`onScroll2Horizontal`**             | Function    | null          | 滚动事件监听(横向)
 **`tabsEnableAnimated`**             | Boolean    | false          | 为Tabs启用滑动效果，需要为 **`tabStyle`** 指定 **`width`**
+**`tabsEnableAnimatedUnderlineWidth`**             | Number    | 0          | 为Tabs Underline设定固定宽度并添加弹跳动画，需要启用 **`tabsEnableAnimated=true`**.( 建议传入 **`tabStyle.width`** 的三分之一或固定 30px )
 
 ## <a name="method"/>Method
 
@@ -250,7 +252,13 @@ Name              | Type     | Description
 
 ## <a name="Snapshot"/>Snapshot
 
+### Android (Sliding Tabs)
 <img src="./snapshot/e18k6-3jmxk.gif" />
+
+### iOS (Bounce Tabs)
+<img src="./snapshot/e18k6-3jmxk-2.gif" />
+
+### API Example
 <img src="./snapshot/qoz8r-klpuc.gif" />
 <br />
 

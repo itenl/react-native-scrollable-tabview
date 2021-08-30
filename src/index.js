@@ -4,11 +4,18 @@ import PropTypes from 'prop-types';
 import Carousel from '@itenl/react-native-snap-carousel';
 import HocComponent from './HocComponent';
 import _throttle from 'lodash.throttle';
+import packagejson from '../package.json';
 const deviceWidth = Dimensions.get('window').width;
+
+const CONSOLE_LEVEL = {
+  LOG: 'log',
+  INFO: 'info',
+  WARN: 'warn',
+  ERROR: 'error'
+};
 
 /**
  * @author itenl
- * @export
  * @class ScrollableTabView
  * @extends {React.Component}
  */
@@ -25,6 +32,7 @@ export default class ScrollableTabView extends React.Component {
     tabActiveOpacity: PropTypes.number,
     tabStyle: PropTypes.object,
     tabsEnableAnimated: PropTypes.bool,
+    tabsEnableAnimatedUnderlineWidth: PropTypes.number,
     useScrollStyle: PropTypes.object,
     textStyle: PropTypes.object,
     textActiveStyle: PropTypes.object,
@@ -48,6 +56,7 @@ export default class ScrollableTabView extends React.Component {
     title: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     titleArgs: PropTypes.object,
     onScroll: PropTypes.func,
+    onScroll2Horizontal: PropTypes.func,
     screenScrollThrottle: PropTypes.number
   };
 
@@ -63,6 +72,7 @@ export default class ScrollableTabView extends React.Component {
     tabActiveOpacity: 0.6,
     tabStyle: {},
     tabsEnableAnimated: false,
+    tabsEnableAnimatedUnderlineWidth: 0,
     useScrollStyle: {},
     textStyle: {},
     textActiveStyle: {},
@@ -90,6 +100,7 @@ export default class ScrollableTabView extends React.Component {
       interpolateHeight: {}
     },
     onScroll: null,
+    onScroll2Horizontal: null,
     screenScrollThrottle: 60
   };
 
@@ -98,32 +109,7 @@ export default class ScrollableTabView extends React.Component {
     this.state = {
       ...this._initialState()
     };
-    this.sectionListScrollY = new Animated.Value(0);
-    this.carouselScrollX = new Animated.Value(0);
-    this.tabsMeasurements = [];
-    this.tabWidth = 0;
-    this.layoutHeight = {
-      container: 0,
-      header: 0,
-      tabs: 0,
-      screen: 0
-    };
-    this.interpolate = {
-      height: {
-        inputRange: [0, 160],
-        outputRange: [0, 80],
-        extrapolate: 'clamp'
-      },
-      opacity: {
-        inputRange: [160, 320],
-        outputRange: [0.2, 1],
-        extrapolate: 'clamp'
-      }
-    };
-    this._throttleCallback = _throttle(this._onTabviewChange.bind(this, true), props.screenScrollThrottle, {
-      leading: false,
-      trailing: true
-    });
+    this._initialProperty();
     this._initial();
   }
 
@@ -140,12 +126,57 @@ export default class ScrollableTabView extends React.Component {
     };
   }
 
+  _initialProperty() {
+    const { screenScrollThrottle } = this.props;
+    this.sectionListScrollY = new Animated.Value(0);
+    this.carouselScrollX = new Animated.Value(0);
+    this.tabsMeasurements = [];
+    this.tabWidth = 0;
+    this.tabWidthWrap = 0;
+    this.layoutHeight = {
+      container: 0,
+      header: 0,
+      tabs: 0,
+      screen: 0
+    };
+    this.titleInterpolateArgs = {
+      height: {
+        inputRange: [0, 160],
+        outputRange: [0, 80],
+        extrapolate: 'clamp'
+      },
+      opacity: {
+        inputRange: [160, 320],
+        outputRange: [0.2, 1],
+        extrapolate: 'clamp'
+      }
+    };
+    this.tabUnderlineInterpolateArgs = {
+      inputRange: [],
+      outputRange: [],
+      extrapolate: 'clamp'
+    };
+    this._throttleCallback = _throttle(this._onTabviewChange.bind(this, true), screenScrollThrottle, {
+      leading: false,
+      trailing: true
+    });
+    this._renderSectionHeader = this._renderSectionHeader.bind(this);
+    this._onRefresh = this._onRefresh.bind(this);
+    this._onEndReached = this._onEndReached.bind(this);
+    this._renderItem = this._renderItem.bind(this);
+    this._toggledRefreshing = this._toggledRefreshing.bind(this);
+    this._onScroll2Vertical = this._onScroll2Vertical.bind(this);
+    this._onScroll2Horizontal = this._onScroll2Horizontal.bind(this);
+    this._setScrollHandler2Vertical();
+    this._setScrollHandler2Horizontal();
+  }
+
   _initial(props = this.props, isProcess = false) {
     isProcess && this._toProcess(props);
     this.tabs = this._getTabs(props);
     this.badges = this._getBadges(props);
     this.stacks = this._getWrapChildren(props);
-    if (props.firstIndex > Math.max(this.stacks.length - 1, 0)) throw new Error('firstIndex cannot exceed the total number of stacks.length');
+    if (props.firstIndex > Math.max(this.stacks.length - 1, 0)) this._displayConsole('firstIndex cannot exceed the total number of stacks.length', CONSOLE_LEVEL.ERROR);
   }
 
   /**
@@ -315,7 +346,7 @@ export default class ScrollableTabView extends React.Component {
     const { useScroll, badges } = this.props;
     const _badges = this.badges[tabIndex] || badges[tabIndex];
     if (_badges && _badges.length) {
-      if (useScroll) console.warn('When useScroll and badges exist at the same time, the badge will not overflow the Tabs container');
+      if (useScroll) this._displayConsole('When useScroll and badges exist at the same time, the badge will not overflow the Tabs container');
       return _badges.map(item => {
         return item;
       });
@@ -331,64 +362,103 @@ export default class ScrollableTabView extends React.Component {
   _renderTab({ item, index }) {
     const { tabActiveOpacity, tabWrapStyle, tabInnerStyle, tabStyle, textStyle, textActiveStyle, tabUnderlineStyle, tabsEnableAnimated } = this.props;
     const _tabUnderlineStyle = Object.assign({ top: 6 }, styles.tabUnderlineStyle, tabUnderlineStyle);
-    const checked = this.state.checkedIndex == index;
-    const _tabWrapStyle = typeof tabWrapStyle === 'function' ? tabWrapStyle(item, index) : tabWrapStyle;
+    const _checked = this.state.checkedIndex == index;
+    const _tabWrapStyle = typeof tabWrapStyle === 'function' ? tabWrapStyle(item, index, _checked) : tabWrapStyle;
+    const _tab = typeof item.tabLabelRender === 'function' ? item.tabLabelRender(item.tabLabel, index, _checked) : item.tabLabel;
     return (
       <View onLayout={this._measureTab.bind(this, index)} key={index} style={_tabWrapStyle}>
         {this._renderBadges(index)}
         <TouchableOpacity activeOpacity={tabActiveOpacity} onPress={() => this._onTabviewChange(false, index)} style={[styles.tabStyle, tabStyle]}>
           <View style={tabInnerStyle}>
-            <Text style={[styles.textStyle, textStyle, checked && textActiveStyle]}>
-              {item.tabLabelRender && typeof item.tabLabelRender == 'function' ? item.tabLabelRender(item.tabLabel) : item.tabLabel}
-            </Text>
-            {!tabsEnableAnimated && checked && <View style={_tabUnderlineStyle}></View>}
+            {typeof _tab === 'string' ? <Text style={[styles.textStyle, textStyle, _checked && textActiveStyle]}>{_tab}</Text> : _tab}
+            {!tabsEnableAnimated && _checked && <View style={_tabUnderlineStyle}></View>}
           </View>
         </TouchableOpacity>
       </View>
     );
   }
 
+  _getTabUnderlineInterpolateArgs(tabsEnableAnimatedUnderlineWidth) {
+    const tabsCount = this.tabs.length - 1;
+    if (tabsCount * 2 + 1 === this.tabUnderlineInterpolateArgs.inputRange.length) return this.tabUnderlineInterpolateArgs;
+    const maxTranslateXVal = deviceWidth * tabsCount;
+    const _outputRange = [];
+    const _inputRange = Array.from({ length: maxTranslateXVal / (deviceWidth / 2) + 1 }, (v, k) => {
+      _outputRange.push(k % 2 ? this.tabWidth / tabsEnableAnimatedUnderlineWidth : 1);
+      return k == 0 ? k : (k * deviceWidth) / 2;
+    });
+    this.tabUnderlineInterpolateArgs.inputRange = _inputRange;
+    this.tabUnderlineInterpolateArgs.outputRange = _outputRange;
+    return this.tabUnderlineInterpolateArgs;
+  }
+
   _renderAnimatedTabUnderline() {
-    const { useScroll, tabUnderlineStyle, useScrollStyle } = this.props;
+    const { useScroll, tabUnderlineStyle, useScrollStyle, tabStyle, tabsEnableAnimatedUnderlineWidth } = this.props;
+    const { marginLeft, marginRight, marginHorizontal } = tabStyle;
     const { paddingLeft, paddingHorizontal } = useScrollStyle;
     const _tabUnderlineStyle = Object.assign({ zIndex: 100, width: this.tabWidth, position: 'absolute' }, styles.tabUnderlineStyle, tabUnderlineStyle);
     if (!_tabUnderlineStyle.top && _tabUnderlineStyle.height) _tabUnderlineStyle.top = this.layoutHeight['tabs'] - _tabUnderlineStyle.height;
-    let outputLeft = paddingLeft || paddingHorizontal || 0;
+    let underlineLeft = marginLeft || marginHorizontal || 0;
+    let underlineRight = marginRight || marginHorizontal || 0;
+    let outputLeft = 0;
     let outputRight = deviceWidth;
-    if (useScroll) outputRight = this.tabs.length * this.tabWidth;
-    if (outputLeft) outputRight = outputRight + outputLeft;
-    // const index = this.state.checkedIndex;
-    // const tabsMeasurements = this.tabsMeasurements[index];
-    // const { left, right, width, height } = tabsMeasurements;
-    return (
-      <Animated.View
-        style={[
-          styles.tabUnderlineStyle,
-          _tabUnderlineStyle,
-          {
-            transform: [
-              {
-                translateX: this.carouselScrollX.interpolate({
-                  inputRange: [0, this.tabs.length * deviceWidth],
-                  outputRange: [outputLeft, outputRight]
-                })
-              }
-            ]
-          }
-        ]}
-      ></Animated.View>
-    );
+    this.tabWidthWrap = this.tabWidth + underlineLeft + underlineRight;
+    if (useScroll) {
+      outputLeft = paddingLeft || paddingHorizontal || 0;
+      outputRight = this.tabWidthWrap * this.tabs.length;
+    }
+    outputLeft = outputLeft + underlineLeft;
+    outputRight = outputRight + outputLeft;
+    const interpolateAnimated = {
+      transform: [
+        {
+          translateX: this.carouselScrollX.interpolate({
+            inputRange: [0, this.tabs.length * deviceWidth],
+            outputRange: [outputLeft, outputRight],
+            extrapolate: 'clamp'
+          })
+        }
+      ]
+    };
+    if (!!tabsEnableAnimatedUnderlineWidth) {
+      if (tabsEnableAnimatedUnderlineWidth >= this.tabWidth / 2) this._displayConsole('The value of tabsEnableAnimatedUnderlineWidth we recommend to be one-third of tabStyle.width or a fixed 30px');
+      interpolateAnimated.marginLeft = this.tabWidth / 2 - tabsEnableAnimatedUnderlineWidth / 2;
+      interpolateAnimated.width = tabsEnableAnimatedUnderlineWidth;
+      interpolateAnimated.transform.push({ scaleX: this.carouselScrollX.interpolate(this._getTabUnderlineInterpolateArgs(tabsEnableAnimatedUnderlineWidth)) });
+    }
+    return <Animated.View style={[styles.tabUnderlineStyle, _tabUnderlineStyle, interpolateAnimated]}></Animated.View>;
+  }
+
+  _displayConsole(message, level = CONSOLE_LEVEL.WARN) {
+    const pluginName = packagejson.name;
+    console[level](`${pluginName}: ${message || ' --- '}`);
+  }
+
+  _errorProps(propName, level) {
+    const props = this.props,
+      property = props[propName],
+      errorProps = {
+        tabStyle: ['left', 'right']
+      };
+    if (errorProps[propName] && property) {
+      errorProps[propName].forEach(errorProperty => {
+        if (errorProperty in property) {
+          this._displayConsole(`Prop ${propName} is not allowed to configure the ${errorProperty} property`, level);
+        }
+      });
+    }
   }
 
   _renderTabs() {
     const { oneTabHidden, tabsShown, tabsStyle, tabStyle, useScroll, tabsEnableAnimated, useScrollStyle } = this.props;
     const { width } = tabStyle;
-    if (tabsEnableAnimated && tabStyle && width == undefined) throw new Error('When tabsEnableAnimated is true, the width must be specified for tabStyle');
-    if (useScroll && tabStyle && width == undefined) throw new Error('When useScroll is true, the width must be specified for tabStyle');
+    if (tabsEnableAnimated && tabStyle && width == undefined) this._displayConsole('When tabsEnableAnimated is true, the width must be specified for tabStyle', CONSOLE_LEVEL.ERROR);
+    if (useScroll && tabStyle && width == undefined) this._displayConsole('When useScroll is true, the width must be specified for tabStyle', CONSOLE_LEVEL.ERROR);
     const renderTab = !(oneTabHidden && this.tabs && this.tabs.length == 1) && tabsShown;
     const _tabsStyle = Object.assign({}, !useScroll && { alignItems: 'center', justifyContent: 'space-around' }, styles.tabsStyle, tabsStyle);
     this.layoutHeight['tabs'] = renderTab ? _tabsStyle.height : 0;
     this.tabWidth = width;
+    this._errorProps('tabStyle', CONSOLE_LEVEL.ERROR);
     return (
       renderTab &&
       this.tabs &&
@@ -415,9 +485,10 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _renderSectionHeader() {
+    const { fixedHeader } = this.props;
     return (
       <View style={{ flex: 1 }}>
-        {this.props.fixedHeader && this._renderHeader()}
+        {this._renderHeader(fixedHeader)}
         {this._renderTabs()}
         {this._renderSticky()}
       </View>
@@ -437,9 +508,10 @@ export default class ScrollableTabView extends React.Component {
   // 启用 useScroll 情况下保证滚动条跟随
   _tabTranslateX(index = this.state.checkedIndex) {
     const { useScroll } = this.props;
-    if (useScroll && this.scrollview && this.tabWidth) {
+    const width = this.tabWidthWrap || this.tabWidth;
+    if (useScroll && this.scrollview && width) {
       this.scrollview.scrollTo({
-        x: (index - 1) * this.tabWidth + this.tabWidth / 2
+        x: (index - 1) * width + width / 2
       });
     }
   }
@@ -457,16 +529,22 @@ export default class ScrollableTabView extends React.Component {
       if (!isCarouselScroll && toTabsOnTab) return this._scrollTo(0);
       return void 0;
     }
-    if (!this.state.lazyIndexs.includes(index)) this.state.lazyIndexs.push(index);
     let state = {
-      checkedIndex: index,
-      lazyIndexs: this.state.lazyIndexs
-    };
-    if (!enableCachePage) state.refsObj = this._resetOtherRefs();
+        checkedIndex: index,
+        lazyIndexs: this.state.lazyIndexs
+      },
+      isFirst = false;
+    if (!enableCachePage) {
+      isFirst = true;
+      state.refsObj = this._resetOtherRefs();
+      state.lazyIndexs = [index];
+    } else {
+      if (!this._getLazyIndexs(index)) state.lazyIndexs.push(index), (isFirst = true);
+    }
     this.setState(state, () => {
       if (onTabviewChanged) {
         const tab = this.tabs[this.state.checkedIndex];
-        onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel);
+        onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel, isFirst);
       }
     });
     this._tabTranslateX(index);
@@ -477,7 +555,7 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _getLazyIndexs(index) {
-    if (this.state.lazyIndexs.includes(index)) return true;
+    return this.state.lazyIndexs.includes(index);
   }
 
   _getScreenHeight() {
@@ -514,8 +592,8 @@ export default class ScrollableTabView extends React.Component {
   _onEndReached() {
     const next = () => {
       const ref = this.getCurrentRef();
-      !ref && console.warn(`The Screen Ref is lost when calling onEndReached. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
-      if (ref && ref.onEndReached && typeof ref.onEndReached == 'function') ref.onEndReached();
+      !ref && this._displayConsole(`The Screen Ref is lost when calling onEndReached. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
+      if (ref && ref.onEndReached && typeof ref.onEndReached === 'function') ref.onEndReached();
     };
     const { onBeforeEndReached } = this.props;
     onBeforeEndReached && typeof onBeforeEndReached === 'function' ? onBeforeEndReached(next) : next();
@@ -530,17 +608,18 @@ export default class ScrollableTabView extends React.Component {
   _onRefresh() {
     const next = () => {
       const ref = this.getCurrentRef();
-      !ref && console.warn(`The Screen Ref is lost when calling onRefresh. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
-      if (ref && ref.onRefresh && typeof ref.onRefresh == 'function') ref.onRefresh(this._toggledRefreshing.bind(this));
+      !ref && this._displayConsole(`The Screen Ref is lost when calling onRefresh. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
+      ref ? ref.onRefresh && typeof ref.onRefresh === 'function' && ref.onRefresh(this._toggledRefreshing) : this._toggledRefreshing(false);
     };
     const { onBeforeRefresh } = this.props;
-    onBeforeRefresh && typeof onBeforeRefresh === 'function' ? onBeforeRefresh(next, this._toggledRefreshing.bind(this)) : next();
+    onBeforeRefresh && typeof onBeforeRefresh === 'function' ? onBeforeRefresh(next, this._toggledRefreshing) : next();
   }
 
-  _renderHeader = () => {
+  _renderHeader = isRender => {
     const { header } = this.props;
     return (
-      header && (
+      header &&
+      isRender && (
         <View
           onLayout={({ nativeEvent }) => {
             const { height } = nativeEvent.layout;
@@ -556,13 +635,14 @@ export default class ScrollableTabView extends React.Component {
 
   _renderTitle = () => {
     const { title, titleArgs } = this.props;
+    if (!title) return null;
     const { style, interpolateHeight, interpolateOpacity } = titleArgs;
     return (
       <Animated.View
         style={[
           {
-            height: this.sectionListScrollY.interpolate(Object.assign(this.interpolate.height, interpolateHeight)),
-            opacity: this.sectionListScrollY.interpolate(Object.assign(this.interpolate.opacity, interpolateOpacity)),
+            height: this.sectionListScrollY.interpolate(Object.assign(this.titleInterpolateArgs.height, interpolateHeight)),
+            opacity: this.sectionListScrollY.interpolate(Object.assign(this.titleInterpolateArgs.opacity, interpolateOpacity)),
             overflow: 'hidden'
           },
           style
@@ -573,8 +653,49 @@ export default class ScrollableTabView extends React.Component {
     );
   };
 
+  _refreshControl() {
+    const ref = this.getCurrentRef();
+    return <RefreshControl enabled={!!(ref && ref.onRefresh)} refreshing={this.state.isRefreshing} onRefresh={this._onRefresh} />;
+  }
+
+  _onScroll2Vertical(event) {
+    const { onScroll } = this.props;
+    // TODO...
+    if (typeof onScroll === 'function' && event) onScroll(event);
+  }
+
+  _setScrollHandler2Vertical() {
+    const { title } = this.props;
+    const scrollEventConfig = {
+      listener: this._onScroll2Vertical,
+      useNativeDriver: false
+    };
+    const argMapping = [];
+    if (title) argMapping.push({ nativeEvent: { contentOffset: { y: this.sectionListScrollY } } });
+    this._onScrollHandler2Vertical = Animated.event(argMapping, scrollEventConfig);
+  }
+
+  _onScroll2Horizontal(event) {
+    const { onScroll2Horizontal } = this.props;
+    // TODO...
+    if (typeof onScroll2Horizontal === 'function' && event) onScroll2Horizontal(event);
+  }
+
+  _setScrollHandler2Horizontal() {
+    const { tabsEnableAnimated, tabsEnableAnimatedUnderlineWidth } = this.props;
+    const scrollEventConfig = {
+      listener: this._onScroll2Horizontal,
+      // listener: ({ nativeEvent }) => console.log(nativeEvent.contentOffset.x),
+      // If useNativeDriver is True, the listener cannot be triggered
+      useNativeDriver: !tabsEnableAnimatedUnderlineWidth && !__DEV__
+    };
+    const argMapping = [];
+    if (tabsEnableAnimated) argMapping.push({ nativeEvent: { contentOffset: { x: this.carouselScrollX } } });
+    this._onScrollHandler2Horizontal = Animated.event(argMapping, scrollEventConfig);
+  }
+
   render() {
-    const { style, title, onEndReachedThreshold, fixedHeader, tabsEnableAnimated, carouselProps, onScroll, sectionListProps } = this.props;
+    const { style, onEndReachedThreshold, fixedHeader, carouselProps, sectionListProps } = this.props;
     return (
       <View
         onLayout={({ nativeEvent }) => {
@@ -584,17 +705,17 @@ export default class ScrollableTabView extends React.Component {
         }}
         style={[styles.container, style]}
       >
-        {!!title && this._renderTitle()}
+        {this._renderTitle()}
         <SectionList
           ref={rf => (this.section = rf)}
           keyExtractor={(item, index) => `scrollable-tab-view-wrap-${index}`}
-          renderSectionHeader={this._renderSectionHeader.bind(this)}
-          onEndReached={this._onEndReached.bind(this)}
+          renderSectionHeader={this._renderSectionHeader}
+          onEndReached={this._onEndReached}
           onEndReachedThreshold={onEndReachedThreshold}
-          refreshControl={<RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh.bind(this)} />}
+          refreshControl={this._refreshControl()}
           sections={[{ data: [1] }]}
           stickySectionHeadersEnabled={true}
-          ListHeaderComponent={!fixedHeader && this._renderHeader()}
+          ListHeaderComponent={this._renderHeader(!fixedHeader)}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           renderItem={() => {
@@ -604,54 +725,19 @@ export default class ScrollableTabView extends React.Component {
                 pagingEnabled={true}
                 inactiveSlideScale={1}
                 data={this.stacks}
-                renderItem={this._renderItem.bind(this)}
+                renderItem={this._renderItem}
                 sliderWidth={deviceWidth}
                 itemWidth={deviceWidth}
                 onScrollIndexChanged={this._throttleCallback}
                 initialScrollIndex={this.state.checkedIndex}
                 firstItem={this.state.checkedIndex}
-                getItemLayout={(data, index) => ({
-                  length: deviceWidth,
-                  offset: deviceWidth * index,
-                  index
-                })}
-                onScroll={
-                  tabsEnableAnimated &&
-                  Animated.event(
-                    [
-                      {
-                        nativeEvent: { contentOffset: { x: this.carouselScrollX } }
-                      }
-                    ],
-                    {
-                      // listener: ({ nativeEvent }) => console.log(nativeEvent.contentOffset.x),
-                      // If useNativeDriver is True, the listener cannot be triggered
-                      useNativeDriver: true
-                    }
-                  )
-                }
+                onScroll={this._onScrollHandler2Horizontal}
                 {...carouselProps}
               />
             );
           }}
           onScrollToIndexFailed={() => {}}
-          onScroll={
-            !!title
-              ? Animated.event(
-                  [
-                    {
-                      nativeEvent: { contentOffset: { y: this.sectionListScrollY } }
-                    }
-                  ],
-                  {
-                    listener: !!onScroll && onScroll.bind(this),
-                    useNativeDriver: false
-                  }
-                )
-              : !!onScroll
-              ? onScroll.bind(this)
-              : null
-          }
+          onScroll={this._onScrollHandler2Vertical}
           {...sectionListProps}
         ></SectionList>
       </View>
