@@ -181,6 +181,7 @@ Prop              | Type     | Default     | Description
 **`onScroll2Horizontal`**             | Function    | null          | Scroll event monitoring for orizontal
 **`tabsEnableAnimated`**             | Boolean    | false          | Enable sliding effect for Tabs, Need to specify **`width`** for **`tabStyle`**
 **`tabsEnableAnimatedUnderlineWidth`**             | Number    | 0          | To set a fixed width for the Tabs Underline and add a jumping animation, you need to enable **`tabsEnableAnimated=true`**. (It is recommended to pass in one third of **`tabStyle.width`** or a fixed 30px)
+**`errorToThrow`**             | Boolean    | false          | **`console.error`** will throw an error **`throw new Error()`**
 
 ## <a name="method"/>Method
 
