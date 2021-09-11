@@ -60,7 +60,8 @@ export default class ScrollableTabView extends React.Component {
     titleArgs: PropTypes.object,
     onScroll: PropTypes.func,
     onScroll2Horizontal: PropTypes.func,
-    screenScrollThrottle: PropTypes.number
+    screenScrollThrottle: PropTypes.number,
+    errorToThrow: PropTypes.bool
   };
 
   static defaultProps = {
@@ -104,7 +105,8 @@ export default class ScrollableTabView extends React.Component {
     },
     onScroll: null,
     onScroll2Horizontal: null,
-    screenScrollThrottle: 60
+    screenScrollThrottle: 60,
+    errorToThrow: false
   };
 
   constructor(props) {
@@ -382,11 +384,10 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _getTabUnderlineInterpolateArgs(tabsEnableAnimatedUnderlineWidth) {
-    const tabsCount = this.tabs.length - 1;
-    if (tabsCount * 2 + 1 === this.tabUnderlineInterpolateArgs.inputRange.length) return this.tabUnderlineInterpolateArgs;
-    const maxTranslateXVal = deviceWidth * tabsCount;
+    const maxTranslateXCount = this.tabs.length * 2 - 1;
+    if (maxTranslateXCount === this.tabUnderlineInterpolateArgs.inputRange.length) return this.tabUnderlineInterpolateArgs;
     const _outputRange = [];
-    const _inputRange = Array.from({ length: maxTranslateXVal / (deviceWidth / 2) + 1 }, (v, k) => {
+    const _inputRange = Array.from({ length: maxTranslateXCount }, (v, k) => {
       _outputRange.push(k % 2 ? this.tabWidth / tabsEnableAnimatedUnderlineWidth : 1);
       return k == 0 ? k : (k * deviceWidth) / 2;
     });
@@ -433,8 +434,11 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _displayConsole(message, level = CONSOLE_LEVEL.WARN) {
+    const { errorToThrow } = this.props;
     const pluginName = packagejson.name;
-    console[level](`${pluginName}: ${message || ' --- '}`);
+    const msg = `${pluginName}: ${message || ' --- '}`;
+    console[level](msg);
+    if (errorToThrow) throw new Error(msg);
   }
 
   _errorProps(propName, level) {
@@ -586,8 +590,10 @@ export default class ScrollableTabView extends React.Component {
       !ref && this._displayConsole(`The Screen Ref is lost when calling onEndReached. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
       if (ref && ref.onEndReached && typeof ref.onEndReached === 'function') ref.onEndReached();
     };
-    const { onBeforeEndReached } = this.props;
-    onBeforeEndReached && typeof onBeforeEndReached === 'function' ? onBeforeEndReached(next) : next();
+    if (this.state.checkedIndex != null) {
+      const { onBeforeEndReached } = this.props;
+      onBeforeEndReached && typeof onBeforeEndReached === 'function' ? onBeforeEndReached(next) : next();
+    }
   }
 
   _toggledRefreshing(status) {
