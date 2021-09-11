@@ -181,6 +181,8 @@ Prop              | Type     | Default     | Description
 **`onScroll2Horizontal`**             | Function    | null          | 滚动事件监听(横向)
 **`tabsEnableAnimated`**             | Boolean    | false          | 为Tabs启用滑动效果，需要为 **`tabStyle`** 指定 **`width`**
 **`tabsEnableAnimatedUnderlineWidth`**             | Number    | 0          | 为Tabs Underline设定固定宽度并添加弹跳动画，需要启用 **`tabsEnableAnimated=true`**.( 建议传入 **`tabStyle.width`** 的三分之一或固定 30px )
+**`errorToThrow`**             | Boolean    | false          | **`console.error`** 将会抛出错误 **`throw new Error()`**
+
 
 ## <a name="method"/>Method
 
