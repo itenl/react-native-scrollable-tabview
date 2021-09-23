@@ -438,7 +438,7 @@ export default class ScrollableTabView extends React.Component {
     const pluginName = packagejson.name;
     const msg = `${pluginName}: ${message || ' --- '}`;
     console[level](msg);
-    if (errorToThrow) throw new Error(msg);
+    if (errorToThrow && level == CONSOLE_LEVEL.ERROR) throw new Error(msg);
   }
 
   _errorProps(propName, level) {
@@ -480,12 +480,12 @@ export default class ScrollableTabView extends React.Component {
           horizontal={true}
         >
           {this.tabs.map((tab, index) => this._renderTab({ item: tab, index }))}
-          {tabsEnableAnimated && this._renderAnimatedTabUnderline()}
+          {tabsEnableAnimated && this.state.checkedIndex !== null && this._renderAnimatedTabUnderline()}
         </ScrollView>
       ) : (
         <View style={_tabsStyle}>
           {this.tabs.map((tab, index) => this._renderTab({ item: tab, index }))}
-          {tabsEnableAnimated && this._renderAnimatedTabUnderline()}
+          {tabsEnableAnimated && this.state.checkedIndex !== null && this._renderAnimatedTabUnderline()}
         </View>
       ))
     );
