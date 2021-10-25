@@ -520,6 +520,8 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _onTabviewChange(isCarouselScroll, index) {
+    if (!this.stacks.length) return;
+    if (!this.stacks[index]) return;
     const { enableCachePage, toHeaderOnTab, toTabsOnTab, onTabviewChanged } = this.props;
     if (index == this.state.checkedIndex) {
       if (!isCarouselScroll && toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
