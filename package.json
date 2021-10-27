@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "lodash.throttle": "^4.1.1",
-    "@itenl/react-native-snap-carousel": "^4.0.0-beta.6"
+    "@itenl/react-native-snap-carousel": "^4.0.0-beta.6",
+    "lodash.throttle": "^4.1.1"
   },
   "keywords": [
     "react",
