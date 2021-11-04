@@ -520,33 +520,36 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _onTabviewChange(isCarouselScroll, index) {
-    const { enableCachePage, toHeaderOnTab, toTabsOnTab, onTabviewChanged } = this.props;
-    if (index == this.state.checkedIndex) {
-      if (!isCarouselScroll && toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
-      if (!isCarouselScroll && toTabsOnTab) return this._scrollTo(0);
-      return void 0;
-    }
-    let state = {
+    const { enableCachePage, toHeaderOnTab, toTabsOnTab, onTabviewChanged, disableChangeTab } = this.props;
+    if (disableChangeTab === true) {
+      if (index == this.state.checkedIndex) {
+        if (!isCarouselScroll && toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
+        if (!isCarouselScroll && toTabsOnTab) return this._scrollTo(0);
+        return void 0;
+      }
+      let state = {
         checkedIndex: index,
         lazyIndexs: this.state.lazyIndexs
       },
-      isFirst = false;
-    if (!enableCachePage) {
-      isFirst = true;
-      state.refsObj = this._resetOtherRefs();
-      state.lazyIndexs = [index];
-    } else {
-      if (!this._getLazyIndexs(index)) state.lazyIndexs.push(index), (isFirst = true);
-    }
-    this.setState(state, () => {
-      if (onTabviewChanged) {
-        const tab = this.tabs[this.state.checkedIndex];
-        onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel, isFirst);
+        isFirst = false;
+      if (!enableCachePage) {
+        isFirst = true;
+        state.refsObj = this._resetOtherRefs();
+        state.lazyIndexs = [index];
+      } else {
+        if (!this._getLazyIndexs(index)) state.lazyIndexs.push(index), (isFirst = true);
       }
-    });
-    this._tabTranslateX(index);
-    // 切换后强制重置刷新状态
-    this._toggledRefreshing(false);
+      this.setState(state, () => {
+        if (onTabviewChanged) {
+          const tab = this.tabs[this.state.checkedIndex];
+          onTabviewChanged(this.state.checkedIndex, tab && tab.tabLabel, isFirst);
+        }
+      });
+
+      this._tabTranslateX(index);
+      // 切换后强制重置刷新状态
+      this._toggledRefreshing(false);
+    }
   }
 
   _getLazyIndexs(index) {
@@ -731,7 +734,7 @@ export default class ScrollableTabView extends React.Component {
               />
             );
           }}
-          onScrollToIndexFailed={() => {}}
+          onScrollToIndexFailed={() => { }}
           onScroll={this._onScrollHandler2Vertical}
           {...sectionListProps}
         ></AnimatedSectionList>

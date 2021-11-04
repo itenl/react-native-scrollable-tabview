@@ -4,6 +4,7 @@
   "description": "react-native-scrollable-tabview",
   "main": "index.js",
   "scripts": {
+    "android": "react-native run-android",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
