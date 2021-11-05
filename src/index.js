@@ -693,7 +693,7 @@ export default class ScrollableTabView extends React.Component {
   }
 
   render() {
-    const { style, onEndReachedThreshold, fixedHeader, carouselProps, sectionListProps } = this.props;
+    const { style, onEndReachedThreshold, fixedHeader, carouselProps, sectionListProps,isScroll } = this.props;
     return (
       <View
         onLayout={({ nativeEvent }) => {
