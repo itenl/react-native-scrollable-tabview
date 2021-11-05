@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@itenl/react-native-snap-carousel": "^4.0.0-beta.6",
-    "lodash.throttle": "^4.1.1"
+    "lodash.throttle": "^4.1.1",
+    "styled-components": "^5.3.3"
   },
   "keywords": [
     "react",

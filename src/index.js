@@ -721,6 +721,7 @@ export default class ScrollableTabView extends React.Component {
               <AnimatedCarousel
                 ref={c => (this.tabview = c)}
                 pagingEnabled={true}
+                scrollEnabled={isScroll}
                 inactiveSlideScale={1}
                 data={this.stacks}
                 renderItem={this._renderItem}
