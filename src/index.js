@@ -494,7 +494,7 @@ export default class ScrollableTabView extends React.Component {
   _renderSectionHeader() {
     const { fixedHeader } = this.props;
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1,alignItems:'center' }}>
         {this._renderHeader(fixedHeader)}
         {this._renderTabs()}
         {this._renderSticky()}
