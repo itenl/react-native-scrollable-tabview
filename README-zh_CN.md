@@ -163,6 +163,7 @@ Prop              | Type     | Default     | Description
 **`onTabviewChanged`**             | Function    | null          | Tab切换完成回调 (回调含有 **`index`**, **`tabLabel`** 两个形参)
 **`screenScrollThrottle`**             | Number    | 60          | **`Screen`** 横向滑动时节流参数,单位 (毫秒)
 **`header`**             | Function / JSX Element / Class Component    | null          | 顶部组件 (若是函数需要返回 Element)
+**`stickyHeader`**             | Function / JSX Element / Class Component    | null          | 顶部带吸顶效果组件 (若是函数需要返回 Element)
 **`oneTabHidden`**             | Boolean    | false          | 仅一个Tab时将隐藏自身
 **`enableCachePage`**             | Boolean    | true          | 是否持久化页面切换后不销毁
 **`carouselProps`**             | Object    | {}          | 传递给 Carousel 的剩余属性 < [阅读 Carousel](https://github.com/meliorence/react-native-snap-carousel/blob/master/doc/PROPS_METHODS_AND_GETTERS.md) >
