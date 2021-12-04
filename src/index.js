@@ -120,7 +120,7 @@ export default class ScrollableTabView extends React.Component {
     this._initial();
   }
 
-  componentWillReceiveProps(newProps) {
+  UNSAFE_componentWillReceiveProps(newProps) {
     this._initial(newProps, true);
   }
 
@@ -288,6 +288,7 @@ export default class ScrollableTabView extends React.Component {
   _scrollTo = y => {
     if (typeof y == 'number') {
       this.section &&
+        this.section.scrollToLocation &&
         this.section.scrollToLocation({
           itemIndex: 0,
           viewOffset: 0 - y
@@ -741,6 +742,7 @@ export default class ScrollableTabView extends React.Component {
               <AnimatedCarousel
                 ref={c => (this.tabview = c)}
                 pagingEnabled={true}
+                inactiveSlideOpacity={1}
                 inactiveSlideScale={1}
                 data={this.stacks}
                 renderItem={this._renderItem}
