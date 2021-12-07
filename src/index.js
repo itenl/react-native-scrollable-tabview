@@ -335,7 +335,6 @@ export default class ScrollableTabView extends React.Component {
   _renderSticky() {
     const stacks = this.props.stacks[this.state.checkedIndex];
     const ref = this.getCurrentRef();
-    if (stacks && stacks.sticky && typeof stacks.sticky == 'function' && ref) {
     if (stacks && stacks.sticky && typeof stacks.sticky == 'function' && ref && stacks.__id__ === ref.__id__) {
       // 用于自动同步 Screen 数据流改变后仅会 render 自身 Screen 的问题，用于自动同步 screenContext 给吸顶组件
       if (this.props.syncToSticky && !ref.__isOverride__) {
