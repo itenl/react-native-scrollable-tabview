@@ -28,6 +28,7 @@ export default class ScrollableTabView extends React.Component {
     firstIndex: PropTypes.number,
     mappingProps: PropTypes.object,
     header: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
+    stickyHeader: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     badges: PropTypes.array,
     tabsStyle: PropTypes.object,
     tabWrapStyle: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
@@ -69,6 +70,7 @@ export default class ScrollableTabView extends React.Component {
     firstIndex: null,
     mappingProps: {},
     header: null,
+    stickyHeader: null,
     badges: [],
     tabsStyle: {},
     tabWrapStyle: {},
@@ -118,7 +120,7 @@ export default class ScrollableTabView extends React.Component {
     this._initial();
   }
 
-  componentWillReceiveProps(newProps) {
+  UNSAFE_componentWillReceiveProps(newProps) {
     this._initial(newProps, true);
   }
 
@@ -141,6 +143,7 @@ export default class ScrollableTabView extends React.Component {
     this.layoutHeight = {
       container: 0,
       header: 0,
+      stickyHeader: 0,
       tabs: 0,
       screen: 0
     };
@@ -285,6 +288,7 @@ export default class ScrollableTabView extends React.Component {
   _scrollTo = y => {
     if (typeof y == 'number') {
       this.section &&
+        this.section.scrollToLocation &&
         this.section.scrollToLocation({
           itemIndex: 0,
           viewOffset: 0 - y
@@ -331,7 +335,7 @@ export default class ScrollableTabView extends React.Component {
   _renderSticky() {
     const stacks = this.props.stacks[this.state.checkedIndex];
     const ref = this.getCurrentRef();
-    if (stacks && stacks.sticky && typeof stacks.sticky == 'function' && ref) {
+    if (stacks && stacks.sticky && typeof stacks.sticky == 'function' && ref && stacks.__id__ === ref.__id__) {
       // 用于自动同步 Screen 数据流改变后仅会 render 自身 Screen 的问题，用于自动同步 screenContext 给吸顶组件
       if (this.props.syncToSticky && !ref.__isOverride__) {
         const originalDidUpdate = ref.componentDidUpdate,
@@ -496,6 +500,7 @@ export default class ScrollableTabView extends React.Component {
     return (
       <View style={{ flex: 1 }}>
         {this._renderHeader(fixedHeader)}
+        {this._renderStickyHeader()}
         {this._renderTabs()}
         {this._renderSticky()}
       </View>
@@ -524,7 +529,7 @@ export default class ScrollableTabView extends React.Component {
     if (!this.stacks[index]) return;
     const { enableCachePage, toHeaderOnTab, toTabsOnTab, onTabviewChanged } = this.props;
     if (index == this.state.checkedIndex) {
-      if (!isCarouselScroll && toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
+      if (!isCarouselScroll && toHeaderOnTab) return this._scrollTo(-(this.layoutHeight['header'] + this.layoutHeight['stickyHeader']));
       if (!isCarouselScroll && toTabsOnTab) return this._scrollTo(0);
       return void 0;
     }
@@ -556,12 +561,12 @@ export default class ScrollableTabView extends React.Component {
   }
 
   _getScreenHeight() {
-    this.layoutHeight['screen'] = this.layoutHeight['container'] - (this.layoutHeight['header'] + this.layoutHeight['tabs']);
+    this.layoutHeight['screen'] = this.layoutHeight['container'] - (this.layoutHeight['header'] + this.layoutHeight['stickyHeader'] + this.layoutHeight['tabs']);
     return this.layoutHeight['screen'];
   }
 
   _getMaximumScreenHeight() {
-    return this.layoutHeight['container'] - this.layoutHeight['tabs'];
+    return this.layoutHeight['container'] - this.layoutHeight['stickyHeader'] - this.layoutHeight['tabs'];
   }
 
   _renderItem({ item, index }) {
@@ -627,6 +632,23 @@ export default class ScrollableTabView extends React.Component {
           }}
         >
           {typeof header === 'function' ? header() : header}
+        </View>
+      )
+    );
+  };
+
+  _renderStickyHeader = () => {
+    const { stickyHeader } = this.props;
+    return (
+      stickyHeader && (
+        <View
+          onLayout={({ nativeEvent }) => {
+            const { height } = nativeEvent.layout;
+            this.layoutHeight['stickyHeader'] = height;
+            if (height !== 0) this._refresh();
+          }}
+        >
+          {typeof stickyHeader === 'function' ? stickyHeader() : stickyHeader}
         </View>
       )
     );
@@ -720,6 +742,7 @@ export default class ScrollableTabView extends React.Component {
               <AnimatedCarousel
                 ref={c => (this.tabview = c)}
                 pagingEnabled={true}
+                inactiveSlideOpacity={1}
                 inactiveSlideScale={1}
                 data={this.stacks}
                 renderItem={this._renderItem}

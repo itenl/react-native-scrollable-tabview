@@ -163,6 +163,7 @@ Prop              | Type     | Default     | Description
 **`onTabviewChanged`**             | Function    | null          | Tab switch completion callback (callback contains **`index`**, **`tabLabel`** two formal parameters)
 **`screenScrollThrottle`**             | Number    | 60          | **`Screen`** Throttle parameters during lateral sliding, Unit (ms)
 **`header`**             | Function / JSX Element / Class Component    | null          | Top component (if the function needs to return Element)
+**`stickyHeader`**             | Function / JSX Element / Class Component    | null          | Top component (if the function needs to return Element) for sticky
 **`oneTabHidden`**             | Boolean    | false          | Hide itself when there is only one Tab
 **`enableCachePage`**             | Boolean    | true          | Whether the persistent page will not be destroyed after switching
 **`carouselProps`**             | Object    | {}          | The remaining attributes passed to Carousel < [Read Carousel](https://github.com/meliorence/react-native-snap-carousel/blob/master/doc/PROPS_METHODS_AND_GETTERS.md) >
