@@ -124,6 +124,12 @@ export default class ScrollableTabView extends React.Component {
     this._initial(newProps, true);
   }
 
+  componentWillUnmount() {
+    this.setState = (state, callback) => {
+      return;
+    };
+  }
+
   _initialState() {
     return {
       checkedIndex: this._getFirstIndex(),
@@ -233,7 +239,7 @@ export default class ScrollableTabView extends React.Component {
       props.stacks.map((item, index) => {
         if (item.screen && !item.screen.__HOCNAME__) {
           this._makeStacksID(item);
-          item.screen = HocComponent(item.screen, this._setCurrentRef(index, item.__id__), index);
+          item.screen = HocComponent(item.screen, this._setCurrentRef(index, item.__id__));
         }
         return item;
       })
@@ -287,12 +293,11 @@ export default class ScrollableTabView extends React.Component {
    */
   _scrollTo = y => {
     if (typeof y == 'number') {
-      this.section &&
-        this.section.scrollToLocation &&
-        this.section.scrollToLocation({
-          itemIndex: 0,
-          viewOffset: 0 - y
-        });
+      this.section?.scrollToLocation({
+        itemIndex: 0,
+        viewOffset: 0 - y,
+        sectionIndex: 0
+      });
     }
   };
 
@@ -437,7 +442,7 @@ export default class ScrollableTabView extends React.Component {
     return <Animated.View style={[styles.tabUnderlineStyle, _tabUnderlineStyle, interpolateAnimated]}></Animated.View>;
   }
 
-  _displayConsole(message, level = CONSOLE_LEVEL.WARN) {
+  _displayConsole(message, level = CONSOLE_LEVEL.LOG) {
     const { errorToThrow } = this.props;
     const pluginName = packagejson.name;
     const msg = `${pluginName}: ${message || ' --- '}`;
@@ -740,7 +745,6 @@ export default class ScrollableTabView extends React.Component {
           renderItem={() => {
             return (
               <AnimatedCarousel
-                ref={c => (this.tabview = c)}
                 pagingEnabled={true}
                 inactiveSlideOpacity={1}
                 inactiveSlideScale={1}
@@ -749,7 +753,6 @@ export default class ScrollableTabView extends React.Component {
                 sliderWidth={deviceWidth}
                 itemWidth={deviceWidth}
                 onScrollIndexChanged={this._throttleCallback}
-                initialScrollIndex={this.state.checkedIndex}
                 firstItem={this.state.checkedIndex}
                 onScroll={this._onScrollHandler2Horizontal}
                 {...carouselProps}
