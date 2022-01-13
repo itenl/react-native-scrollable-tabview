@@ -655,7 +655,8 @@ export default class ScrollableTabView extends React.Component {
 
   _refreshControl() {
     const ref = this.getCurrentRef();
-    return <RefreshControl enabled={!!(ref && ref.onRefresh)} refreshing={this.state.isRefreshing} onRefresh={this._onRefresh} />;
+  //return <RefreshControl enabled={!!(ref && ref.onRefresh)} refreshing={this.state.isRefreshing} onRefresh={this._onRefresh} />;
+     return <RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh} />;
   }
 
   _onScroll2Vertical(event) {
