@@ -44,6 +44,7 @@ export default class ScrollableTabView extends React.Component {
     onEndReachedThreshold: PropTypes.number,
     onBeforeRefresh: PropTypes.func,
     onBeforeEndReached: PropTypes.func,
+    ListFooterComponent: PropTypes.func,
     onTabviewChanged: PropTypes.func,
     oneTabHidden: PropTypes.bool,
     enableCachePage: PropTypes.bool,
@@ -694,7 +695,7 @@ export default class ScrollableTabView extends React.Component {
   }
 
   render() {
-    const { style, onEndReachedThreshold, fixedHeader, carouselProps, sectionListProps,isScroll } = this.props;
+    const { style, onEndReachedThreshold,ListFooterComponent, fixedHeader, carouselProps, sectionListProps,isScroll } = this.props;
     return (
       <View
         onLayout={({ nativeEvent }) => {
@@ -717,6 +718,7 @@ export default class ScrollableTabView extends React.Component {
           ListHeaderComponent={this._renderHeader(!fixedHeader)}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
+          ListFooterComponent={ListFooterComponent}
           renderItem={() => {
             return (
               <AnimatedCarousel
