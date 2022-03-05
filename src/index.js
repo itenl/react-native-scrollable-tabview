@@ -426,7 +426,6 @@ export default class ScrollableTabView extends React.Component {
       ]
     };
     if (!!tabsEnableAnimatedUnderlineWidth) {
-      if (tabsEnableAnimatedUnderlineWidth >= this.tabWidth / 2) this._displayConsole('The value of tabsEnableAnimatedUnderlineWidth we recommend to be one-third of tabStyle.width or a fixed 30px');
       interpolateAnimated.marginLeft = this.tabWidth / 2 - tabsEnableAnimatedUnderlineWidth / 2;
       interpolateAnimated.width = tabsEnableAnimatedUnderlineWidth;
       interpolateAnimated.transform.push({ scaleX: this.scroll2HorizontalPos.interpolate(this._getTabUnderlineInterpolateArgs(tabsEnableAnimatedUnderlineWidth)) });
