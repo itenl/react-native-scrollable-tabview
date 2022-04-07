@@ -574,7 +574,6 @@ export default class ScrollableTabView extends React.Component {
     });
     this._tabTranslateX(index);
     // 切换后强制重置刷新状态
-    // index != this.state.checkedIndex &&
     this._toggledRefreshing(false);
   }
 
