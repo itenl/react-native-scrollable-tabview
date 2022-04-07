@@ -2,7 +2,7 @@ export const onceMap = new Map();
 export const refreshMap = new Map();
 export const endReachedhMap = new Map();
 
-export const useInit = screen => {
+export const initScreen = screen => {
   if (onceMap.has(screen)) {
     const getRef = onceMap.get(screen);
     getRef && getRef(screen);
@@ -16,7 +16,7 @@ export const triggerOnce = (screen, getRef) => {
   }
 };
 
-export const useRefresh = (screen, callback) => {
+export const onRefresh = (screen, callback) => {
   if (!refreshMap.has(screen)) {
     refreshMap.set(screen, callback);
   }
@@ -29,7 +29,7 @@ export const triggerRefresh = (screen, toggled) => {
   }
 };
 
-export const useEndReached = (screen, callback) => {
+export const onEndReached = (screen, callback) => {
   if (!endReachedhMap.has(screen)) {
     endReachedhMap.set(screen, callback);
   }

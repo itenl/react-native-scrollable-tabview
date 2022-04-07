@@ -5,7 +5,7 @@ import Carousel from '@itenl/react-native-snap-carousel';
 import HocComponent from './HocComponent';
 import _throttle from 'lodash.throttle';
 import packagejson from '../package.json';
-import { useInit, triggerOnce, refreshMap, useRefresh, triggerRefresh, useEndReached, triggerEndReached } from './useRefreshEndReached';
+import { initScreen, triggerOnce, refreshMap, onRefresh, triggerRefresh, onEndReached, triggerEndReached } from './useRefreshEndReached';
 const deviceWidth = Dimensions.get('window').width;
 
 const AnimatedSectionList = Animated.createAnimatedComponent(SectionList);
@@ -340,9 +340,14 @@ export default class ScrollableTabView extends React.Component {
         layoutHeight: this.layoutHeight
       },
       !!screen && {
-        useInit: () => useInit(screen),
-        useRefresh: callback => useRefresh(screen, callback),
-        useEndReached: callback => useEndReached(screen, callback)
+        initScreen: () => initScreen(screen),
+        onRefresh: callback => {
+          if (!screen.onRefresh) {
+            screen.onRefresh = () => callback(this._toggledRefreshing);
+          }
+          onRefresh(screen, callback);
+        },
+        onEndReached: callback => onEndReached(screen, callback)
       },
       props || {}
     );
@@ -569,6 +574,7 @@ export default class ScrollableTabView extends React.Component {
     });
     this._tabTranslateX(index);
     // 切换后强制重置刷新状态
+    // index != this.state.checkedIndex &&
     this._toggledRefreshing(false);
   }
 
