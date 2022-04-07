@@ -23,7 +23,7 @@
 * [Snapshot](#Snapshot)
 
 ## <a name="features"/>Features
-* 支持为每个 `Screen` 设置下拉刷新与上滑加载更多(生命周期注入形式)
+* 支持为每个 `Screen` 设置下拉刷新与上滑加载更多(生命周期注入或属性注入)
 * Tabs 支持固定自适应与水平滚动两种配置方式
 * 允许为每个 `Screen` 独立配置 `Sticky` 组件
 * 允许为每个 `Tab` 独立配置自定义的徽章
@@ -96,7 +96,52 @@ function App() {
             toProps: {
               xx: 123,
             },
-          },
+          }, {
+            screen: ({
+              layoutHeight,
+              refresh,
+              scrollTo,
+              toTabView,
+              initScreen,
+              onRefresh,
+              onEndReached,
+            }) => {
+              // The code is required
+              initScreen();
+              const [datetime, setDatetime] = useState(Date.now());
+              useEffect(() => {
+                setInterval(() => {
+                  setDatetime(Date.now());
+                }, 1000);
+              }, []);
+              onRefresh((toggled) => {
+                toggled(true);
+                alert("onRefresh start");
+                setTimeout(() => {
+                  toggled(false);
+                  alert("onRefresh stop");
+                }, 3000);
+              });
+              onEndReached(() => {
+                alert("onEndReached");
+              });
+              return (
+                <View
+                  style={{
+                    flex: 1,
+                    backgroundColor: "#151723",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ color: "#ffffff" }}>
+                    Test function component {datetime}
+                  </Text>
+                </View>
+              );
+            },
+            tabLabel: "TestFunctionComponent",
+          }
         ]}
         tabsStyle={{}}
         tabWrapStyle={{}}
@@ -116,7 +161,7 @@ function App() {
         onBeforeEndReached={next => {
           next();
         }}
-        onTabviewChanged={index => {
+        onTabviewChanged={(index, tabLabel, isFirst) => {
           alert(index);
         }}
         header={() => {
@@ -160,7 +205,7 @@ Prop              | Type     | Default     | Description
 **`onEndReachedThreshold`**             | Number    | 0.2          | 触底回调阈值
 **`onBeforeRefresh`**             | Function    | null          | 下拉刷新前置函数, 执行 **`next`** 将执行Screen中 **`onRefresh`** 函数，执行 **`toggled`** 将切换系统loading,可传 true / false 进行指定 (回调含有 **`next`** , **`toggled`** 两个形参)
 **`onBeforeEndReached`**             | Function    | null          | 上滑加载更多前置函数, 执行next将执行Screen中 **`onEndReached`** 函数 (回调含有 **`next`** 形参)
-**`onTabviewChanged`**             | Function    | null          | Tab切换完成回调 (回调含有 **`index`**, **`tabLabel`** 两个形参)
+**`onTabviewChanged`**             | Function    | null          | Tab切换完成回调 (回调含有 **`index`**, **`tabLabel`**, **`isFirst`** 形参)
 **`screenScrollThrottle`**             | Number    | 60          | **`Screen`** 横向滑动时节流参数,单位 (毫秒)
 **`header`**             | Function / JSX Element / Class Component    | null          | 顶部组件 (若是函数需要返回 Element)
 **`stickyHeader`**             | Function / JSX Element / Class Component    | null          | 顶部带吸顶效果组件 (若是函数需要返回 Element)
@@ -224,7 +269,7 @@ Type     | Description
 JSX Element   | 基于当前Tab进行渲染的 徽章 / 悬浮 Tips 等
 
 
-##  <a name="InjectionLifecycle"/>Injection lifecycle to Screen
+##  <a name="InjectionLifecycle"/>Injection lifecycle to Screen(仅在类组件)
 
 Name              | Type     | Description
 ----------------- | -------- | -----------
@@ -243,6 +288,9 @@ Name              | Type     | Description
 **`layoutHeight.header`**            | Number   | Header 高度
 **`layoutHeight.tabs`**            | Number   | Tabs 高度
 **`layoutHeight.screen`**            | Number   | 视图 高度
+**`initScreen`**            | Function   | (仅在函数组件) 如果是函数组件则必须调用
+**`onRefresh`**            | Function   | (仅在函数组件) < [阅读 onRefresh 描述](#InjectionLifecycle) >
+**`onEndReached`**            | Function   | (仅在函数组件) < [阅读 onEndReached 描述](#InjectionLifecycle) >
 
 ##  <a name="InjectionStickyProps"/>Injection props to Sticky
 

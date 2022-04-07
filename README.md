@@ -23,7 +23,7 @@ Based on pure `JS` scripts, without relying on native, no need for `react-native
 * [Snapshot](#Snapshot)
 
 ## <a name="features"/>Features
-* Support to individually set pull-down refresh and up-slide load for each screen (life cycle injection form)
+* Support to individually set pull-down refresh and up-slide load for each screen (Lifecycle injection or props injection)
 * Flex Tabs and multiple Tabs horizontal scrolling support configuration method
 * Allow to set up each Screen’s own Sticky component
 * Custom badges can be configured for each Tab
@@ -96,7 +96,52 @@ function App() {
             toProps: {
               xx: 123,
             },
-          },
+          }, {
+            screen: ({
+              layoutHeight,
+              refresh,
+              scrollTo,
+              toTabView,
+              initScreen,
+              onRefresh,
+              onEndReached,
+            }) => {
+              // The code is required
+              initScreen();
+              const [datetime, setDatetime] = useState(Date.now());
+              useEffect(() => {
+                setInterval(() => {
+                  setDatetime(Date.now());
+                }, 1000);
+              }, []);
+              onRefresh((toggled) => {
+                toggled(true);
+                alert("onRefresh start");
+                setTimeout(() => {
+                  toggled(false);
+                  alert("onRefresh stop");
+                }, 3000);
+              });
+              onEndReached(() => {
+                alert("onEndReached");
+              });
+              return (
+                <View
+                  style={{
+                    flex: 1,
+                    backgroundColor: "#151723",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ color: "#ffffff" }}>
+                    Test function component {datetime}
+                  </Text>
+                </View>
+              );
+            },
+            tabLabel: "TestFunctionComponent",
+          }
         ]}
         tabsStyle={{}}
         tabWrapStyle={{}}
@@ -116,7 +161,7 @@ function App() {
         onBeforeEndReached={next => {
           next();
         }}
-        onTabviewChanged={index => {
+        onTabviewChanged={(index, tabLabel, isFirst) => {
           alert(index);
         }}
         header={() => {
@@ -160,7 +205,7 @@ Prop              | Type     | Default     | Description
 **`onEndReachedThreshold`**             | Number    | 0.2          | Bottom callback threshold
 **`onBeforeRefresh`**             | Function    | null          | Pull down to refresh the pre-functions, execute **`next`** to execute **`onRefresh`** function in Screen, execute **`toggled`** to switch system loading, you can pass true / false to specify (callback contains **`next`**, **`toggled`** two formal parameters)
 **`onBeforeEndReached`**             | Function    | null          | Slide up to load more pre-functions, execute next will execute the **`onEndReached`** function in the Screen (callback contains **`next`** formal parameters)
-**`onTabviewChanged`**             | Function    | null          | Tab switch completion callback (callback contains **`index`**, **`tabLabel`** two formal parameters)
+**`onTabviewChanged`**             | Function    | null          | Tab switch completion callback (callback contains **`index`**, **`tabLabel`**, **`isFirst`** parameters)
 **`screenScrollThrottle`**             | Number    | 60          | **`Screen`** Throttle parameters during lateral sliding, Unit (ms)
 **`header`**             | Function / JSX Element / Class Component    | null          | Top component (if the function needs to return Element)
 **`stickyHeader`**             | Function / JSX Element / Class Component    | null          | Top component (if the function needs to return Element) for sticky
@@ -208,7 +253,7 @@ Name              | Type     | Description
 
 Name              | Type     | Description
 ----------------- | -------- | -----------
-**`screen`**            | Class Component   | Screen class components
+**`screen`**            | Class / Function Component    | Screen components ( If the function component must call initScreen )
 **`sticky`**            | Class Component   | Sticky component, The context of this type of component will be returned in the instance
 **`tabLabel`**            | String   | Tab display name
 **`tabLabelRender`**            | Function   | Custom Tab rendering function, priority is higher than **`tabLabel`**
@@ -222,7 +267,7 @@ Type     | Description
 JSX Element   | Badges/Hovering Tips, etc. rendered based on the current Tab
 
 
-##  <a name="InjectionLifecycle"/>Injection lifecycle to Screen
+##  <a name="InjectionLifecycle"/>Injection lifecycle to Screen (On Class Component) 
 
 Name              | Type     | Description
 ----------------- | -------- | -----------
@@ -241,6 +286,9 @@ Name              | Type     | Description
 **`layoutHeight.header`**            | Number   | Total height of the Header
 **`layoutHeight.tabs`**            | Number   | Total height of the Tabs
 **`layoutHeight.screen`**            | Number   | Total height of the Screen
+**`initScreen`**            | Function   | (On Function Component) If it is a function component, it must be called
+**`onRefresh`**            | Function   | (On Function Component) < [Read onRefresh description](#InjectionLifecycle) >
+**`onEndReached`**            | Function   | (On Function Component) < [Read onEndReached description](#InjectionLifecycle) >
 
 ##  <a name="InjectionStickyProps"/>Injection props to Sticky
 

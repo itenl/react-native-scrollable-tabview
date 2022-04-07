@@ -5,6 +5,7 @@ import Carousel from '@itenl/react-native-snap-carousel';
 import HocComponent from './HocComponent';
 import _throttle from 'lodash.throttle';
 import packagejson from '../package.json';
+import { initScreen, triggerOnce, refreshMap, onRefresh, triggerRefresh, onEndReached, triggerEndReached } from './useRefreshEndReached';
 const deviceWidth = Dimensions.get('window').width;
 
 const AnimatedSectionList = Animated.createAnimatedComponent(SectionList);
@@ -231,9 +232,14 @@ export default class ScrollableTabView extends React.Component {
     return (
       props.stacks &&
       props.stacks.map((item, index) => {
-        if (item.screen && !item.screen.__HOCNAME__) {
-          this._makeStacksID(item);
-          item.screen = HocComponent(item.screen, this._setCurrentRef(index, item.__id__), index);
+        if (item.screen) {
+          if (this.isClassCompoent(item.screen) && !item.screen.__HOCNAME__) {
+            this._makeStacksID(item);
+            item.screen = HocComponent(item.screen, this._setCurrentRef(index, item.__id__));
+          } else {
+            this._makeStacksID(item);
+            triggerOnce(item.screen, this._setCurrentRef(index, item.__id__));
+          }
         }
         return item;
       })
@@ -287,12 +293,11 @@ export default class ScrollableTabView extends React.Component {
    */
   _scrollTo = y => {
     if (typeof y == 'number') {
-      this.section &&
-        this.section.scrollToLocation &&
-        this.section.scrollToLocation({
-          itemIndex: 0,
-          viewOffset: 0 - y
-        });
+      this.section?.scrollToLocation({
+        itemIndex: 0,
+        viewOffset: 0 - y,
+        sectionIndex: 0
+      });
     }
   };
 
@@ -320,13 +325,23 @@ export default class ScrollableTabView extends React.Component {
     this.setState({});
   };
 
-  _getProps(props) {
+  _getProps(props, screen) {
     return Object.assign(
       {
         refresh: this._refresh,
         scrollTo: this._scrollTo,
         toTabView: this.toTabView,
         layoutHeight: this.layoutHeight
+      },
+      !!screen && {
+        initScreen: () => initScreen(screen),
+        onRefresh: callback => {
+          if (!screen.onRefresh) {
+            screen.onRefresh = () => callback(this._toggledRefreshing);
+          }
+          onRefresh(screen, callback);
+        },
+        onEndReached: callback => onEndReached(screen, callback)
       },
       props || {}
     );
@@ -337,7 +352,7 @@ export default class ScrollableTabView extends React.Component {
     const ref = this.getCurrentRef();
     if (stacks && stacks.sticky && typeof stacks.sticky == 'function' && ref && stacks.__id__ === ref.__id__) {
       // 用于自动同步 Screen 数据流改变后仅会 render 自身 Screen 的问题，用于自动同步 screenContext 给吸顶组件
-      if (this.props.syncToSticky && !ref.__isOverride__) {
+      if (this.props.syncToSticky && !ref.__isOverride__ && this.isClassCompoent(ref.constructor)) {
         const originalDidUpdate = ref.componentDidUpdate,
           context = this;
         ref.componentDidUpdate = function () {
@@ -437,7 +452,7 @@ export default class ScrollableTabView extends React.Component {
     return <Animated.View style={[styles.tabUnderlineStyle, _tabUnderlineStyle, interpolateAnimated]}></Animated.View>;
   }
 
-  _displayConsole(message, level = CONSOLE_LEVEL.WARN) {
+  _displayConsole(message, level = CONSOLE_LEVEL.LOG) {
     const { errorToThrow } = this.props;
     const pluginName = packagejson.name;
     const msg = `${pluginName}: ${message || ' --- '}`;
@@ -569,6 +584,10 @@ export default class ScrollableTabView extends React.Component {
     return this.layoutHeight['container'] - this.layoutHeight['stickyHeader'] - this.layoutHeight['tabs'];
   }
 
+  isClassCompoent(component) {
+    return !!(component.prototype && component.prototype.isReactComponent);
+  }
+
   _renderItem({ item, index }) {
     const { enableCachePage, fillScreen, fixedTabs, mappingProps } = this.props;
     const screenHeight = this._getScreenHeight();
@@ -585,7 +604,7 @@ export default class ScrollableTabView extends React.Component {
             !enableCachePage && this.state.checkedIndex == index && { minHeight: screenHeight }
           ]}
         >
-          <item.screen {...this._getProps(mappingProps)} {...(item.toProps || {})} />
+          <item.screen {...this._getProps(mappingProps, !this.isClassCompoent(item.screen) && item.screen)} {...(item.toProps || {})} />
         </View>
       )
     );
@@ -595,7 +614,7 @@ export default class ScrollableTabView extends React.Component {
     const next = () => {
       const ref = this.getCurrentRef();
       !ref && this._displayConsole(`The Screen Ref is lost when calling onEndReached. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
-      if (ref && ref.onEndReached && typeof ref.onEndReached === 'function') ref.onEndReached();
+      !!ref && this.isClassCompoent(ref.constructor) ? ref && ref.onEndReached && typeof ref.onEndReached === 'function' && ref.onEndReached() : triggerEndReached(ref);
     };
     if (this.state.checkedIndex != null) {
       const { onBeforeEndReached } = this.props;
@@ -613,7 +632,11 @@ export default class ScrollableTabView extends React.Component {
     const next = () => {
       const ref = this.getCurrentRef();
       !ref && this._displayConsole(`The Screen Ref is lost when calling onRefresh. Please confirm whether the Stack is working properly.(index: ${this.state.checkedIndex})`);
-      ref ? ref.onRefresh && typeof ref.onRefresh === 'function' && ref.onRefresh(this._toggledRefreshing) : this._toggledRefreshing(false);
+      if (ref) {
+        this.isClassCompoent(ref.constructor) ? ref.onRefresh && typeof ref.onRefresh === 'function' && ref.onRefresh(this._toggledRefreshing) : triggerRefresh(ref, this._toggledRefreshing);
+      } else {
+        this._toggledRefreshing(false);
+      }
     };
     const { onBeforeRefresh } = this.props;
     onBeforeRefresh && typeof onBeforeRefresh === 'function' ? onBeforeRefresh(next, this._toggledRefreshing) : next();
@@ -676,7 +699,8 @@ export default class ScrollableTabView extends React.Component {
 
   _refreshControl() {
     const ref = this.getCurrentRef();
-    return <RefreshControl enabled={!!(ref && ref.onRefresh)} refreshing={this.state.isRefreshing} onRefresh={this._onRefresh} />;
+    const enabled = !!(ref && ref.onRefresh) || refreshMap.has(ref);
+    return <RefreshControl enabled={enabled} refreshing={this.state.isRefreshing} onRefresh={this._onRefresh} />;
   }
 
   _onScroll2Vertical(event) {
@@ -740,7 +764,6 @@ export default class ScrollableTabView extends React.Component {
           renderItem={() => {
             return (
               <AnimatedCarousel
-                ref={c => (this.tabview = c)}
                 pagingEnabled={true}
                 inactiveSlideOpacity={1}
                 inactiveSlideScale={1}
@@ -749,7 +772,6 @@ export default class ScrollableTabView extends React.Component {
                 sliderWidth={deviceWidth}
                 itemWidth={deviceWidth}
                 onScrollIndexChanged={this._throttleCallback}
-                initialScrollIndex={this.state.checkedIndex}
                 firstItem={this.state.checkedIndex}
                 onScroll={this._onScrollHandler2Horizontal}
                 {...carouselProps}
