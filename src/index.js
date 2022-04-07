@@ -285,8 +285,8 @@ export default class ScrollableTabView extends React.Component {
    */
   _scrollTo = y => {
     if (typeof y == 'number') {
-      this.section &&
-        this.section.scrollToLocation({
+      this.props?.scrollRef &&
+        this.props?.scrollRef?.scrollToLocation({
           itemIndex: 0,
           viewOffset: 0 - y
         });
@@ -321,7 +321,7 @@ export default class ScrollableTabView extends React.Component {
     return Object.assign(
       {
         refresh: this._refresh,
-        scrollTo: this._scrollTo,
+        // scrollTo: this._scrollTo,
         toTabView: this.toTabView,
         layoutHeight: this.layoutHeight
       },
@@ -494,7 +494,7 @@ export default class ScrollableTabView extends React.Component {
   _renderSectionHeader() {
     const { fixedHeader } = this.props;
     return (
-      <View style={{ flex: 1,alignItems:'center',backgroundColor: '#fff' }}>
+      <View style={{ flex: 1, alignItems: 'center', backgroundColor: '#fff' }}>
         {this._renderHeader(fixedHeader)}
         {this._renderTabs()}
         {this._renderSticky()}
@@ -523,8 +523,8 @@ export default class ScrollableTabView extends React.Component {
     const { enableCachePage, toHeaderOnTab, toTabsOnTab, onTabviewChanged, disableChangeTab } = this.props;
     if (disableChangeTab === true) {
       if (index == this.state.checkedIndex) {
-        if (!isCarouselScroll && toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
-        if (!isCarouselScroll && toTabsOnTab) return this._scrollTo(0);
+        // if (!isCarouselScroll && toHeaderOnTab) return this._scrollTo(-this.layoutHeight['header']);
+        // if (!isCarouselScroll && toTabsOnTab) return this._scrollTo(0);
         return void 0;
       }
       let state = {
@@ -655,8 +655,8 @@ export default class ScrollableTabView extends React.Component {
 
   _refreshControl() {
     const ref = this.getCurrentRef();
-  //return <RefreshControl enabled={!!(ref && ref.onRefresh)} refreshing={this.state.isRefreshing} onRefresh={this._onRefresh} />;
-     return <RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh} />;
+    //return <RefreshControl enabled={!!(ref && ref.onRefresh)} refreshing={this.state.isRefreshing} onRefresh={this._onRefresh} />;
+    return <RefreshControl refreshing={this.state.isRefreshing} onRefresh={this._onRefresh} />;
   }
 
   _onScroll2Vertical(event) {
@@ -694,7 +694,7 @@ export default class ScrollableTabView extends React.Component {
   }
 
   render() {
-    const { style, onEndReachedThreshold,ListFooterComponent, fixedHeader, carouselProps, sectionListProps,isScroll } = this.props;
+    const { style, onEndReachedThreshold, ListFooterComponent, fixedHeader, carouselProps, sectionListProps, isScroll } = this.props;
     return (
       <View
         onLayout={({ nativeEvent }) => {
@@ -702,11 +702,10 @@ export default class ScrollableTabView extends React.Component {
           this.layoutHeight['container'] = height;
           if (height !== 0) this._refresh();
         }}
-        style={[styles.container, style]}
-      >
+        style={[styles.container, style]}>
         {this._renderTitle()}
         <AnimatedSectionList
-          ref={rf => (this.section = rf)}
+          ref={this.props.scrollRef}
           keyExtractor={(item, index) => `scrollable-tab-view-wrap-${index}`}
           renderSectionHeader={this._renderSectionHeader}
           onEndReached={this._onEndReached}
