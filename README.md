@@ -286,6 +286,7 @@ Name              | Type     | Description
 **`layoutHeight.header`**            | Number   | Total height of the Header
 **`layoutHeight.tabs`**            | Number   | Total height of the Tabs
 **`layoutHeight.screen`**            | Number   | Total height of the Screen
+**`initScreen`**            | Function   | (On Function Component) If it is a function component, it must be called
 **`onRefresh`**            | Function   | (On Function Component) < [Read onRefresh description](#InjectionLifecycle) >
 **`onEndReached`**            | Function   | (On Function Component) < [Read onEndReached description](#InjectionLifecycle) >
 

@@ -288,6 +288,7 @@ Name              | Type     | Description
 **`layoutHeight.header`**            | Number   | Header 高度
 **`layoutHeight.tabs`**            | Number   | Tabs 高度
 **`layoutHeight.screen`**            | Number   | 视图 高度
+**`initScreen`**            | Function   | (仅在函数组件) 如果是函数组件则必须调用
 **`onRefresh`**            | Function   | (仅在函数组件) < [阅读 onRefresh 描述](#InjectionLifecycle) >
 **`onEndReached`**            | Function   | (仅在函数组件) < [阅读 onEndReached 描述](#InjectionLifecycle) >
 
