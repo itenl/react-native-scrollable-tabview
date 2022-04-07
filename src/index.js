@@ -125,12 +125,6 @@ export default class ScrollableTabView extends React.Component {
     this._initial(newProps, true);
   }
 
-  componentWillUnmount() {
-    this.setState = (state, callback) => {
-      return;
-    };
-  }
-
   _initialState() {
     return {
       checkedIndex: this._getFirstIndex(),
